@@ -1,17 +1,15 @@
 from django.http import HttpResponse
+from django.views import View
 
 
-def home(request):
-    return HttpResponse("Welcome to our E-Learning Website!")
+class HomeView(View):
 
-def courses(request):
-    return HttpResponse("Here are all the courses.")
+    def get(self, request):
+        return HttpResponse(
+            "Welcome (---GET---) to our E-Learning Website!"
+        )
 
-def about(request):
-    return HttpResponse("About our E-Learning Website.")
-
-def contact(request):
-    return HttpResponse("Contact us.")
-
-def student(request):
-    return HttpResponse("Student Dashboard")
+    def post(self, request):
+        return HttpResponse(
+            "Welcome (---POST---) to our E-Learning Website!"
+        )
