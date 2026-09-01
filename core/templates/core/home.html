@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Home | E-Learning{% endblock %}
+
+{% block content %}
+    <h1>Welcome to our E-Learning Website!</h1>
+
+    <p>Hi {{ name }}, this is the home page of our e-learning platform.</p>
+    <p>We teach Python, Django, Flask, SQL and more.</p>
+
+    <ul>
+        <li>Python</li>
+        <li>Django</li>
+        <li>Flask</li>
+        <li>SQL</li>
+    </ul>
+
+    <a href="{% url 'course_list' %}">
+        <button>Explore Courses</button>
+    </a>
+{% endblock %}

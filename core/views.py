@@ -1,15 +1,9 @@
-from django.http import HttpResponse
-from django.views import View
+from django.shortcuts import render
 
 
-class HomeView(View):
+def home(request):
+    return render(request, "core/home.html", {"name": "Romaan_Ali"})
 
-    def get(self, request):
-        return HttpResponse(
-            "Welcome (---GET---) to our E-Learning Website!"
-        )
 
-    def post(self, request):
-        return HttpResponse(
-            "Welcome (---POST---) to our E-Learning Website!"
-        )
+def about(request):
+    return render(request, "core/about.html")

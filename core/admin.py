@@ -1,3 +1,3 @@
 from django.contrib import admin
 
-# Register your models here.
+# The Course / Lesson models are registered in the "courses" app admin.

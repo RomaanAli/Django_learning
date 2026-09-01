@@ -1,3 +1,5 @@
 from django.db import models
 
-# Create your models here.
+# Note: The Course model (and the new Lesson model) now live in the
+# "courses" app. `core` only handles general site pages (home, about).
+
