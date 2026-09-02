@@ -38,6 +38,26 @@ ALLOWED_HOSTS = os.environ.get(
     'localhost,127.0.0.1,.up.railway.app'
 ).split(',')
 
+# Railway terminates HTTPS at its proxy and forwards the original scheme in
+# the X-Forwarded-Proto header. Trusting it lets Django know requests are
+# HTTPS, which also fixes CSRF verification on the login/register forms.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Allow the CSRF origin check to pass for the Railway-hosted domain(s).
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.up.railway.app',
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get(
+        "DJANGO_CSRF_TRUSTED_ORIGINS",
+        "",
+    ).split(",")
+    if origin.strip()
+]
 
 # Application definition
 
