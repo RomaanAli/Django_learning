@@ -155,8 +155,13 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() == "true"
+
 ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "djangolearning-production.up.railway.app",
+    host.strip()
+    for host in os.environ.get(
+        "DJANGO_ALLOWED_HOSTS",
+        "localhost,127.0.0.1,.up.railway.app",
+    ).split(",")
+    if host.strip()
 ]
