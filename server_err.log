@@ -1,0 +1,2 @@
+[15/Sep/2026 09:30:52] "GET / HTTP/1.1" 200 1628
+[15/Sep/2026 09:30:53] "GET /static/css/style.css HTTP/1.1" 200 10913

@@ -3,11 +3,15 @@
 {% block title %}Register | E-Learning{% endblock %}
 
 {% block content %}
-    <h1>Create a Student Account</h1>
+    <div class="card form-panel">
+        <h1>Create a Student Account</h1>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Register</button>
-    </form>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn btn-primary" type="submit">Register</button>
+        </form>
+
+        <p class="form-footer">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+    </div>
 {% endblock %}

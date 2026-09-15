@@ -3,20 +3,29 @@
 {% block title %}{{ course.title }} | E-Learning{% endblock %}
 
 {% block content %}
-    <h1>{{ course.title }}</h1>
-    <p>{{ course.description }}</p>
-    <p>Price: ${{ course.price }}</p>
+    <div class="card">
+        <h1>{{ course.title }}</h1>
+        <p class="muted">{{ course.description }}</p>
+        <p><span class="price price-lg">${{ course.price }}</span></p>
+    </div>
 
-    <h2>Lessons</h2>
+    <h2 class="section-title">Lessons</h2>
     {% if course.lessons.all %}
-        <ol>
+        <ol class="lesson-list">
             {% for lesson in course.lessons.all %}
-                <li>{{ lesson.title }}</li>
+                <li class="card lesson-item">
+                    <h3 class="lesson-title">{{ lesson.title }}</h3>
+                    {% if lesson.content %}
+                        <p>{{ lesson.content }}</p>
+                    {% endif %}
+                </li>
             {% endfor %}
         </ol>
     {% else %}
-        <p>No lessons have been added for this course yet.</p>
+        <div class="card">
+            <p>No lessons have been added for this course yet.</p>
+        </div>
     {% endif %}
 
-    <p><a href="{% url 'course_list' %}">Back to all courses</a></p>
+    <a class="back-link" href="{% url 'course_list' %}">&larr; Back to all courses</a>
 {% endblock %}

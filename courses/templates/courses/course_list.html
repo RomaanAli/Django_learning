@@ -6,15 +6,21 @@
     <h1>Available Courses</h1>
 
     {% if courses %}
-        <ul>
+        <div class="course-grid">
             {% for course in courses %}
-                <li>
-                    <a href="{% url 'course_detail' course.pk %}">{{ course.title }}</a>
-                    - ${{ course.price }}
-                </li>
+                <a class="course-card" href="{% url 'course_detail' course.pk %}">
+                    <h2 class="course-card-title">{{ course.title }}</h2>
+                    <p class="course-card-desc">{{ course.description|truncatewords:25 }}</p>
+                    <div class="course-card-footer">
+                        <span class="price">${{ course.price }}</span>
+                        <span class="lesson-count">{{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</span>
+                    </div>
+                </a>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
-        <p>No courses are available right now. Please check back later.</p>
+        <div class="card">
+            <p>No courses are available right now. Please check back later.</p>
+        </div>
     {% endif %}
 {% endblock %}

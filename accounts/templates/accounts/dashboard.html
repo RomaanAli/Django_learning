@@ -3,17 +3,19 @@
 {% block title %}Dashboard | E-Learning{% endblock %}
 
 {% block content %}
-    <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
+    <div class="card">
+        <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
 
-    <p>This is your student dashboard.</p>
+        <p>This is your student dashboard.</p>
 
-    <ul>
-        <li>Username: {{ user.username }}</li>
-        <li>Email: {{ user.email }}</li>
-        <li>First name: {{ user.first_name }}</li>
-    </ul>
+        <ul class="stats">
+            <li><strong>Username:</strong> {{ user.username }}</li>
+            <li><strong>Email:</strong> {{ user.email }}</li>
+            <li><strong>First name:</strong> {{ user.first_name|default:"—" }}</li>
+        </ul>
 
-    <p>Your enrolled courses will appear here soon.</p>
+        <p class="muted">Your enrolled courses will appear here soon.</p>
 
-    <p><a href="{% url 'course_list' %}">Browse Courses</a></p>
+        <a class="btn btn-primary" href="{% url 'course_list' %}">Browse Courses</a>
+    </div>
 {% endblock %}

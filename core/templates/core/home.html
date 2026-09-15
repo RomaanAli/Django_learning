@@ -3,19 +3,20 @@
 {% block title %}Home | E-Learning{% endblock %}
 
 {% block content %}
-    <h1>Welcome to our E-Learning Website!</h1>
+    <section class="hero">
+        <h1>Welcome to our E-Learning Website!</h1>
+        <p>Hi {{ name }}, this is the home page of our e-learning platform.</p>
+        <p>We teach Python, Django, Flask, SQL and more.</p>
+        <a class="btn btn-primary" href="{% url 'course_list' %}">Explore Courses</a>
+    </section>
 
-    <p>Hi {{ name }}, this is the home page of our e-learning platform.</p>
-    <p>We teach Python, Django, Flask, SQL and more.</p>
-
-    <ul>
-        <li>Python</li>
-        <li>Django</li>
-        <li>Flask</li>
-        <li>SQL</li>
-    </ul>
-
-    <a href="{% url 'course_list' %}">
-        <button>Explore Courses</button>
-    </a>
+    <section>
+        <h2 class="section-title">What you can learn</h2>
+        <div class="chip-list">
+            <span class="chip">Python</span>
+            <span class="chip">Django</span>
+            <span class="chip">Flask</span>
+            <span class="chip">SQL</span>
+        </div>
+    </section>
 {% endblock %}

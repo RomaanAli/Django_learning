@@ -158,6 +158,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Extra locations Django's staticfiles finder will look in (served by
+# `runserver` in DEBUG and collected via `collectstatic` for production).
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
 STORAGES = {
     'default': {
         'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
