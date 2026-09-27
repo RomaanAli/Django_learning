@@ -160,11 +160,21 @@ AUTH_PASSWORD_VALIDATORS = [
 # remove it) and set the EMAIL_* variables to your provider's values. Nothing
 # is hard-coded here — everything comes from environment variables. Empty
 # values in .env are treated as "not set".
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND") or (
-    "django.core.mail.backends.console.EmailBackend"
-    if DEBUG
-    else "django.core.mail.backends.smtp.EmailBackend"
-)
+#
+# If no explicit EMAIL_BACKEND is given, one is picked automatically:
+#   * in DEBUG (local development) it is always the console backend, which
+#     prints every email to the terminal;
+#   * in production the SMTP backend is used whenever SMTP credentials
+#     (EMAIL_HOST_USER) are configured. If they are not (e.g. a fresh deploy
+#     before a mail provider has been added), it falls back to the console
+#     backend so registrations still work — the OTP is written to the server
+#     logs instead of failing the sign-up outright.
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND")
+if not EMAIL_BACKEND:
+    if DEBUG or not os.environ.get("EMAIL_HOST_USER"):
+        EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    else:
+        EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST") or "localhost"
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT") or "587")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER") or ""
