@@ -240,6 +240,12 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "home"
 # allauth's intermediate "click to continue" page.
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
+# Custom adapter: keeps "Continue with Google" working even when the Google
+# OAuth app is configured both in the Django admin (SocialApp) and via the
+# GOOGLE_OAUTH_CLIENT_* environment variables. Without it, that duplicate
+# setup makes allauth raise MultipleObjectsReturned -> HTTP 500 on click.
+SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountAdapter"
+
 # Google OAuth ("Continue with Google").
 # Get OAuth client credentials from the Google Cloud Console:
 #   https://console.cloud.google.com/apis/credentials
