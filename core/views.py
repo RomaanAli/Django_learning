@@ -1,9 +1,18 @@
-from django.shortcuts import render
+from django.views.generic import TemplateView
 
 
-def home(request):
-    return render(request, "core/home.html", {"name": "Romaan_Ali"})
+class HomeView(TemplateView):
+    """Render the site's home page."""
+
+    template_name = "core/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["name"] = "Romaan_Ali"
+        return context
 
 
-def about(request):
-    return render(request, "core/about.html")
+class AboutView(TemplateView):
+    """Render the site's about page."""
+
+    template_name = "core/about.html"

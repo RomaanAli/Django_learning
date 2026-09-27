@@ -14,9 +14,15 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load local secrets from the .env file (git-ignored — never committed).
+# On Railway the variables are injected straight into the environment, so
+# this is a harmless no-op there.
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -65,6 +71,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'core',
     'courses',
     'accounts',
@@ -77,6 +88,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -140,6 +152,34 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# Email (used to send the OTP during registration)
+# ---------------------------------------------------------------------------
+# Development: the console backend prints every email (including the OTP) to
+# the terminal, so no SMTP server is needed locally.
+# Production (e.g. Railway): set EMAIL_BACKEND to the SMTP backend (or simply
+# remove it) and set the EMAIL_* variables to your provider's values. Nothing
+# is hard-coded here — everything comes from environment variables. Empty
+# values in .env are treated as "not set".
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND") or (
+    "django.core.mail.backends.console.EmailBackend"
+    if DEBUG
+    else "django.core.mail.backends.smtp.EmailBackend"
+)
+EMAIL_HOST = os.environ.get("EMAIL_HOST") or "localhost"
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT") or "587")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER") or ""
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") or ""
+EMAIL_USE_TLS = (os.environ.get("EMAIL_USE_TLS") or "true").lower() == "true"
+# If no explicit From address is given, send from the SMTP account itself —
+# many providers (e.g. Gmail) reject emails whose From address does not match
+# the authenticated sender.
+DEFAULT_FROM_EMAIL = (
+    os.environ.get("DEFAULT_FROM_EMAIL")
+    or os.environ.get("EMAIL_HOST_USER")
+    or "E-Learning <noreply@example.com>"
+)
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -175,3 +215,45 @@ STORAGES = {
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SITE_ID = 1
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# django-allauth: where users land after login / logout.
+LOGIN_REDIRECT_URL = "dashboard"
+ACCOUNT_LOGOUT_REDIRECT_URL = "home"
+
+# Let "Continue with Google" redirect straight to Google instead of showing
+# allauth's intermediate "click to continue" page.
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Google OAuth ("Continue with Google").
+# Get OAuth client credentials from the Google Cloud Console:
+#   https://console.cloud.google.com/apis/credentials
+# Then supply them as environment variables (on Railway add them under
+# Variables; locally set them in your terminal, for example):
+#   GOOGLE_OAUTH_CLIENT_ID=xxxxx.apps.googleusercontent.com
+#   GOOGLE_OAUTH_CLIENT_SECRET=GOCSPX-xxxxx
+# Alternative: create the app record in Django admin at
+#   /admin/socialaccount/socialapp/  (provider "Google", assigned to a site) —
+#   in that case leave the APP block below unset.
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "OAUTH_PKCE_ENABLED": True,
+    }
+}
+
+_google_client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+_google_client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
+if _google_client_id and _google_client_secret:
+    SOCIALACCOUNT_PROVIDERS["google"]["APP"] = {
+        "client_id": _google_client_id,
+        "secret": _google_client_secret,
+        "key": "",
+    }
+

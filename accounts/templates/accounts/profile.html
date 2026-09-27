@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile | E-Learning{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h1>{{ user.first_name|default:user.username }}'s Profile</h1>
+
+        <ul class="stats">
+            <li><strong>Username:</strong> {{ user.username }}</li>
+            <li><strong>First name:</strong> {{ user.first_name|default:"—" }}</li>
+            <li><strong>Last name:</strong> {{ user.last_name|default:"—" }}</li>
+            <li><strong>Email:</strong> {{ user.email|default:"—" }}</li>
+            <li><strong>Age:</strong> {{ profile.age|default:"—" }}</li>
+            <li><strong>Contact:</strong> {{ profile.contact|default:"—" }}</li>
+        </ul>
+
+        <a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit Profile</a>
+        <a class="btn btn-secondary" href="{% url 'dashboard' %}">Back to Dashboard</a>
+    </div>
+{% endblock %}

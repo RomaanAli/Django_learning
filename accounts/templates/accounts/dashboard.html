@@ -12,10 +12,26 @@
             <li><strong>Username:</strong> {{ user.username }}</li>
             <li><strong>Email:</strong> {{ user.email }}</li>
             <li><strong>First name:</strong> {{ user.first_name|default:"—" }}</li>
+            <li><strong>Enrolled courses:</strong> {{ enrollments|length }}</li>
         </ul>
 
-        <p class="muted">Your enrolled courses will appear here soon.</p>
-
         <a class="btn btn-primary" href="{% url 'course_list' %}">Browse Courses</a>
+        <a class="btn btn-secondary" href="{% url 'profile' %}">View Profile</a>
     </div>
+
+    {% if enrollments %}
+        <h2 class="section-title">Your Enrolled Courses</h2>
+        <div class="card">
+            <ul class="enrolled-list">
+                {% for enrollment in enrollments %}
+                    <li>
+                        <a href="{% url 'course_detail' enrollment.course.pk %}">
+                            {{ enrollment.course.title }}
+                        </a>
+                        <span class="muted">— ${{ enrollment.course.price }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 {% endblock %}

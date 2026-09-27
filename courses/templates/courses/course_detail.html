@@ -3,27 +3,75 @@
 {% block title %}{{ course.title }} | E-Learning{% endblock %}
 
 {% block content %}
-    <div class="card">
-        <h1>{{ course.title }}</h1>
-        <p class="muted">{{ course.description }}</p>
-        <p><span class="price price-lg">${{ course.price }}</span></p>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}">Home</a>
+        <span>/</span>
+        <a href="{% url 'course_list' %}">Courses</a>
+        <span>/</span>
+        <span class="current">{{ course.title }}</span>
+    </nav>
+
+    <div class="card course-header">
+        <div class="course-header-top">
+            <h1>{{ course.title }}</h1>
+            <div class="course-badges">
+                <span class="price price-lg">${{ course.price }}</span>
+                {% if is_enrolled %}
+                    <span class="badge-success">&#10003; Enrolled</span>
+                {% endif %}
+            </div>
+        </div>
+        <p class="muted course-description">{{ course.description }}</p>
+
+        <div class="course-header-cta">
+            {% if is_enrolled %}
+                <p class="muted">You are enrolled! Your lessons are unlocked below.</p>
+            {% elif user.is_authenticated %}
+                <form method="post" action="{% url 'enroll_course' course.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="submit">Enroll now</button>
+                </form>
+            {% else %}
+                <p class="muted">
+                    <a href="{% url 'login' %}">Login</a> or
+                    <a href="{% url 'register' %}">register</a> to enroll in this course
+                    and view its lessons.
+                </p>
+            {% endif %}
+        </div>
     </div>
 
-    <h2 class="section-title">Lessons</h2>
-    {% if course.lessons.all %}
-        <ol class="lesson-list">
-            {% for lesson in course.lessons.all %}
-                <li class="card lesson-item">
-                    <h3 class="lesson-title">{{ lesson.title }}</h3>
-                    {% if lesson.content %}
-                        <p>{{ lesson.content }}</p>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ol>
+    <div class="lessons-head">
+        <h2 class="section-title">Lessons</h2>
+        <span class="count-badge">{{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</span>
+    </div>
+
+    {% if is_enrolled %}
+        {% if course.lessons.all %}
+            <ol class="lesson-list">
+                {% for lesson in course.lessons.all %}
+                    <li class="card lesson-item">
+                        <span class="lesson-marker" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</span>
+                        <div class="lesson-body">
+                            <h3 class="lesson-title">{{ lesson.title }}</h3>
+                            {% if lesson.content %}
+                                <div class="lesson-content">{{ lesson.content|linebreaks }}</div>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ol>
+        {% else %}
+            <div class="card">
+                <p>No lessons have been added for this course yet.</p>
+            </div>
+        {% endif %}
     {% else %}
         <div class="card">
-            <p>No lessons have been added for this course yet.</p>
+            <p>
+                &#128274; Lessons are only visible to enrolled students.
+                Enroll above to unlock them.
+            </p>
         </div>
     {% endif %}
 

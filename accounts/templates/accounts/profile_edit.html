@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile | E-Learning{% endblock %}
+
+{% block content %}
+    <div class="card form-panel">
+        <h1>Edit Profile</h1>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ user_form.as_p }}
+            {{ profile_form.as_p }}
+            <button class="btn btn-primary" type="submit">Save changes</button>
+        </form>
+
+        <p class="form-footer"><a href="{% url 'profile' %}">Back to profile</a></p>
+    </div>
+{% endblock %}

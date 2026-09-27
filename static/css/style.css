@@ -121,6 +121,29 @@ a:hover {
     text-decoration: none;
 }
 
+.nav-button {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    font-style: inherit;
+    font-weight: 500;
+    font-size: 0.95rem;
+    line-height: inherit;
+    color: var(--color-muted);
+    text-align: center;
+    cursor: pointer;
+}
+
+.nav-button:hover,
+.nav-button:focus-visible {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
 /* --------------------------------------------------------------------------
    Buttons
    -------------------------------------------------------------------------- */
@@ -245,41 +268,156 @@ a:hover {
 }
 
 /* --------------------------------------------------------------------------
+   Page header used on listing pages (e.g. courses)
+   -------------------------------------------------------------------------- */
+
+.page-head {
+    margin-bottom: 1.75rem;
+}
+
+.page-head h1 {
+    margin-bottom: 0.25rem;
+}
+
+.page-subtitle {
+    color: var(--color-muted);
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Breadcrumb
+   -------------------------------------------------------------------------- */
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--color-muted);
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.breadcrumb a {
+    color: var(--color-muted);
+}
+
+.breadcrumb a:hover {
+    color: var(--color-primary);
+}
+
+.breadcrumb .current {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
    Course list grid
    -------------------------------------------------------------------------- */
 
 .course-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
+    gap: 1.5rem;
 }
 
 .course-card {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 1.4rem;
+    padding: 1.35rem 1.35rem 1.2rem;
     color: var(--color-text);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    text-decoration: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-.course-card:hover {
+.course-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.course-card.acc-indigo::before {
+    background: linear-gradient(90deg, #818cf8, #4f46e5);
+}
+
+.course-card.acc-violet::before {
+    background: linear-gradient(90deg, #c4b5fd, #8b5cf6);
+}
+
+.course-card.acc-teal::before {
+    background: linear-gradient(90deg, #5eead4, #0d9488);
+}
+
+.course-card:hover,
+.course-card:focus-visible {
     text-decoration: none;
     border-color: var(--color-primary);
-    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.12), 0 8px 20px rgba(15, 23, 42, 0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.12), 0 10px 22px rgba(15, 23, 42, 0.09);
+}
+
+.course-card:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.course-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.course-card-icon {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #ffffff;
+    background: var(--color-primary);
+}
+
+.course-card.acc-indigo .course-card-icon {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+
+.course-card.acc-violet .course-card-icon {
+    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+}
+
+.course-card.acc-teal .course-card-icon {
+    background: linear-gradient(135deg, #2dd4bf, #0d9488);
 }
 
 .course-card-title {
-    font-size: 1.15rem;
-    margin: 0 0 0.5rem;
+    flex: 1;
+    min-width: 0;
+    font-size: 1.12rem;
+    font-weight: 700;
+    margin: 0;
+    overflow-wrap: break-word;
 }
 
 .course-card-desc {
     color: var(--color-muted);
     font-size: 0.95rem;
-    margin: 0 0 1rem;
+    line-height: 1.5;
+    margin: 0.85rem 0 1rem;
+    overflow-wrap: break-word;
 }
 
 .course-card-footer {
@@ -288,6 +426,25 @@ a:hover {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem;
+    margin-top: auto;
+    min-width: 0;
+}
+
+.course-card-cta {
+    display: block;
+    margin-top: 1rem;
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-align: center;
+}
+
+.course-card:hover .course-card-cta,
+.course-card:focus-visible .course-card-cta {
+    background: var(--color-primary-dark);
 }
 
 .price {
@@ -309,45 +466,110 @@ a:hover {
    Course detail
    -------------------------------------------------------------------------- */
 
+.course-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.course-header-top h1 {
+    margin: 0;
+}
+
+.course-badges {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
 .price-lg {
     font-size: 1.05rem;
     padding: 0.4rem 1rem;
     display: inline-block;
 }
 
+.course-description {
+    margin-bottom: 1.25rem;
+}
+
+.course-header-cta form {
+    margin: 0;
+}
+
+.lessons-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 2rem 0 1rem;
+}
+
+.lessons-head .section-title {
+    margin: 0;
+}
+
+.count-badge {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    border: 1px solid #dfe3ff;
+    border-radius: 999px;
+    padding: 0.15rem 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
 .lesson-list {
-    counter-reset: lesson;
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.9rem;
+    gap: 1rem;
 }
 
 .lesson-item {
-    padding: 1.1rem 1.4rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.2rem 1.4rem;
 }
 
-.lesson-item::before {
-    counter-increment: lesson;
-    content: "Lesson " counter(lesson);
-    display: block;
-    font-size: 0.75rem;
+.lesson-marker {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    border: 1px solid #dfe3ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-primary);
-    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+}
+
+.lesson-body {
+    min-width: 0;
 }
 
 .lesson-title {
-    margin: 0 0 0.3rem;
+    margin: 0 0 0.4rem;
     font-size: 1.05rem;
 }
 
-.lesson-item p {
+.lesson-content {
     margin: 0;
+}
+
+.lesson-content p {
+    margin: 0 0 0.6rem;
     color: var(--color-muted);
+}
+
+.lesson-content p:last-child {
+    margin-bottom: 0;
 }
 
 .back-link {
@@ -427,6 +649,41 @@ a:hover {
 }
 
 /* --------------------------------------------------------------------------
+   Enrollment
+   -------------------------------------------------------------------------- */
+
+.badge-success {
+    display: inline-block;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    border-radius: 999px;
+    padding: 0.25rem 0.8rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+}
+
+.enrolled-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.enrolled-list li {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+}
+
+.enrolled-list a {
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
    Alerts (Django messages)
    -------------------------------------------------------------------------- */
 
@@ -499,4 +756,147 @@ a:hover {
     margin: 0;
     color: var(--color-muted);
     font-size: 0.85rem;
+}
+
+/* --------------------------------------------------------------------------
+   Social login (Continue with Google)
+   -------------------------------------------------------------------------- */
+
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+
+.btn-google:hover {
+    background: #fafafa;
+    border-color: #d1d5db;
+    color: var(--color-text);
+}
+
+.google-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.25rem 0 1rem;
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+/* --------------------------------------------------------------------------
+   Logout confirmation modal
+   -------------------------------------------------------------------------- */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+/* The `hidden` attribute must win over `display: flex` above. */
+.modal-overlay[hidden] {
+    display: none;
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+    padding: 2rem 2rem 1.75rem;
+    text-align: center;
+}
+
+.modal-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.modal-card h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.3rem;
+}
+
+.modal-card p {
+    color: var(--color-muted);
+    margin: 0 0 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.modal-actions form {
+    margin: 0;
+}
+
+.modal-actions .btn {
+    min-width: 120px;
+}
+
+/* Danger button for the destructive "Log out" confirmation. */
+.btn-danger {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+    color: #ffffff;
+}
+
+/* Prevent the page behind the dialog from scrolling while it is open. */
+body.modal-open {
+    overflow: hidden;
 }

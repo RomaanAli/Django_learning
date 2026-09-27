@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}E-Learning{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 </head>
 <body>
 
@@ -18,7 +18,8 @@
                 <a href="{% url 'course_list' %}">Courses</a>
                 {% if user.is_authenticated %}
                     <a href="{% url 'dashboard' %}">Dashboard</a>
-                    <a href="{% url 'logout' %}">Logout</a>
+                    <a href="{% url 'profile' %}">Profile</a>
+                    <button type="button" class="nav-button" id="logout-open">Logout</button>
                 {% else %}
                     <a href="{% url 'login' %}">Login</a>
                     <a class="btn btn-primary btn-sm" href="{% url 'register' %}">Register</a>
@@ -43,6 +44,65 @@
             <p>&copy; {% now "Y" %} E-Learning. Built with Django.</p>
         </div>
     </footer>
+
+    {% if user.is_authenticated %}
+        {# Logout confirmation dialog — logout only happens on the explicit POST. #}
+        <div class="modal-overlay" id="logout-modal" hidden>
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="logout-modal-title" aria-describedby="logout-modal-desc">
+                <span class="modal-icon" aria-hidden="true">&#128274;</span>
+                <h2 id="logout-modal-title">Log out?</h2>
+                <p id="logout-modal-desc">Are you sure you want to log out? You will need to log in again to access your courses.</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="logout-cancel">Cancel</button>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Log out</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <script>
+        (function () {
+            var openBtn = document.getElementById("logout-open");
+            var modal = document.getElementById("logout-modal");
+            var cancelBtn = document.getElementById("logout-cancel");
+
+            if (!openBtn || !modal || !cancelBtn) {
+                return;
+            }
+
+            function openModal() {
+                modal.hidden = false;
+                document.body.classList.add("modal-open");
+                cancelBtn.focus();
+            }
+
+            function closeModal() {
+                modal.hidden = true;
+                document.body.classList.remove("modal-open");
+                openBtn.focus();
+            }
+
+            openBtn.addEventListener("click", openModal);
+            cancelBtn.addEventListener("click", closeModal);
+
+            // Clicking the dark backdrop also closes the dialog.
+            modal.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Pressing Escape closes the dialog too.
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && !modal.hidden) {
+                    closeModal();
+                }
+            });
+        })();
+    </script>
 
 </body>
 </html>
