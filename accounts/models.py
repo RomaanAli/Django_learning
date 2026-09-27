@@ -60,6 +60,13 @@ class EmailVerification(models.Model):
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_profile(sender, instance, created, **kwargs):
-    """Automatically create a Profile whenever a new user is created."""
-    if created:
+    """Automatically create a Profile whenever a new user is created.
+
+    The `raw` guard skips this during fixture loads (e.g. ``loaddata``), where
+    the Profile rows come from the fixture itself. Without it, importing users
+    from a backup would first auto-create a Profile for each user and then
+    collide with the Profile record stored in the fixture (unique constraint
+    on user).
+    """
+    if created and not kwargs.get("raw", False):
         Profile.objects.get_or_create(user=instance)
