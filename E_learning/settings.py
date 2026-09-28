@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'core',
     'courses',
     'accounts',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -272,4 +273,21 @@ if _google_client_id and _google_client_secret:
         "secret": _google_client_secret,
         "key": "",
     }
+
+
+# Stripe payments ("Buy this course" via Stripe Checkout)
+# ---------------------------------------------------------------------------
+# All keys are read from the environment ONLY — never hard-code them, never
+# commit them. Locally they live in .env (git-ignored); on Railway add them
+# under Variables. The keys are used purely server-side; the hosted Checkout
+# page keeps card details off this server, so the publishable key is never
+# sent to the browser either.
+#   STRIPE_PUBLISHABLE_KEY=pk_test_...
+#   STRIPE_SECRET_KEY=sk_test_...
+#   STRIPE_WEBHOOK_SECRET=whsec_...     (from Stripe > Developers > Webhooks)
+# Switch the pk_test_/sk_test_ values for pk_live_/sk_live_ to take real money.
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "").strip()
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "").strip()
+STRIPE_CURRENCY = os.environ.get("STRIPE_CURRENCY", "usd").strip().lower()
 

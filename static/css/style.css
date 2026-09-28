@@ -900,3 +900,124 @@ a:hover {
 body.modal-open {
     overflow: hidden;
 }
+
+/* ==========================================================================
+   Stripe payments (course checkout, success & cancel pages)
+   ========================================================================== */
+
+/* Larger call-to-action button used on "Buy this course". */
+.btn-lg {
+    padding: 0.8rem 1.8rem;
+    font-size: 1.05rem;
+}
+
+/* Order summary card shown on the confirm page. */
+.payment-summary {
+    max-width: 560px;
+    margin: 1.5rem auto;
+    padding: 1.5rem 2rem;
+}
+
+.payment-summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.payment-summary-row:last-of-type {
+    border-bottom: none;
+}
+
+.payment-summary-label {
+    color: var(--color-muted);
+    font-weight: 600;
+}
+
+.payment-summary-value {
+    font-weight: 700;
+    text-align: right;
+}
+
+.payment-summary-total {
+    background: var(--color-primary-soft);
+    margin: 0 -0.5rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius);
+}
+
+.payment-summary-total .price-lg {
+    color: var(--color-primary);
+}
+
+/* Reassurance strip under the order summary. */
+.payment-secure-note {
+    max-width: 560px;
+    margin: 1rem auto;
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--color-muted);
+}
+
+.stripe-mark {
+    font-weight: 700;
+    color: #635bff; /* Stripe brand indigo */
+}
+
+/* Buttons row on confirm / success / cancel pages. */
+.payment-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem auto;
+}
+
+.payment-actions form {
+    margin: 0;
+}
+
+/* Success & cancel result cards. */
+.payment-result-card {
+    max-width: 560px;
+    margin: 2.5rem auto;
+    text-align: center;
+    padding: 2rem 2.5rem;
+}
+
+.payment-result-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    background: var(--color-primary-soft);
+    color: #16a34a;
+    font-size: 2rem;
+    line-height: 72px;
+}
+
+.payment-result-icon.payment-warning {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.payment-confirming {
+    color: var(--color-muted);
+    animation: payment-pulse 1.2s ease-in-out infinite;
+}
+
+.payment-enrolled {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+@keyframes payment-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.45;
+    }
+}

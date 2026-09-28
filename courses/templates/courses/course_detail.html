@@ -27,14 +27,20 @@
             {% if is_enrolled %}
                 <p class="muted">You are enrolled! Your lessons are unlocked below.</p>
             {% elif user.is_authenticated %}
-                <form method="post" action="{% url 'enroll_course' course.pk %}">
-                    {% csrf_token %}
-                    <button class="btn btn-primary" type="submit">Enroll now</button>
-                </form>
+                {% if course.price > 0 %}
+                    <a class="btn btn-primary btn-lg" href="{% url 'payments:confirm' course.pk %}">
+                        Buy this course &mdash; ${{ course.price }}
+                    </a>
+                {% else %}
+                    <form method="post" action="{% url 'enroll_course' course.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-primary" type="submit">Enroll for free</button>
+                    </form>
+                {% endif %}
             {% else %}
                 <p class="muted">
                     <a href="{% url 'login' %}">Login</a> or
-                    <a href="{% url 'register' %}">register</a> to enroll in this course
+                    <a href="{% url 'register' %}">register</a> to buy this course
                     and view its lessons.
                 </p>
             {% endif %}

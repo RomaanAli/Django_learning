@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Payment successful | E-Learning{% endblock %}
+
+{% block content %}
+    <div class="card payment-result-card" data-course-id="{{ course.pk }}"
+         data-enrolled="{{ is_enrolled|yesno:'true,false' }}">
+        <div class="payment-result-icon" aria-hidden="true">&#10003;</div>
+        <h1>Payment successful!</h1>
+        <p class="muted">
+            Thank you! Your payment for <strong>{{ course.title }}</strong>
+            has been received.
+        </p>
+
+        {% if not is_enrolled %}
+            <p class="payment-confirming" id="confirming">
+                &#8987; Confirming your enrollment&hellip; this usually takes a
+                couple of seconds.
+            </p>
+        {% else %}
+            <p class="payment-enrolled">
+                &#10003; You are enrolled. Your lessons are unlocked now.
+            </p>
+        {% endif %}
+
+        <div class="payment-actions">
+            <a class="btn btn-primary" href="{% url 'course_detail' course.pk %}">Go to the course</a>
+            <a class="btn btn-secondary" href="{% url 'dashboard' %}">Go to my dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var card = document.querySelector(".payment-result-card");
+            if (!card || card.dataset.enrolled === "true") {
+                return;
+            }
+            var courseId = card.dataset.courseId;
+            var tries = 0;
+
+            function poll() {
+                tries += 1;
+                if (tries > 30) {  // give up after ~90 seconds
+                    document.getElementById("confirming").textContent =
+                        "If you are not enrolled within a minute, please contact support.";
+                    return;
+                }
+                fetch("/payments/status/" + courseId + "/")
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.enrolled) {
+                            window.location.reload();
+                        } else {
+                            setTimeout(poll, 3000);
+                        }
+                    })
+                    .catch(function () { setTimeout(poll, 3000); });
+            }
+
+            setTimeout(poll, 3000);
+        })();
+    </script>
+{% endblock %}

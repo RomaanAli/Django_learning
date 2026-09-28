@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Payment cancelled | E-Learning{% endblock %}
+
+{% block content %}
+    <div class="card payment-result-card">
+        <div class="payment-result-icon payment-warning" aria-hidden="true">&#10006;</div>
+        <h1>Payment cancelled</h1>
+        <p class="muted">
+            No money was taken and you were not charged. You can come back and
+            try again whenever you are ready.
+        </p>
+        <div class="payment-actions">
+            <a class="btn btn-primary" href="{% url 'payments:confirm' course.pk %}">Try again</a>
+            <a class="btn btn-secondary" href="{% url 'course_detail' course.pk %}">Back to the course</a>
+        </div>
+    </div>
+{% endblock %}

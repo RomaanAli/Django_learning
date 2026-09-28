@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from payments import views as payments_views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
@@ -26,4 +28,6 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('allauth.urls')),
     path('courses/', include('courses.urls')),
+    path('payments/', include('payments.urls')),
+    path('webhooks/stripe/', payments_views.stripe_webhook, name='stripe_webhook'),
 ]

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout | E-Learning{% endblock %}
+
+{% block content %}
+    <div class="page-head">
+        <h1>Secure Checkout</h1>
+        <p class="page-subtitle">
+            Review your order. Payment is handled securely by Stripe — we never
+            see your card details.
+        </p>
+    </div>
+
+    {% if is_enrolled %}
+        <div class="card">
+            <p>&#10003; You are already enrolled in <strong>{{ course.title }}</strong>.</p>
+            <p>
+                <a class="btn btn-primary" href="{% url 'course_detail' course.pk %}">Go to the course</a>
+            </p>
+        </div>
+    {% elif not stripe_ready %}
+        <div class="card">
+            <p>Payments are not configured yet (<code>STRIPE_SECRET_KEY</code> is missing on the server).</p>
+            <p><a class="back-link" href="{% url 'course_detail' course.pk %}">&larr; Back to the course</a></p>
+        </div>
+    {% else %}
+        <div class="card payment-summary">
+            <div class="payment-summary-row">
+                <span class="payment-summary-label">Course</span>
+                <span class="payment-summary-value">{{ course.title }}</span>
+            </div>
+            <div class="payment-summary-row">
+                <span class="payment-summary-label">Included</span>
+                <span class="payment-summary-value">
+                    {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}
+                </span>
+            </div>
+            <div class="payment-summary-row">
+                <span class="payment-summary-label">Duration</span>
+                <span class="payment-summary-value">Lifetime access</span>
+            </div>
+            <div class="payment-summary-row payment-summary-total">
+                <span class="payment-summary-label">Total due</span>
+                <span class="payment-summary-value price price-lg">${{ course.price }}</span>
+            </div>
+        </div>
+
+        <div class="payment-secure-note">
+            &#128274; Secured by <span class="stripe-mark">Stripe</span> — Visa,
+            Mastercard, Amex, PayPal and more are accepted. You will leave this
+            site to complete payment and will be brought back automatically.
+        </div>
+
+        <div class="payment-actions">
+            <form method="post" action="{% url 'payments:checkout' course.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-primary btn-lg" type="submit">
+                    Continue to payment &rarr;
+                </button>
+            </form>
+            <a class="btn btn-secondary" href="{% url 'course_detail' course.pk %}">Cancel</a>
+        </div>
+    {% endif %}
+{% endblock %}

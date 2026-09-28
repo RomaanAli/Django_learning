@@ -1,0 +1,1 @@
+"""Payments app — Stripe Checkout integration for course purchases."""

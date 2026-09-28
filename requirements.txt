@@ -11,3 +11,5 @@ gunicorn==23.0.0
 whitenoise==6.8.2
 dj-database-url==2.2.0
 psycopg[binary]==3.2.12
+# Stripe payments (server-side only — keys come from the environment).
+stripe==15.6.1

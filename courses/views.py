@@ -34,12 +34,23 @@ class CourseDetailView(DetailView):
 
 
 class EnrollCourseView(LoginRequiredMixin, View):
-    """Enroll the logged-in student in a course (no duplicate enrollments)."""
+    """Enroll the logged-in student in a FREE course (no duplicate enrollments).
+
+    Paid courses (``price > 0``) are routed to the Stripe checkout instead —
+    the student must pay before the enrollment is created (via webhook).
+    """
 
     def _enroll(self, request, pk):
         course = get_object_or_404(
             Course.objects.filter(is_published=True), pk=pk
         )
+        if course.price > 0:
+            messages.info(
+                request,
+                f'"{course.title}" is a paid course — please complete payment '
+                "to enroll.",
+            )
+            return redirect("payments:confirm", course_id=course.pk)
         _, created = Enrollment.objects.get_or_create(
             student=request.user,
             course=course,
