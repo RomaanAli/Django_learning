@@ -155,39 +155,53 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Email (used to send the OTP during registration)
 # ---------------------------------------------------------------------------
-# Development: the console backend prints every email (including the OTP) to
-# the terminal, so no SMTP server is needed locally.
-# Production (e.g. Railway): set EMAIL_BACKEND to the SMTP backend (or simply
-# remove it) and set the EMAIL_* variables to your provider's values. Nothing
-# is hard-coded here — everything comes from environment variables. Empty
-# values in .env are treated as "not set".
+# Everything comes from environment variables — nothing is hard-coded.
 #
-# If no explicit EMAIL_BACKEND is given, one is picked automatically:
-#   * in DEBUG (local development) it is always the console backend, which
-#     prints every email to the terminal;
-#   * in production the SMTP backend is used whenever SMTP credentials
-#     (EMAIL_HOST_USER) are configured. If they are not (e.g. a fresh deploy
-#     before a mail provider has been added), it falls back to the console
-#     backend so registrations still work — the OTP is written to the server
-#     logs instead of failing the sign-up outright.
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND")
+# The backend is chosen in this order:
+#   1. an explicit EMAIL_BACKEND always wins (handy locally when you want the
+#      console backend, or when using an API-based provider);
+#   2. otherwise, if SMTP credentials are present (EMAIL_HOST_USER and
+#      EMAIL_HOST_PASSWORD), the SMTP backend is used;
+#   3. otherwise the console backend is used, which only PRINTS the email to
+#      the server log — it delivers nothing.
+#
+# EMAIL_DELIVERY_REQUIRED (default: True whenever DEBUG is off) makes the app
+# treat "console backend outside development" as a delivery FAILURE. That is
+# the important part: registration then reports a real error instead of
+# telling the user to check an inbox that will never receive anything. Only
+# set EMAIL_DELIVERY_REQUIRED=false if you deliberately want console output in
+# a deployed environment.
+CONSOLE_EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+SMTP_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_BACKEND = (os.environ.get("EMAIL_BACKEND") or "").strip()
+_smtp_configured = bool(
+    (os.environ.get("EMAIL_HOST_USER") or "").strip()
+    and (os.environ.get("EMAIL_HOST_PASSWORD") or "").strip()
+)
 if not EMAIL_BACKEND:
-    if DEBUG or not os.environ.get("EMAIL_HOST_USER"):
-        EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    else:
-        EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ.get("EMAIL_HOST") or "localhost"
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT") or "587")
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER") or ""
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") or ""
-EMAIL_USE_TLS = (os.environ.get("EMAIL_USE_TLS") or "true").lower() == "true"
+    EMAIL_BACKEND = SMTP_EMAIL_BACKEND if _smtp_configured else CONSOLE_EMAIL_BACKEND
+
+EMAIL_HOST = (os.environ.get("EMAIL_HOST") or "localhost").strip()
+EMAIL_PORT = int((os.environ.get("EMAIL_PORT") or "587").strip())
+EMAIL_HOST_USER = (os.environ.get("EMAIL_HOST_USER") or "").strip()
+EMAIL_HOST_PASSWORD = (os.environ.get("EMAIL_HOST_PASSWORD") or "").strip()
+EMAIL_USE_TLS = (os.environ.get("EMAIL_USE_TLS") or "true").strip().lower() == "true"
+# Add a timeout so a dead SMTP server cannot hang the registration request.
+EMAIL_TIMEOUT = int((os.environ.get("EMAIL_TIMEOUT") or "15").strip())
 # If no explicit From address is given, send from the SMTP account itself —
 # many providers (e.g. Gmail) reject emails whose From address does not match
 # the authenticated sender.
 DEFAULT_FROM_EMAIL = (
-    os.environ.get("DEFAULT_FROM_EMAIL")
-    or os.environ.get("EMAIL_HOST_USER")
+    (os.environ.get("DEFAULT_FROM_EMAIL") or "").strip()
+    or EMAIL_HOST_USER
     or "E-Learning <noreply@example.com>"
+)
+
+# Is this environment expected to actually deliver email?
+_delivery_required = (os.environ.get("EMAIL_DELIVERY_REQUIRED") or "").strip().lower()
+EMAIL_DELIVERY_REQUIRED = (
+    _delivery_required == "true" if _delivery_required else not DEBUG
 )
 
 
