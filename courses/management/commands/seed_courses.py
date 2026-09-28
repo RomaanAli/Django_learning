@@ -1,10 +1,21 @@
 """
-Seed the five extra E-Learning courses and their lessons.
+Seed the extra E-Learning courses and their lessons.
+
+The catalogue this command installs:
+
+* Computer Networks (4 lessons)
+* Programming Fundamentals (4 lessons)
+* RESTful API (5 lessons)
+* Software Engineering Concepts (4 lessons)
+* Software Project Management (5 lessons)
+* Artificial Intelligence (5 lessons)
+* Machine Learning (6 lessons)
+* Deployment (3 lessons)
 
 This is an *idempotent* management command: it is completely safe to run it
 many times. Every course and lesson is looked up with ``get_or_create``, so
 re-running the command never creates duplicate records and it never touches
-the two courses that already exist in the database.
+courses that already exist in the database under the same title.
 
 Usage:
 
@@ -541,12 +552,381 @@ COURSES = [
             },
         ],
     },
+{
+        "title": "Artificial Intelligence",
+        "description": (
+            "Discover how machines can think, reason and decide. This beginner "
+            "course introduces intelligent agents, search and problem solving, "
+            "knowledge representation, learning, and the ethical questions that "
+            "come with building intelligent systems."
+        ),
+        "price": "2400.00",
+        "lessons": [
+            {
+                "title": "Introduction to Artificial Intelligence",
+                "content": (
+                    "Artificial Intelligence (AI) is the branch of computer "
+                    "science that builds systems able to do things that normally "
+                    "need human intelligence - understanding language, "
+                    "recognising images, planning and making decisions.\n\n"
+                    "The idea is old: Alan Turing asked whether machines could "
+                    "think back in 1950, and the term 'artificial intelligence' "
+                    "was coined in 1956. Today AI works so well because three "
+                    "things arrived together - huge amounts of data, fast and "
+                    "cheap computing power, and much better algorithms. You "
+                    "already use it in search engines, spam filters, photo "
+                    "tagging, voice assistants and recommendation feeds. This "
+                    "course explains how such systems are built, starting with "
+                    "the classical ideas that need no machine learning at all.\n\n"
+                    "Key takeaway: AI makes computers behave intelligently, and "
+                    "modern success comes from data, computing power and better "
+                    "algorithms together."
+                ),
+            },
+            {
+                "title": "Intelligent Agents and Problem Solving",
+                "content": (
+                    "An intelligent agent perceives its environment through "
+                    "sensors and acts on it through actuators in order to reach a "
+                    "goal. A thermostat, a chess program and a self-driving car "
+                    "are all agents; only the complexity differs.\n\n"
+                    "Many classical problems are solved by search. The state "
+                    "space lists every situation the agent could be in, and "
+                    "search algorithms explore it looking for a path from start "
+                    "to goal. Breadth-first search goes level by level and finds "
+                    "the shortest path when every step costs the same; "
+                    "depth-first search uses less memory but may wander; informed "
+                    "search such as A* uses a heuristic - an educated guess of "
+                    "the remaining distance - to look in the most promising "
+                    "direction first. Games add an opponent, so algorithms such "
+                    "as minimax choose the move that is best even if the "
+                    "opponent always plays perfectly.\n\n"
+                    "Key takeaway: intelligence often means searching a space of "
+                    "possibilities, and heuristics make that search practical."
+                ),
+            },
+            {
+                "title": "Knowledge Representation and Reasoning",
+                "content": (
+                    "For an agent to reason, its knowledge must be written in a "
+                    "form a computer can use. A knowledge base holds facts and "
+                    "rules, and an inference engine derives new facts from "
+                    "them.\n\n"
+                    "Propositional logic works with simple true or false "
+                    "statements, while first-order logic adds objects, properties "
+                    "and relations, so we can express 'every student who passes "
+                    "all exams graduates'. Rule-based systems store knowledge as "
+                    "IF-THEN rules and powered the expert systems of the 1980s, "
+                    "which captured a specialist's experience as hundreds of "
+                    "rules. Semantic networks and ontologies organise concepts "
+                    "into graphs, which is how a search engine knows that a car "
+                    "is a kind of vehicle. Symbolic reasoning is explainable - "
+                    "you can point to the rules that produced a conclusion - but "
+                    "writing enough rules for the real world is very hard, which "
+                    "is why machine learning became so important.\n\n"
+                    "Key takeaway: knowledge representation lets computers reason "
+                    "with facts and rules, and keeps that reasoning explainable."
+                ),
+            },
+            {
+                "title": "Machine Learning and Deep Learning in AI",
+                "content": (
+                    "For decades AI was hand-written: people encoded the rules. "
+                    "Machine learning reversed that. Instead of writing rules we "
+                    "give the computer examples and let it find the patterns "
+                    "itself.\n\n"
+                    "This matters because some tasks have no practical rule list "
+                    "- recognising a face, translating a sentence, understanding "
+                    "speech - yet learning from millions of examples works "
+                    "extremely well. Deep learning goes further with artificial "
+                    "neural networks of many layers, which learn increasingly "
+                    "abstract features: edges, then shapes, then whole objects. "
+                    "AI and machine learning are therefore not rivals; machine "
+                    "learning is one family of techniques inside AI, and it "
+                    "drives almost all of the recent progress.\n\n"
+                    "Key takeaway: machine learning is a subset of AI in which "
+                    "patterns are learned from data instead of being programmed "
+                    "by hand."
+                ),
+            },
+            {
+                "title": "AI Ethics, Applications and the Future",
+                "content": (
+                    "Powerful tools bring powerful risks. The best known is "
+                    "bias: a model trained on unfair historical data repeats and "
+                    "even amplifies that unfairness when it decides who gets a "
+                    "loan, a job interview or medical attention. Other concerns "
+                    "are privacy, because models learn from personal data; "
+                    "opacity, because deep networks are hard to explain; and "
+                    "misuse, from deepfakes to disinformation.\n\n"
+                    "Good practice begins before any code is written. Ask what "
+                    "problem is being solved, whose data is used, who could be "
+                    "harmed, and how the result will be tested and monitored. "
+                    "Keeping a human in the loop for high-stakes decisions, "
+                    "documenting data sources and limitations, and letting "
+                    "affected people appeal are practical safeguards. The people "
+                    "who understand both the strengths and the limits of AI will "
+                    "be the ones who use it well.\n\n"
+                    "Key takeaway: AI is a tool whose value depends on how "
+                    "thoughtfully it is designed, tested and governed."
+                ),
+            },
+        ],
+    },
+{
+        "title": "Machine Learning",
+        "description": (
+            "Learn how computers improve with experience. This course covers "
+            "supervised, unsupervised and reinforcement learning, data "
+            "preparation and feature engineering, the main regression and "
+            "classification algorithms, honest model evaluation, and how to take "
+            "a model into production."
+        ),
+        "price": "2800.00",
+        "lessons": [
+            {
+                "title": "Introduction to Machine Learning",
+                "content": (
+                    "Machine learning means writing programs that improve with "
+                    "experience instead of following hand-written rules. You "
+                    "supply examples, the algorithm finds patterns, and the "
+                    "result is a model that can make predictions about new "
+                    "data.\n\n"
+                    "Compare the two approaches for spam filtering. By hand you "
+                    "would list suspicious words and rules, then keep patching "
+                    "them as spammers adapt. With machine learning you show the "
+                    "computer thousands of emails already labelled spam or not "
+                    "spam, and it works out its own signals - signals that are "
+                    "usually better and much easier to update. The same idea "
+                    "powers recommendations, credit scoring, speech recognition "
+                    "and fraud detection, wherever patterns are too complex to "
+                    "write down as rules. It is not magic: relevant data, a clear "
+                    "question and honest evaluation decide whether it works.\n\n"
+                    "Key takeaway: machine learning finds patterns in examples, "
+                    "and the data and the question matter more than the "
+                    "algorithm."
+                ),
+            },
+            {
+                "title": "Types of Learning: Supervised, Unsupervised and Reinforcement",
+                "content": (
+                    "Machine learning splits into three families depending on "
+                    "what feedback is available.\n\n"
+                    "Supervised learning uses labelled examples, where each input "
+                    "comes with the correct answer. When the answer is a category "
+                    "- spam or not spam, cat or dog - the task is classification; "
+                    "when the answer is a number - price, demand, temperature - it "
+                    "is regression. This is the most common type in business.\n\n"
+                    "Unsupervised learning uses unlabelled data and looks for "
+                    "structure. Clustering groups similar items together, which "
+                    "is how customers get segmented into behavioural groups, "
+                    "while dimensionality reduction squeezes many features into a "
+                    "few informative ones.\n\n"
+                    "Reinforcement learning learns by trial and error. An agent "
+                    "acts in an environment, receives rewards or penalties, and "
+                    "gradually discovers a policy that maximises reward. It "
+                    "powers game playing and robot control but needs a lot of "
+                    "interaction.\n\n"
+                    "Key takeaway: match the family to the data - labels mean "
+                    "supervised, structure-seeking means unsupervised, and action "
+                    "with reward means reinforcement."
+                ),
+            },
+            {
+                "title": "Data Preparation and Feature Engineering",
+                "content": (
+                    "Real data is messy, and preparing it is usually the biggest "
+                    "part of a machine learning project. Expect missing values, "
+                    "duplicates, impossible numbers, mixed units and text that "
+                    "means the same thing in three different spellings.\n\n"
+                    "Cleaning comes first: fix or drop bad rows, handle missing "
+                    "values, and check that nothing leaks information from the "
+                    "future into the past. Then engineer features that make "
+                    "patterns easy to see. A date becomes day of week and "
+                    "is-weekend; long text becomes word counts; scaling puts "
+                    "features on comparable ranges so a salary in millions does "
+                    "not drown out an age in tens. Finally split the data: "
+                    "training rows to fit the model, validation rows to tune it, "
+                    "and a test set kept untouched until the very end. Tuning "
+                    "against the test set quietly turns it into training data and "
+                    "gives you an over-optimistic score.\n\n"
+                    "Key takeaway: good features and honest data splits matter "
+                    "more than a fancy algorithm."
+                ),
+            },
+            {
+                "title": "Regression and Classification Algorithms",
+                "content": (
+                    "Two groups of algorithms cover most beginner projects.\n\n"
+                    "Regression predicts a number. Linear regression fits the "
+                    "best straight line through the data and is easy to "
+                    "interpret, because each coefficient shows how much the "
+                    "prediction moves when a feature changes. Regularised "
+                    "versions such as ridge and lasso add flexibility while "
+                    "discouraging the model from chasing noise.\n\n"
+                    "Classification predicts a category. Logistic regression "
+                    "estimates a probability and applies a threshold - simple, "
+                    "fast and a strong baseline. Decision trees ask a series of "
+                    "questions and are very readable, but a single tree overfits "
+                    "easily. Ensembles fix that: random forests average many "
+                    "trees, and gradient boosting builds trees one after another, "
+                    "each correcting the previous one's mistakes. Boosted trees "
+                    "win most competitions on tabular data.\n\n"
+                    "Key takeaway: start with a simple, interpretable model as a "
+                    "baseline, then try a tree ensemble and compare honestly."
+                ),
+            },
+            {
+                "title": "Model Evaluation and Overfitting",
+                "content": (
+                    "A model that scores perfectly on its training data has "
+                    "usually just memorised it. Overfitting is the gap between "
+                    "memorising and generalising, and evaluation is how we measure "
+                    "that gap.\n\n"
+                    "Accuracy alone is misleading. If only one percent of "
+                    "transactions are fraudulent, a model that always answers "
+                    "'not fraud' is 99 percent accurate and completely useless. "
+                    "Confusion matrices, precision, recall and F1 show what "
+                    "happens to each class, and ROC-AUC summarises ranking quality "
+                    "across thresholds. For regression, mean absolute error and "
+                    "root mean squared error give the average mistake in the "
+                    "target's own units. To fight overfitting, use "
+                    "cross-validation so every row is tested at some point, add "
+                    "regularisation, gather more data, and drop redundant "
+                    "features. Report the test result only once you have stopped "
+                    "choosing.\n\n"
+                    "Key takeaway: use metrics that match the real cost of "
+                    "mistakes, and trust only results from data the model has "
+                    "never seen."
+                ),
+            },
+            {
+                "title": "From Notebook to Production",
+                "content": (
+                    "A model that lives only in a notebook delivers no value. "
+                    "Getting it into a product means agreeing what to build, "
+                    "serving predictions reliably, and watching what happens "
+                    "afterwards.\n\n"
+                    "Start by defining success in business terms: a fraud model "
+                    "may be judged on money saved rather than accuracy, and a "
+                    "recommender on engagement rather than error. Then package the "
+                    "trained model so other programs can call it - save it with a "
+                    "tool such as joblib, expose it through a small API endpoint, "
+                    "and keep the exact preprocessing steps beside it so training "
+                    "and serving agree. Once live, monitor input distributions, "
+                    "prediction volume, latency and error rates, because data "
+                    "drifts as behaviour changes and a model can decay silently. "
+                    "Version your models and data, log predictions so problems can "
+                    "be explained, and plan how you will retrain and roll "
+                    "back.\n\n"
+                    "Key takeaway: the project is finished only when the model "
+                    "runs in production, is monitored, and can be retrained "
+                    "safely."
+                ),
+            },
+        ],
+    },
+{
+        "title": "Deployment",
+        "description": (
+            "Take your project from your laptop to a real URL. Learn what "
+            "changes in production, how to deploy a Django app to a cloud "
+            "platform, and how to manage secrets, logs, backups and updates once "
+            "the site is live."
+        ),
+        "price": "1500.00",
+        "lessons": [
+            {
+                "title": "Introduction to Deployment",
+                "content": (
+                    "Writing an application on your own computer is only half "
+                    "the job; deploying means putting it somewhere other people "
+                    "can reach it. In development you run a lightweight server "
+                    "inside your project, with helpful error pages and your "
+                    "machine's own database. In production the same code runs on "
+                    "a real server behind HTTPS, with a proper database, real "
+                    "secrets, and logging that records what happened.\n\n"
+                    "The main differences are configuration and discipline. "
+                    "Settings such as debug mode, allowed hosts, secret keys and "
+                    "database credentials must never be hard-coded; they arrive "
+                    "as environment variables. Static files such as CSS and "
+                    "images have to be collected and served efficiently. And the "
+                    "process that starts your app must also apply database "
+                    "migrations, otherwise new code meets an old schema. Hosting "
+                    "choices range from a virtual private server you manage "
+                    "yourself to platforms such as Railway or Render that build "
+                    "and run your code straight from a Git repository. For a "
+                    "learning project, a platform is the fastest route to a "
+                    "working URL.\n\n"
+                    "Key takeaway: deployment runs the same code in a stricter "
+                    "environment, configured entirely through environment "
+                    "variables."
+                ),
+            },
+            {
+                "title": "Deploying a Django App to the Cloud",
+                "content": (
+                    "A typical Django deployment on a platform such as Railway "
+                    "follows the same short sequence.\n\n"
+                    "First, prepare the project: turn debug off, restrict the "
+                    "allowed hosts, read every secret from the environment, add a "
+                    "production web server such as Gunicorn, and make sure static "
+                    "files are collected. Second, commit everything to Git and "
+                    "connect the repository to the platform. Third, add a "
+                    "database plugin and the environment variables the app "
+                    "expects - the secret key, the database URL and any "
+                    "third-party API keys. Fourth, define the start command that "
+                    "runs migrations and then starts the web server.\n\n"
+                    "Two details cause most beginner failures. The first is "
+                    "HTTPS: the platform ends encryption at its proxy and "
+                    "forwards the original scheme in a header, so the framework "
+                    "must be told to trust it, otherwise secure cookies and "
+                    "redirects break. The second is host checking: the deployed "
+                    "domain must be listed as allowed, and form security must "
+                    "trust that origin. Reading the deploy logs carefully usually "
+                    "reveals both immediately.\n\n"
+                    "Key takeaway: deploy with environment variables, a "
+                    "production server, migrations in the start command, and the "
+                    "proxy and host settings correct."
+                ),
+            },
+            {
+                "title": "Going Live: Secrets, Debugging and Maintenance",
+                "content": (
+                    "Deployment is not a one-off event; a live application needs "
+                    "regular care.\n\n"
+                    "Secrets management comes first. Keep keys out of the "
+                    "repository, store them only in the platform's variable "
+                    "settings, and rotate anything that has been exposed. Keep "
+                    "debug mode off in production so internal details are never "
+                    "shown to visitors, and make sure error logs are collected "
+                    "somewhere you actually read. When something breaks, the "
+                    "fastest path is usually the platform's log view: reproduce "
+                    "the failing action and watch the traceback appear.\n\n"
+                    "Then think about the data. Schedule and verify regular "
+                    "database backups, and test restoring them at least once. "
+                    "Plan how you will ship updates: a small change, a migration "
+                    "if needed, a deploy, and a check that the site still works. "
+                    "Add monitoring or at least an uptime check so you learn "
+                    "about outages before your users do, and keep an eye on cost "
+                    "and usage so a surprise bill does not end the project. "
+                    "Finally, treat security as routine: keep dependencies "
+                    "updated, serve everything over HTTPS, and protect the admin "
+                    "area.\n\n"
+                    "Key takeaway: production needs secrets kept safe, logs "
+                    "read, backups tested and updates shipped deliberately."
+                ),
+            },
+        ],
+    },
 ]
 
 
 class Command(BaseCommand):
     help = (
-        "Add the 5 extra courses and their lessons to the database. "
+        "Add the extra courses (Computer Networks, Programming Fundamentals, "
+        "RESTful API, Software Engineering, Project Management, Artificial "
+        "Intelligence, Machine Learning, Deployment) and their lessons. "
         "Safe to re-run: existing records are never duplicated or modified."
     )
 
