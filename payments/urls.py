@@ -25,9 +25,4 @@ urlpatterns = [
         views.PaymentCancelView.as_view(),
         name="cancel",
     ),
-    path(
-        "status/<int:course_id>/",
-        views.PaymentStatusView.as_view(),
-        name="status",
-    ),
 ]

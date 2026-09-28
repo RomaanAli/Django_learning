@@ -11,7 +11,10 @@ import hmac
 import json
 import time
 from decimal import Decimal
+from unittest.mock import patch
 
+import stripe
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 
@@ -175,3 +178,199 @@ class PaymentPageTests(TestCase):
         self.assertTrue(Enrollment.objects.filter(
             student=self.user, course=self.free
         ).exists())
+
+
+class CheckoutSessionPayloadTests(TestCase):
+    """Regression guard: the exact payload handed to Stripe.
+
+    Stripe rejects an *empty* ``product_data.description``, which used to make
+    buying a course with no description fail with a 500 message. These tests
+    capture the kwargs the view sends and assert the field is omitted.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(
+            username="buyer", email="buyer@example.com", password="x"
+        )
+
+    def _create_call_kwargs(self, course):
+        self.client.force_login(self.user)
+        with override_settings(STRIPE_SECRET_KEY="sk_test_dummy"):
+            with patch("payments.views.stripe.checkout.Session.create") as create:
+                create.return_value = stripe.StripeObject.construct_from(
+                    {"id": "cs_test_payload", "url": "https://checkout.stripe.com/x"},
+                    None,
+                )
+                response = self.client.post(f"/payments/checkout/{course.pk}/")
+        return response, create.call_args.kwargs
+
+    def test_course_without_description_omits_the_field(self):
+        course = Course.objects.create(
+            title="No description", price="10.00", is_published=True,
+            description="",
+        )
+        response, kwargs = self._create_call_kwargs(course)
+
+        self.assertEqual(response.status_code, 302)
+        product = kwargs["line_items"][0]["price_data"]["product_data"]
+        self.assertEqual(product, {"name": "No description"})
+        self.assertNotIn("description", product)
+
+    def test_course_with_description_sends_it(self):
+        course = Course.objects.create(
+            title="With description", price="10.00", is_published=True,
+            description="A short blurb",
+        )
+        _, kwargs = self._create_call_kwargs(course)
+
+        product = kwargs["line_items"][0]["price_data"]["product_data"]
+        self.assertEqual(product["description"], "A short blurb")
+
+    def test_price_is_taken_from_the_database_in_cents(self):
+        course = Course.objects.create(
+            title="Priced", price="12.34", is_published=True, description="d"
+        )
+        _, kwargs = self._create_call_kwargs(course)
+
+        price_data = kwargs["line_items"][0]["price_data"]
+        self.assertEqual(price_data["unit_amount"], 1234)
+        self.assertEqual(price_data["currency"], settings.STRIPE_CURRENCY)
+        self.assertEqual(
+            kwargs["metadata"],
+            {"user_id": str(self.user.pk), "course_id": str(course.pk)},
+        )
+        self.assertIn(
+            "session_id={CHECKOUT_SESSION_ID}", kwargs["success_url"]
+        )
+
+
+class PaymentSuccessPageTests(TestCase):
+    """The webhook-free flow: the success page verifies the session with
+    Stripe and grants the enrolment itself."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(
+            username="buyer", email="buyer@example.com", password="x"
+        )
+        cls.other = User.objects.create_user(
+            username="someone", email="someone@example.com", password="x"
+        )
+        cls.course = Course.objects.create(
+            title="Paid Course", price="29.00", is_published=True
+        )
+        cls.other_course = Course.objects.create(
+            title="Other Course", price="9.00", is_published=True
+        )
+
+    def _session(self, **overrides):
+        """A real ``StripeObject``, exactly like the API returns."""
+        data = {
+            "id": "cs_test_success_1",
+            "payment_status": "paid",
+            "payment_intent": "pi_test_1",
+            "currency": "usd",
+            "amount_total": 2900,
+            "metadata": {
+                "user_id": str(self.user.pk),
+                "course_id": str(self.course.pk),
+            },
+        }
+        data.update(overrides)
+        return stripe.StripeObject.construct_from(data, None)
+
+    def _success_url(self, course, session_id="cs_test_success_1"):
+        return f"/payments/success/{course.pk}/?session_id={session_id}"
+
+    @override_settings(STRIPE_SECRET_KEY="sk_test_dummy")
+    @patch("payments.views.stripe.checkout.Session.retrieve")
+    def test_paid_session_on_success_page_enrolls(self, retrieve):
+        retrieve.return_value = self._session()
+        self.client.force_login(self.user)
+
+        response = self.client.get(self._success_url(self.course))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Payment successful")
+        self.assertTrue(Enrollment.objects.filter(
+            student=self.user, course=self.course
+        ).exists())
+        payment = Payment.objects.get(stripe_session_id="cs_test_success_1")
+        self.assertEqual(payment.status, Payment.Status.PAID)
+        self.assertEqual(payment.amount, Decimal("29.00"))
+
+    @override_settings(STRIPE_SECRET_KEY="sk_test_dummy")
+    @patch("payments.views.stripe.checkout.Session.retrieve")
+    def test_reloading_success_page_does_not_duplicate(self, retrieve):
+        retrieve.return_value = self._session()
+        self.client.force_login(self.user)
+
+        self.client.get(self._success_url(self.course))
+        self.client.get(self._success_url(self.course))
+
+        self.assertEqual(Enrollment.objects.filter(
+            student=self.user, course=self.course
+        ).count(), 1)
+        self.assertEqual(Payment.objects.count(), 1)
+
+    @override_settings(STRIPE_SECRET_KEY="sk_test_dummy")
+    @patch("payments.views.stripe.checkout.Session.retrieve")
+    def test_another_users_session_is_refused(self, retrieve):
+        retrieve.return_value = self._session(metadata={
+            "user_id": str(self.other.pk),
+            "course_id": str(self.course.pk),
+        })
+        self.client.force_login(self.user)
+
+        response = self.client.get(self._success_url(self.course))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Confirming your payment")
+        self.assertFalse(Enrollment.objects.filter(student=self.user).exists())
+
+    @override_settings(STRIPE_SECRET_KEY="sk_test_dummy")
+    @patch("payments.views.stripe.checkout.Session.retrieve")
+    def test_session_for_another_course_is_refused(self, retrieve):
+        retrieve.return_value = self._session(metadata={
+            "user_id": str(self.user.pk),
+            "course_id": str(self.other_course.pk),
+        })
+        self.client.force_login(self.user)
+
+        self.client.get(self._success_url(self.course))
+
+        self.assertFalse(Enrollment.objects.filter(
+            student=self.user, course=self.course
+        ).exists())
+
+    @override_settings(STRIPE_SECRET_KEY="sk_test_dummy")
+    @patch("payments.views.stripe.checkout.Session.retrieve")
+    def test_unpaid_session_is_refused(self, retrieve):
+        retrieve.return_value = self._session(payment_status="unpaid")
+        self.client.force_login(self.user)
+
+        self.client.get(self._success_url(self.course))
+
+        self.assertFalse(Enrollment.objects.filter(
+            student=self.user, course=self.course
+        ).exists())
+        self.assertEqual(Payment.objects.count(), 0)
+
+    @override_settings(STRIPE_SECRET_KEY="sk_test_dummy")
+    @patch("payments.views.stripe.checkout.Session.retrieve")
+    def test_stripe_error_does_not_break_the_page(self, retrieve):
+        retrieve.side_effect = stripe.error.StripeError("boom")
+        self.client.force_login(self.user)
+
+        response = self.client.get(self._success_url(self.course))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Enrollment.objects.filter(student=self.user).exists())
+
+    def test_success_page_without_session_id_does_not_enroll(self):
+        self.client.force_login(self.user)
+        response = self.client.get(f"/payments/success/{self.course.pk}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Confirming your payment")
+        self.assertFalse(Enrollment.objects.filter(student=self.user).exists())

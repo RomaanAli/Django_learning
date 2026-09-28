@@ -284,7 +284,11 @@ if _google_client_id and _google_client_secret:
 # sent to the browser either.
 #   STRIPE_PUBLISHABLE_KEY=pk_test_...
 #   STRIPE_SECRET_KEY=sk_test_...
-#   STRIPE_WEBHOOK_SECRET=whsec_...     (from Stripe > Developers > Webhooks)
+#   STRIPE_WEBHOOK_SECRET=whsec_...     (OPTIONAL — see below)
+# Only the secret key is required: after payment the success page asks Stripe
+# whether the session was really paid and enrols the student itself, so no
+# webhook has to be configured. STRIPE_WEBHOOK_SECRET may be added later if you
+# create a webhook endpoint in Stripe's dashboard (it then runs the same code).
 # Switch the pk_test_/sk_test_ values for pk_live_/sk_live_ to take real money.
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "").strip()
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
