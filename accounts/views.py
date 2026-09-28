@@ -381,6 +381,85 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         return context
 
 
+def google_check(request):
+    """Temporary diagnostic page for "Continue with Google" (HTTP 500).
+
+    Shows everything that affects the social login flow so it can be checked
+    directly on the deployed site without needing shell access to Railway:
+    environment variables, how many Google apps allauth can see, the exact
+    callback URL allauth builds, the current host/site and CSRF/ALLOWED_HOSTS
+    settings.  Secrets are masked — only the first characters of the client id
+    and the length of the client secret are printed.
+    """
+    import os as _os
+    from allauth.socialaccount.adapter import get_adapter
+    from django.contrib.sites.shortcuts import get_current_site
+    from django.http import HttpResponse
+    from django.urls import reverse
+
+    def mask(value, shown=10):
+        value = value or ""
+        if not value:
+            return "(not set)"
+        return f"{value[:shown]}... (total {len(value)})"
+
+    items = []
+
+    def add(name, value):
+        items.append((name, str(value)))
+
+    add("request URL", request.build_absolute_uri())
+    add("scheme", request.scheme)
+    add("host", request.get_host())
+    add("DEBUG", settings.DEBUG)
+    add("ALLOWED_HOSTS", settings.ALLOWED_HOSTS)
+    add("CSRF_TRUSTED_ORIGINS", settings.CSRF_TRUSTED_ORIGINS)
+    add("SITE_ID", getattr(settings, "SITE_ID", None))
+    try:
+        add("current Site domain", get_current_site(request).domain)
+    except Exception as exc:  # noqa: BLE001 - diagnostic page must not crash
+        add("current Site domain", f"ERROR {type(exc).__name__}: {exc}")
+
+    add(
+        "GOOGLE_OAUTH_CLIENT_ID",
+        mask(_os.environ.get("GOOGLE_OAUTH_CLIENT_ID")),
+    )
+    secret = _os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET") or ""
+    add(
+        "GOOGLE_OAUTH_CLIENT_SECRET",
+        f"{'yes' if secret else 'no'} (len {len(secret)})",
+    )
+
+    try:
+        apps = get_adapter(request).list_apps(request, provider="google")
+        for i, app in enumerate(apps, 1):
+            add(
+                f"google app #{i}",
+                f"pk={app.pk} name={app.name!r} "
+                f"provider={app.provider} client_id={mask(app.client_id)}",
+            )
+        add("total google apps allauth sees", len(apps))
+    except Exception as exc:  # noqa: BLE001
+        add("list_apps", f"ERROR {type(exc).__name__}: {exc}")
+
+    try:
+        cb = request.build_absolute_uri(reverse("google_callback"))
+        add("callback URL allauth builds (must be in Google Console)", cb)
+    except Exception as exc:  # noqa: BLE001
+        add("callback URL", f"ERROR {type(exc).__name__}: {exc}")
+
+    rows = "".join(f"<tr><td>{k}</td><td class='v'>{v}</td></tr>" for k, v in items)
+    html = (
+        "<!doctype html><html><head><meta charset='utf-8'><title>Google login "
+        "diagnostics</title><style>body{font-family:monospace}table{"
+        "border-collapse:collapse}td{border:1px solid #999;padding:6px 12px;"
+        "vertical-align:top;word-break:break-all}td.v{max-width:900px}"
+        "</style></head><body><h1>Google login diagnostics</h1>"
+        f"<table>{rows}</table></body></html>"
+    )
+    return HttpResponse(html, content_type="text/html; charset=utf-8")
+
+
 class ProfileEditView(LoginRequiredMixin, View):
     """Edit the logged-in student's profile (name, email, age, contact)."""
 
