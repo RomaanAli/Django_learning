@@ -127,11 +127,12 @@ class RegisterView(View):
             return self._render(request, form)
 
         user = form.save()  # created with is_active=False
-        otp = _create_or_refresh_otp(user)
+        try:
+            otp = _create_or_refresh_otp(user)
+        except Exception as e:
+            print("otp generation failed:", e)
+
         if not _send_otp_email(user, otp):
-            # Email failed (SMTP not configured / misconfigured). Remove the
-            # half-registered account so the user can retry cleanly, and say
-            # what happened instead of silently leaving them stuck.
             user.delete()
             messages.error(
                 request,
@@ -382,14 +383,20 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 
 
 def google_check(request):
-    """Temporary diagnostic page for "Continue with Google" (HTTP 500).
+    """Diagnostic page for "Continue with Google" problems.
 
-    Shows everything that affects the social login flow so it can be checked
-    directly on the deployed site without needing shell access to Railway:
-    environment variables, how many Google apps allauth can see, the exact
-    callback URL allauth builds, the current host/site and CSRF/ALLOWED_HOSTS
-    settings.  Secrets are masked — only the first characters of the client id
-    and the length of the client secret are printed.
+    Two sections:
+
+    1. Raw diagnostics — environment variables, how many Google apps
+       allauth can see, the exact redirect_uri allauth sends to Google
+       for the current host plus the loopback alternates, and the
+       current host/site/CSRF/ALLOWED_HOSTS settings.  Secrets are
+       masked — only the first characters of the client id and the
+       length of the client secret are printed.
+    2. A fix-it checklist for Google's "Access blocked" error page.
+       That page is produced by Google's servers (not by this project)
+       and is resolved in the Google Cloud Console: authorized redirect
+       URIs and the consent-screen test-users list.
     """
     import os as _os
     from allauth.socialaccount.adapter import get_adapter
@@ -442,20 +449,85 @@ def google_check(request):
     except Exception as exc:  # noqa: BLE001
         add("list_apps", f"ERROR {type(exc).__name__}: {exc}")
 
+    # allauth builds the OAuth redirect_uri from the host the visitor is
+    # browsing with, so opening the site as 127.0.0.1 instead of localhost
+    # (or another port) changes it.  Google only accepts a redirect_uri that
+    # was registered verbatim in the Google Cloud Console, so both loopback
+    # spellings should be registered — they differ only in the host name.
+    redirect_uris = []
     try:
-        cb = request.build_absolute_uri(reverse("google_callback"))
-        add("callback URL allauth builds (must be in Google Console)", cb)
+        callback_path = reverse("google_callback")
+        redirect_uris.append(request.build_absolute_uri(callback_path))
+        host = request.get_host()
+        hostname = host.split(":")[0]
+        port = host[len(hostname):]  # ":8000", or "" when no port is present
+        alternate = None
+        if hostname == "localhost":
+            alternate = "127.0.0.1" + port
+        elif hostname == "127.0.0.1":
+            alternate = "localhost" + port
+        if alternate:
+            redirect_uris.append(f"{request.scheme}://{alternate}{callback_path}")
+        add(
+            "redirect_uri allauth sends to Google (register it VERBATIM)",
+            redirect_uris[0],
+        )
+        for uri in redirect_uris[1:]:
+            add("alternate loopback redirect_uri (register it too)", uri)
     except Exception as exc:  # noqa: BLE001
         add("callback URL", f"ERROR {type(exc).__name__}: {exc}")
 
-    rows = "".join(f"<tr><td>{k}</td><td class='v'>{v}</td></tr>" for k, v in items)
+    from django.utils.html import escape
+
+    rows = "".join(
+        f"<tr><td>{escape(k)}</td><td class='v'>{escape(v)}</td></tr>"
+        for k, v in items
+    )
+
+    uris_html = "".join(f"<li><code>{escape(u)}</code></li>" for u in redirect_uris)
+    checklist = [
+        "<b>1. Register the redirect URIs.</b> Google Cloud Console &rarr; "
+        "APIs &amp; Services &rarr; <b>Credentials</b> &rarr; OAuth 2.0 "
+        "Client ID (type <i>Web application</i>) &rarr; <b>Authorized "
+        "redirect URIs</b> &rarr; paste each of these <i>exactly</i> "
+        "(scheme, port and trailing slash all matter) &rarr; <b>Save</b> "
+        "&rarr; wait ~1 minute before retrying:<ul>"
+        + uris_html
+        + "</ul>Google error <i>400: redirect_uri_mismatch</i> means this "
+        "list is wrong for the host you are browsing with.",
+        "<b>2. Allow the account you sign in with.</b> APIs &amp; Services "
+        "&rarr; <b>OAuth consent screen</b> &rarr; while <i>Publishing "
+        "status</i> is <i>Testing</i>, add your Google account under "
+        "<b>Test users</b> &rarr; <b>Save</b> (or click <b>Publish app</b> "
+        "so every account works). The <i>Access blocked / 403</i> error for "
+        "one specific account means that account is missing from this list.",
+        "<b>3. Use matching credentials.</b> The client id / secret in "
+        "<code>.env</code> (or the SocialApp row in Django admin) must "
+        "belong to that same <i>Web application</i> client — a client of "
+        "any other type (Android, TVs, etc.) cannot complete this flow.",
+        "<b>4. Keep the host consistent.</b> If only "
+        "<code>localhost</code> is registered, browse "
+        "<code>http://localhost:&lt;port&gt;/</code> — not "
+        "<code>127.0.0.1</code> (and vice versa); the redirect_uri "
+        "changes with the host name.",
+    ]
+    checklist_html = "".join(f"<li>{c}</li>" for c in checklist)
+
     html = (
         "<!doctype html><html><head><meta charset='utf-8'><title>Google login "
-        "diagnostics</title><style>body{font-family:monospace}table{"
-        "border-collapse:collapse}td{border:1px solid #999;padding:6px 12px;"
-        "vertical-align:top;word-break:break-all}td.v{max-width:900px}"
-        "</style></head><body><h1>Google login diagnostics</h1>"
-        f"<table>{rows}</table></body></html>"
+        "diagnostics</title><style>body{font-family:monospace;max-width:1100px;"
+        "margin:24px auto;padding:0 16px}table{border-collapse:collapse;"
+        "width:100%}td{border:1px solid #999;padding:6px 12px;vertical-align:"
+        "top;word-break:break-all}td.v{max-width:900px}h2{margin-top:32px}"
+        "code{background:#f3f3f3;padding:2px 4px}li{margin:8px 0}</style>"
+        "</head><body><h1>Google login diagnostics</h1>"
+        f"<table>{rows}</table>"
+        "<h2>Fixing Google's &quot;Access blocked&quot; page</h2>"
+        "<p>That error is generated by Google's servers after the redirect "
+        "to <code>accounts.google.com</code>, so it is fixed in the Google "
+        "Cloud Console, not in Django. Work through this list:</p>"
+        f"<ol>{checklist_html}</ol>"
+        "</body></html>"
     )
     return HttpResponse(html, content_type="text/html; charset=utf-8")
 

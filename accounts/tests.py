@@ -191,3 +191,50 @@ class ExistingActiveUserTests(TestCase):
             {"username": "oldstudent", "password": PASSWORD},
         )
         self.assertRedirects(response, reverse("dashboard"))
+
+
+class GoogleLoginDiagnosticsTests(TestCase):
+    """/accounts/google-check/ must show the exact redirect_uri(s) that have
+    to be registered in the Google Cloud Console plus the fix checklist for
+    Google's "Access blocked" error page."""
+
+    def _get(self, host="localhost:8000"):
+        return self.client.get(reverse("google_check"), SERVER_NAME=host)
+
+    def test_page_lists_both_loopback_redirect_uris(self):
+        response = self._get()
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        # Both loopback spellings must be shown — Google only accepts a
+        # redirect_uri registered verbatim, so either host may be browsed.
+        self.assertIn(
+            "http://localhost:8000/accounts/google/login/callback/", content
+        )
+        self.assertIn(
+            "http://127.0.0.1:8000/accounts/google/login/callback/", content
+        )
+
+    def test_redirect_uri_follows_the_host_the_visitor_uses(self):
+        # Browsing via 127.0.0.1 changes the redirect_uri allauth builds;
+        # the page must surface that so the right one gets registered.
+        content = self._get(host="127.0.0.1:8000").content.decode()
+        self.assertIn("redirect_uri allauth sends to Google", content)
+        self.assertIn(
+            "http://127.0.0.1:8000/accounts/google/login/callback/", content
+        )
+
+    def test_page_explains_how_to_fix_access_blocked(self):
+        content = self._get().content.decode()
+        self.assertIn("Access blocked", content)
+        self.assertIn("OAuth consent screen", content)
+        self.assertIn("Test users", content)
+        self.assertIn("Authorized redirect URIs", content)
+
+    def test_client_id_is_masked_not_leaked(self):
+        # The page is public: never echo the raw OAuth credentials.
+        content = self._get().content.decode()
+        import os
+
+        client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID") or ""
+        if client_id:
+            self.assertNotIn(client_id, content)
