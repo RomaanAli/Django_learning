@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -114,24 +115,48 @@ TEMPLATES = [
 WSGI_APPLICATION = 'E_learning.wsgi.application'
 
 
-# Database
+# Database — PostgreSQL ONLY
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 #
-# On Railway we connect to the managed Postgres plugin through the
-# DATABASE_URL variable Railway injects automatically. Locally we keep
-# using SQLite so `runserver` works as before.
+# SQLite support has been removed on purpose: local development, the test
+# suite and the Render deployment all run against the same engine, so what
+# you build and test locally behaves exactly like production.
+#
+# DATABASE_URL must point at PostgreSQL:
+#   * locally   -> set it in .env (git-ignored), e.g.
+#       DATABASE_URL=postgresql://postgres:<password>@127.0.0.1:5432/elearning
+#   * on Render -> injected automatically by the managed Postgres instance
+#       (service -> Environment -> DATABASE_URL).
+#
+# A missing or non-PostgreSQL URL fails fast with a clear message instead of
+# silently falling back to an ephemeral SQLite file whose data disappears on
+# every redeploy.
 
-DATABASES = {}
-if 'DATABASE_URL' in os.environ:
-    DATABASES['default'] = dj_database_url.config(
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+if not DATABASE_URL:
+    raise ImproperlyConfigured(
+        "DATABASE_URL is not set. This project requires PostgreSQL "
+        "(SQLite is no longer supported).\n"
+        "Locally, add to .env:\n"
+        "  DATABASE_URL=postgresql://postgres:<password>"
+        "@127.0.0.1:5432/elearning\n"
+        "On Render, set DATABASE_URL from your Postgres instance "
+        "(service -> Environment)."
+    )
+if not DATABASE_URL.startswith(("postgres://", "postgresql://")):
+    raise ImproperlyConfigured(
+        "DATABASE_URL must be a PostgreSQL URL starting with "
+        f"postgresql:// (got scheme {DATABASE_URL.split(':', 1)[0]!r}). "
+        "SQLite is no longer supported."
+    )
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
         conn_max_age=600,
         conn_health_checks=True,
-    )
-else:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    ),
+}
 
 
 # Password validation
