@@ -457,6 +457,7 @@ def google_check(request):
     redirect_uris = []
     try:
         callback_path = reverse("google_callback")
+
         redirect_uris.append(request.build_absolute_uri(callback_path))
         host = request.get_host()
         hostname = host.split(":")[0]
