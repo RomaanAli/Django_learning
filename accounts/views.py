@@ -160,8 +160,9 @@ class RegisterView(View):
             user.delete()
             messages.error(
                 request,
-                "We could not send the verification email (details in the "
-                "server console). Please check the EMAIL_* settings and try again.",
+                "We could not send the verification email (the reason is "
+                "printed in the server log). Please check BREVO_API_KEY and "
+                "the EMAIL_* settings, then try again.",
             )
             return redirect("register")
         _set_pending_user(request, user)

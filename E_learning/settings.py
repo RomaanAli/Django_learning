@@ -182,49 +182,81 @@ AUTH_PASSWORD_VALIDATORS = [
 # ---------------------------------------------------------------------------
 # Everything comes from environment variables — nothing is hard-coded.
 #
-# The backend is chosen in this order:
+# Free cloud plans BLOCK outbound SMTP (ports 25/465/587):
+#   * Railway Free/Trial/Hobby - SMTP is disabled entirely (Pro and up only);
+#   * Render free instances    - those same ports are blocked.
+# SMTP alone can therefore never deliver from those hosts: the connection
+# just times out, which is exactly the "SMTP error / not responding" symptom.
+# HTTPS (port 443) is always allowed, so Brevo's transactional email API is
+# the primary transport and SMTP is KEPT as the fallback.
+#
+# The transport is chosen in this order:
 #   1. an explicit EMAIL_BACKEND always wins (handy locally when you want the
-#      console backend, or when using an API-based provider);
-#   2. otherwise, if SMTP credentials are present (EMAIL_HOST_USER and
-#      EMAIL_HOST_PASSWORD), the SMTP backend is used;
-#   3. otherwise the console backend is used, which only PRINTS the email to
-#      the server log — it delivers nothing.
+#      console backend);
+#   2. otherwise EMAIL_BACKEND_CHAIN is tried in order: the Brevo HTTPS API,
+#      then SMTP (only when its credentials are present), then the console;
+#   3. the console backend only PRINTS the email to the server log — it
+#      delivers nothing, which is why it is always last.
 #
 # EMAIL_DELIVERY_REQUIRED (default: True whenever DEBUG is off) makes the app
-# treat "console backend outside development" as a delivery FAILURE. That is
-# the important part: registration then reports a real error instead of
-# telling the user to check an inbox that will never receive anything. Only
-# set EMAIL_DELIVERY_REQUIRED=false if you deliberately want console output in
-# a deployed environment.
+# treat "no real transport configured" as a delivery FAILURE. That is the
+# important part: registration then reports a real error instead of telling
+# the user to check an inbox that will never receive anything. Only set
+# EMAIL_DELIVERY_REQUIRED=false if you deliberately want console output in a
+# deployed environment.
 CONSOLE_EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 SMTP_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
-EMAIL_BACKEND = (os.environ.get("EMAIL_BACKEND") or "").strip()
-_smtp_configured = bool(
-    (os.environ.get("EMAIL_HOST_USER") or "").strip()
-    and (os.environ.get("EMAIL_HOST_PASSWORD") or "").strip()
-)
-if not EMAIL_BACKEND:
-    EMAIL_BACKEND = SMTP_EMAIL_BACKEND if _smtp_configured else CONSOLE_EMAIL_BACKEND
+BREVO_EMAIL_BACKEND = "core.mail_backends.BrevoAPIBackend"
+CHAIN_EMAIL_BACKEND = "core.mail_backends.FallbackEmailBackend"
 
 EMAIL_HOST = (os.environ.get("EMAIL_HOST") or "localhost").strip()
 EMAIL_PORT = int((os.environ.get("EMAIL_PORT") or "587").strip())
 EMAIL_HOST_USER = (os.environ.get("EMAIL_HOST_USER") or "").strip()
 EMAIL_HOST_PASSWORD = (os.environ.get("EMAIL_HOST_PASSWORD") or "").strip()
-EMAIL_USE_TLS = (os.environ.get("EMAIL_USE_TLS") or "true").strip().lower() == "true"
-# Add a timeout so a dead SMTP server cannot hang the registration request.
+EMAIL_USE_TLS = (
+    (os.environ.get("EMAIL_USE_TLS") or "true").strip().lower() == "true"
+)
+# Add a timeout so a dead SMTP server or API endpoint cannot hang the
+# registration request (the Brevo backend uses the same value).
 EMAIL_TIMEOUT = int((os.environ.get("EMAIL_TIMEOUT") or "15").strip())
 # If no explicit From address is given, send from the SMTP account itself —
 # many providers (e.g. Gmail) reject emails whose From address does not match
-# the authenticated sender.
+# the authenticated sender. With Brevo this must be a VERIFIED sender.
 DEFAULT_FROM_EMAIL = (
     (os.environ.get("DEFAULT_FROM_EMAIL") or "").strip()
     or EMAIL_HOST_USER
     or "E-Learning <noreply@example.com>"
 )
 
+# Brevo transactional email API (HTTPS on port 443 — never blocked by the
+# free plans above). Create the key in Brevo: profile menu -> "SMTP & API" ->
+# "API Keys". It starts with "xkeysib-" and is NOT the SMTP key from the
+# "SMTP" tab; the two cannot be swapped.
+BREVO_API_KEY = (os.environ.get("BREVO_API_KEY") or "").strip()
+
+_smtp_configured = bool(EMAIL_HOST_USER and EMAIL_HOST_PASSWORD)
+
+# Transports that are usable in this environment, best first. The console
+# backend is always appended so an email can never silently disappear.
+EMAIL_BACKEND_CHAIN = []
+if BREVO_API_KEY:
+    EMAIL_BACKEND_CHAIN.append(BREVO_EMAIL_BACKEND)
+if _smtp_configured:
+    EMAIL_BACKEND_CHAIN.append(SMTP_EMAIL_BACKEND)
+EMAIL_BACKEND_CHAIN.append(CONSOLE_EMAIL_BACKEND)
+
+EMAIL_BACKEND = (os.environ.get("EMAIL_BACKEND") or "").strip()
+if not EMAIL_BACKEND:
+    EMAIL_BACKEND = (
+        CHAIN_EMAIL_BACKEND
+        if len(EMAIL_BACKEND_CHAIN) > 1
+        else CONSOLE_EMAIL_BACKEND
+    )
+
 # Is this environment expected to actually deliver email?
-_delivery_required = (os.environ.get("EMAIL_DELIVERY_REQUIRED") or "").strip().lower()
+_delivery_required = (
+    (os.environ.get("EMAIL_DELIVERY_REQUIRED") or "").strip().lower()
+)
 EMAIL_DELIVERY_REQUIRED = (
     _delivery_required == "true" if _delivery_required else not DEBUG
 )
