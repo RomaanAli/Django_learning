@@ -122,6 +122,21 @@ class RegisterView(View):
         return self._render(request, StudentRegistrationForm())
 
     def post(self, request):
+        # A signup whose OTP email never arrived leaves an INACTIVE,
+        # unverified row behind, which would make this retry fail with
+        # "A user with that email already exists." Clear any such stale
+        # signup for this email first so registration can start fresh.
+        # Active or already-verified accounts are never touched.
+        email = (request.POST.get("email") or "").strip()
+        if email:
+            stale_ids = [
+                u.pk
+                for u in User.objects.filter(email__iexact=email)
+                if not u.is_active and not _is_email_verified(u)
+            ]
+            if stale_ids:
+                User.objects.filter(pk__in=stale_ids).delete()
+
         form = StudentRegistrationForm(request.POST)
         if not form.is_valid():
             return self._render(request, form)
@@ -130,7 +145,16 @@ class RegisterView(View):
         try:
             otp = _create_or_refresh_otp(user)
         except Exception as e:
+            # Never leave the inactive row behind with no OTP on file: it
+            # would silently block the next registration for this email.
             print("otp generation failed:", e)
+            user.delete()
+            messages.error(
+                request,
+                "We could not prepare email verification (details in the "
+                "server console). Please try again.",
+            )
+            return redirect("register")
 
         if not _send_otp_email(user, otp):
             user.delete()

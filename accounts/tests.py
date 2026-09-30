@@ -159,13 +159,48 @@ class EmailOtpRegistrationTests(TestCase):
         self.assertFalse(user.is_active)
         self.assertNotIn("_auth_user_id", self.client.session)
 
-    # Case 7 — duplicate email is rejected.
+    # Case 7 — duplicate email is rejected once that account is active
+    # (i.e. it really exists — a stale unverified signup is handled in 7b).
     def test_case_7_duplicate_email_is_rejected(self):
         self._register()
+        user = User.objects.get(username="student1")
+        user.is_active = True  # account completed verification
+        user.save(update_fields=["is_active"])
+
         response = self._register(username="student2", email="student1@example.com")
         self.assertEqual(response.status_code, 200)
         self.assertFalse(User.objects.filter(username="student2").exists())
         self.assertContains(response, "already exists")
+
+    # Case 7b — the reported bug: the OTP email never arrived, so the first
+    # signup is stuck as an INACTIVE/unverified row. Retrying with the same
+    # email (and username) must register fresh instead of dead-ending with
+    # "A user with that email already exists."
+    def test_case_7b_retry_with_same_email_after_lost_otp_registers_fresh(self):
+        self._register()
+        stale_id = User.objects.get(username="student1").pk
+
+        response = self._register()  # same username + email again
+
+        self.assertRedirects(response, reverse("verify_email"))
+        self.assertFalse(User.objects.filter(pk=stale_id).exists())
+        self.assertEqual(User.objects.filter(email="student1@example.com").count(), 1)
+        user = User.objects.get(email="student1@example.com")
+        self.assertFalse(user.is_active)
+        # A fresh OTP was emailed for the new account.
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertRegex(user.email_verification.otp, r"^\d{6}$")
+
+    # Case 7c — if OTP creation crashes, the half-created user must be
+    # removed again so it cannot block the next registration attempt.
+    @mock.patch(
+        "accounts.views._create_or_refresh_otp", side_effect=RuntimeError("boom")
+    )
+    def test_case_7c_otp_failure_leaves_no_phantom_user(self, _mock):
+        response = self._register()
+        self.assertRedirects(response, reverse("register"))
+        self.assertFalse(User.objects.filter(username="student1").exists())
+        self.assertEqual(len(mail.outbox), 0)
 
     # Case 8 — duplicate username is rejected.
     def test_case_8_duplicate_username_is_rejected(self):
