@@ -3,11 +3,12 @@
 {% block title %}Dashboard | E-Learning{% endblock %}
 
 {% block content %}
-    <div class="card">
+    <div class="page-head">
         <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
+        <p class="page-subtitle">This is your student dashboard.</p>
+    </div>
 
-        <p>This is your student dashboard.</p>
-
+    <div class="card">
         <ul class="stats">
             <li><strong>Username:</strong> {{ user.username }}</li>
             <li><strong>Email:</strong> {{ user.email }}</li>
@@ -15,8 +16,10 @@
             <li><strong>Enrolled courses:</strong> {{ enrollments|length }}</li>
         </ul>
 
-        <a class="btn btn-primary" href="{% url 'course_list' %}">Browse Courses</a>
-        <a class="btn btn-secondary" href="{% url 'profile' %}">View Profile</a>
+        <div class="form-actions">
+            <a class="btn btn-primary" href="{% url 'course_list' %}">Browse Courses</a>
+            <a class="btn btn-secondary" href="{% url 'profile' %}">View Profile</a>
+        </div>
     </div>
 
     {% if enrollments %}

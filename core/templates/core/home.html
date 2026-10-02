@@ -1,22 +1,222 @@
 {% extends "base.html" %}
+{% load site_content %}
 
 {% block title %}Home | E-Learning{% endblock %}
 
 {% block content %}
+    {% site_stats as stats %}
+    {% featured_courses 3 as featured %}
+
+    {# ------------------------------------------------------------------ #}
+    {# Hero                                                                #}
+    {# ------------------------------------------------------------------ #}
     <section class="hero">
-        <h1>Welcome to our E-Learning Website!</h1>
-        <p>Hi {{ name }}, this is the home page of our e-learning platform.</p>
-        <p>We teach Python, Django, Flask, SQL and more.</p>
-        <a class="btn btn-primary" href="{% url 'course_list' %}">Explore Courses</a>
+        <div class="hero-inner">
+            <div class="hero-content">
+                <span class="eyebrow">E-Learning Platform</span>
+                <h1 class="hero-title">Learn programming skills that move you forward</h1>
+                <p class="hero-lead">
+                    Hi {{ name }}, welcome to E-Learning &mdash; practical courses in
+                    Python, Django, Flask and SQL with structured lessons you can
+                    follow at your own pace, on any device.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary btn-lg" href="{% url 'course_list' %}">Explore Courses</a>
+                    <a class="btn btn-secondary btn-lg" href="{% url 'about' %}">Learn more</a>
+                </div>
+                <div class="hero-stats">
+                    <div>
+                        <div class="hero-stat-value">{{ stats.courses }}</div>
+                        <div class="hero-stat-label">Published courses</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-value">{{ stats.lessons }}</div>
+                        <div class="hero-stat-label">Lessons inside</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-value">{{ stats.enrollments }}</div>
+                        <div class="hero-stat-label">Student enrollments</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual" aria-hidden="true">
+                <div class="hero-panel">
+                    <div class="hero-panel-head">
+                        <span class="hero-panel-title">Featured courses</span>
+                        <span class="hero-progress-label">{{ stats.courses }} published</span>
+                    </div>
+                    <div class="hero-bar"><span></span></div>
+                    {% for course in featured %}
+                        <div class="hero-lesson">
+                            <span class="hero-lesson-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            </span>
+                            <div class="hero-lesson-text">
+                                <div class="hero-lesson-name">{{ course.title }}</div>
+                                <div class="hero-lesson-meta">{{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</div>
+                            </div>
+                            <span class="price">${{ course.price }}</span>
+                        </div>
+                    {% empty %}
+                        <div class="hero-lesson">
+                            <span class="hero-lesson-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                            </span>
+                            <div class="hero-lesson-text">
+                                <div class="hero-lesson-name">New courses are on the way</div>
+                                <div class="hero-lesson-meta">Check back soon</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </section>
 
-    <section>
-        <h2 class="section-title">What you can learn</h2>
-        <div class="chip-list">
+    {# ------------------------------------------------------------------ #}
+    {# What you can learn                                                  #}
+    {# ------------------------------------------------------------------ #}
+    <section class="section">
+        <div class="section-head center">
+            <span class="eyebrow">What you can learn</span>
+            <h2 class="section-title">In-demand topics, taught hands-on</h2>
+            <p class="section-subtitle">Pick a subject and go from fundamentals to building real projects.</p>
+        </div>
+        <div class="chip-list center">
             <span class="chip">Python</span>
             <span class="chip">Django</span>
             <span class="chip">Flask</span>
             <span class="chip">SQL</span>
+        </div>
+    </section>
+
+    {# ------------------------------------------------------------------ #}
+    {# Featured courses (real published data)                              #}
+    {# ------------------------------------------------------------------ #}
+    <section class="section">
+        <div class="section-head">
+            <span class="eyebrow">Featured</span>
+            <h2 class="section-title">Start with one of these courses</h2>
+            <p class="section-subtitle">Fresh from the catalog &mdash; every course includes a full lesson list.</p>
+        </div>
+
+        {% if featured %}
+            <div class="course-grid">
+                {% for course in featured %}
+                    <a class="course-card" href="{% url 'course_detail' course.pk %}">
+                        <div class="course-card-media {% cycle 'acc-indigo' 'acc-violet' 'acc-teal' %}">
+                            <span class="course-card-icon" aria-hidden="true">{{ course.title|slice:":1"|upper }}</span>
+                        </div>
+                        <div class="course-card-body">
+                            <h3 class="course-card-title">{{ course.title }}</h3>
+                            <p class="course-card-desc">{{ course.description|truncatewords:18 }}</p>
+                            <div class="course-card-footer">
+                                <span class="price">${{ course.price }}</span>
+                                <span class="lesson-count">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                                    {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}
+                                </span>
+                            </div>
+                        </div>
+                        <span class="course-card-cta">View course &rarr;</span>
+                    </a>
+                {% endfor %}
+            </div>
+            <div class="section-cta">
+                <a class="btn btn-secondary" href="{% url 'course_list' %}">Browse all courses</a>
+            </div>
+        {% else %}
+            <div class="card">
+                <p>No courses are published yet &mdash; check back soon.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    {# ------------------------------------------------------------------ #}
+    {# Why learn with us                                                   #}
+    {# ------------------------------------------------------------------ #}
+    <section class="section">
+        <div class="section-head center">
+            <span class="eyebrow">Why learn with us</span>
+            <h2 class="section-title">Built for focused, self-paced learning</h2>
+            <p class="section-subtitle">Everything you need to go from first lesson to finished project.</p>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <span class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                </span>
+                <h3>Structured curriculum</h3>
+                <p>Every course is an ordered list of lessons &mdash; you always know what to learn next.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </span>
+                <h3>Learn at your own pace</h3>
+                <p>No schedules and no deadlines &mdash; start a course today and pick it up whenever suits you.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </span>
+                <h3>Progress you can see</h3>
+                <p>Your dashboard keeps every enrollment in one place so your learning never gets lost.</p>
+            </div>
+        </div>
+    </section>
+
+    {# ------------------------------------------------------------------ #}
+    {# How it works                                                        #}
+    {# ------------------------------------------------------------------ #}
+    <section class="section">
+        <div class="section-head center">
+            <span class="eyebrow">How it works</span>
+            <h2 class="section-title">Three steps to start learning</h2>
+            <p class="section-subtitle">From signing up to your first completed lesson in minutes.</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <span class="step-num">1</span>
+                <h3>Create your account</h3>
+                <p>Register for free and confirm your email so your progress can be saved.</p>
+            </div>
+            <div class="step">
+                <span class="step-num">2</span>
+                <h3>Pick a course</h3>
+                <p>Browse the catalog, open a course page, and enroll &mdash; free courses unlock instantly.</p>
+            </div>
+            <div class="step">
+                <span class="step-num">3</span>
+                <h3>Learn lesson by lesson</h3>
+                <p>Work through the lessons in order and track everything from your dashboard.</p>
+            </div>
+        </div>
+    </section>
+
+    {# ------------------------------------------------------------------ #}
+    {# Closing CTA                                                         #}
+    {# ------------------------------------------------------------------ #}
+    <section class="section">
+        <div class="cta-band">
+            <h2>{% if user.is_authenticated %}Ready for your next lesson?{% else %}Start learning today{% endif %}</h2>
+            <p>
+                {% if user.is_authenticated %}
+                    Jump back into your dashboard and pick up exactly where you left off.
+                {% else %}
+                    Create a free account, pick a course, and follow the lessons at your own pace.
+                {% endif %}
+            </p>
+            <div class="cta-actions">
+                {% if user.is_authenticated %}
+                    <a class="btn btn-primary" href="{% url 'dashboard' %}">Go to dashboard</a>
+                    <a class="btn btn-secondary" href="{% url 'course_list' %}">Browse courses</a>
+                {% else %}
+                    <a class="btn btn-primary" href="{% url 'register' %}">Create a free account</a>
+                    <a class="btn btn-secondary" href="{% url 'course_list' %}">Browse courses</a>
+                {% endif %}
+            </div>
         </div>
     </section>
 {% endblock %}

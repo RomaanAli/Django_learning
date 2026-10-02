@@ -3,9 +3,12 @@
 {% block title %}My Profile | E-Learning{% endblock %}
 
 {% block content %}
-    <div class="card">
+    <div class="page-head">
         <h1>{{ user.first_name|default:user.username }}'s Profile</h1>
+        <p class="page-subtitle">Your account details as stored on the platform.</p>
+    </div>
 
+    <div class="card profile-card">
         <ul class="stats">
             <li><strong>Username:</strong> {{ user.username }}</li>
             <li><strong>First name:</strong> {{ user.first_name|default:"—" }}</li>
@@ -15,7 +18,9 @@
             <li><strong>Contact:</strong> {{ profile.contact|default:"—" }}</li>
         </ul>
 
-        <a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit Profile</a>
-        <a class="btn btn-secondary" href="{% url 'dashboard' %}">Back to Dashboard</a>
+        <div class="form-actions">
+            <a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit Profile</a>
+            <a class="btn btn-secondary" href="{% url 'dashboard' %}">Back to Dashboard</a>
+        </div>
     </div>
 {% endblock %}
