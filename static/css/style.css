@@ -7,36 +7,46 @@
    ========================================================================== */
 
 :root {
-    /* Brand */
-    --color-primary: #4f46e5;
-    --color-primary-dark: #4338ca;
-    --color-primary-darker: #3730a3;
+    /* Brand — deep, restrained indigo (primary) */
+    --color-primary: #4338ca;
+    --color-primary-dark: #3730a3;
+    --color-primary-darker: #312e81;
     --color-primary-soft: #eef2ff;
-    --color-primary-line: #dbe0ff;
-    --color-accent: #0d9488;
-    --color-accent-soft: #ecfdf5;
+    --color-primary-line: #d9defb;
 
-    /* Surfaces */
-    --color-bg: #f5f7fb;
+    /* Secondary — deep slate-navy for dark surfaces */
+    --color-secondary: #1e293b;
+    --color-secondary-dark: #0f172a;
+
+    /* Single accent — muted, calm teal */
+    --color-accent: #0f766e;
+    --color-accent-soft: #f0fdfa;
+
+    /* Surfaces — white / very light cool gray */
+    --color-bg: #f6f7fa;
     --color-surface: #ffffff;
     --color-surface-alt: #f8fafc;
-    --color-border: #e5e7eb;
-    --color-border-strong: #d5dae2;
+    --color-border: #e2e8f0;
+    --color-border-strong: #cbd5e1;
 
-    /* Text */
-    --color-text: #141b2d;
+    /* Text — dark charcoal-navy headings, muted gray secondary */
+    --color-text: #1e293b;
     --color-heading: #0f172a;
-    --color-muted: #5b6472;
-    --color-muted-soft: #7b8494;
+    --color-muted: #64748b;
+    --color-muted-soft: #6f7d94;
 
     /* Feedback */
     --color-success: #15803d;
+    --color-success-dark: #065f46;
     --color-success-soft: #ecfdf5;
     --color-success-line: #a7f3d0;
     --color-danger: #dc2626;
     --color-danger-dark: #b91c1c;
     --color-danger-soft: #fef2f2;
     --color-danger-line: #fecaca;
+    --color-warning: #92400e;
+    --color-warning-soft: #fffbeb;
+    --color-warning-line: #fde68a;
 
     /* Shape & depth */
     --radius-sm: 8px;
@@ -186,13 +196,13 @@ a:hover {
 .btn-primary {
     background: var(--color-primary);
     color: #ffffff;
-    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.35);
+    box-shadow: 0 1px 2px rgba(67, 56, 202, 0.35);
 }
 
 .btn-primary:hover {
     background: var(--color-primary-dark);
     color: #ffffff;
-    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.28);
+    box-shadow: 0 6px 16px rgba(67, 56, 202, 0.28);
 }
 
 .btn-secondary {
@@ -277,7 +287,7 @@ a:hover {
     width: 38px;
     height: 38px;
     border-radius: 10px;
-    background: linear-gradient(135deg, var(--color-primary), #7c6cf0);
+    background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
     color: #ffffff;
     flex: 0 0 auto;
 }
@@ -376,9 +386,9 @@ a:hover {
    -------------------------------------------------------------------------- */
 
 .footer {
-    border-top: 1px solid var(--color-border);
-    background: var(--color-surface);
-    padding: 3rem 0 1.5rem;
+    border-top: none;
+    background: var(--color-secondary-dark);
+    padding: 3.25rem 0 1.75rem;
     margin-top: 2rem;
 }
 
@@ -394,12 +404,12 @@ a:hover {
     gap: 0.6rem;
     font-size: 1.15rem;
     font-weight: 800;
-    color: var(--color-heading);
+    color: #ffffff;
     margin-bottom: 0.9rem;
 }
 
 .footer-about {
-    color: var(--color-muted);
+    color: #aeb9cb;
     font-size: 0.92rem;
     max-width: 340px;
     margin: 0;
@@ -409,7 +419,7 @@ a:hover {
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--color-muted-soft);
+    color: #8ea0ba;
     margin: 0 0 1rem;
 }
 
@@ -422,18 +432,18 @@ a:hover {
 }
 
 .footer-links a {
-    color: var(--color-muted);
+    color: #c4cede;
     font-size: 0.95rem;
 }
 
 .footer-links a:hover {
-    color: var(--color-primary);
+    color: #ffffff;
 }
 
 .footer-bottom {
     margin-top: 2.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -443,7 +453,7 @@ a:hover {
 
 .footer-bottom p {
     margin: 0;
-    color: var(--color-muted-soft);
+    color: #8ea0ba;
     font-size: 0.85rem;
 }
 
@@ -516,8 +526,8 @@ a:hover {
     height: 460px;
     background: radial-gradient(
         circle at center,
-        rgba(79, 70, 229, 0.12),
-        rgba(79, 70, 229, 0) 68%
+        rgba(67, 56, 202, 0.1),
+        rgba(67, 56, 202, 0) 68%
     );
     pointer-events: none;
 }
@@ -617,7 +627,7 @@ a:hover {
     display: block;
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, var(--color-primary), #7c6cf0);
+    background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary));
 }
 
 .hero-lesson {
@@ -727,19 +737,19 @@ a:hover {
     align-items: center;
     justify-content: center;
     height: 132px;
-    background: linear-gradient(135deg, #4f46e5, #7c6cf0);
+    background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
 }
 
 .course-card-media.acc-indigo {
-    background: linear-gradient(135deg, #4f46e5, #6d61ec);
+    background: linear-gradient(135deg, #312e81, #4338ca);
 }
 
 .course-card-media.acc-violet {
-    background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+    background: linear-gradient(135deg, #1e3a8a, #3730a3);
 }
 
 .course-card-media.acc-teal {
-    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    background: linear-gradient(135deg, #134e4a, #0f766e);
 }
 
 .course-card-media::before {
@@ -748,12 +758,12 @@ a:hover {
     inset: 0;
     background-image: radial-gradient(
             circle at 18% 22%,
-            rgba(255, 255, 255, 0.22),
+            rgba(255, 255, 255, 0.16),
             transparent 45%
         ),
         radial-gradient(
             circle at 85% 80%,
-            rgba(255, 255, 255, 0.14),
+            rgba(255, 255, 255, 0.1),
             transparent 42%
         );
 }
@@ -1047,7 +1057,7 @@ a:hover {
 .cta-band {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #312e81, #4f46e5 55%, #6d61ec);
+    background: linear-gradient(135deg, #1e1b4b, #312e81 55%, #4338ca);
     border-radius: var(--radius-lg);
     padding: 3rem;
     text-align: center;
@@ -1080,7 +1090,7 @@ a:hover {
 }
 
 .cta-band .btn-primary:hover {
-    background: #f1f2ff;
+    background: var(--color-primary-soft);
     color: var(--color-primary-darker);
 }
 
@@ -1288,7 +1298,7 @@ a:hover {
     align-items: center;
     gap: 0.3rem;
     background: var(--color-success-soft);
-    color: #065f46;
+    color: var(--color-success-dark);
     border: 1px solid var(--color-success-line);
     border-radius: 999px;
     padding: 0.25rem 0.8rem;
@@ -1465,7 +1475,7 @@ a:hover {
 .form-panel select:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.14);
 }
 
 .form-panel .helptext,
@@ -1573,7 +1583,7 @@ a:hover {
 .alert-success {
     background: var(--color-success-soft);
     border-color: var(--color-success-line);
-    color: #065f46;
+    color: var(--color-success-dark);
 }
 
 .alert-error {
@@ -1589,9 +1599,9 @@ a:hover {
 }
 
 .alert-warning {
-    background: #fffbeb;
-    border-color: #fde68a;
-    color: #92400e;
+    background: var(--color-warning-soft);
+    border-color: var(--color-warning-line);
+    color: var(--color-warning);
 }
 
 /* --------------------------------------------------------------------------
