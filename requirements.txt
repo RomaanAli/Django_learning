@@ -4,6 +4,10 @@ django-allauth==65.19.3
 # Needed by allauth's "Continue with Google" provider (allauth does not
 # declare it as a dependency, so it must be listed here explicitly).
 requests==2.34.2
+# allauth's Google provider verifies the ID token with PyJWT (import name
+# `jwt`). It is an optional dependency, so without it "Continue with Google"
+# crashes with ModuleNotFoundError: No module named 'jwt'.
+PyJWT==2.10.1
 python-dotenv==1.2.3
 sqlparse==0.6.0
 tzdata==2026.3
