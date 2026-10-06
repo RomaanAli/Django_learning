@@ -1,0 +1,37 @@
+# Render Blueprint (Infrastructure as Code) — https://render.com/docs/yaml
+# Create the services from this file via Dashboard -> Blueprints, or keep your
+# dashboard-configured services and treat this file as reference.
+databases:
+  - name: elearning
+    plan: free
+    databaseName: elearning
+    user: elearning
+
+services:
+  - type: web
+    name: e-learning
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    startCommand: "python manage.py migrate && python manage.py seed_courses && gunicorn E_learning.wsgi --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: elearning
+          property: connectionString
+      - key: BREVO_API_KEY
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_ID
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false

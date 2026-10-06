@@ -7,9 +7,9 @@ Usage:
 The command prints which transports are active (masking every secret), then
 sends a single message and reports the exact provider error if it fails. It is
 the fastest way to prove email delivery works -- locally as well as on a
-deployed environment:
+deployed environment (Render Dashboard -> Shell):
 
-    railway run python manage.py send_test_email you@gmail.com
+    python manage.py send_test_email you@gmail.com
 """
 
 from django.conf import settings

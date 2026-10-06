@@ -4,9 +4,9 @@ Why this file exists
 --------------------
 Free cloud plans block *outbound SMTP*:
 
+* Render -- free instances block outbound SMTP ports 25/465/587.
 * Railway -- Free, Trial and Hobby plans have SMTP disabled entirely; only
   Pro and above may open ports 25/465/587.
-* Render -- free instances block those same outbound SMTP ports.
 
 A plain SMTP backend can therefore never deliver from those hosts: the
 connection just times out, producing the "SMTP error / not responding"
@@ -16,7 +16,7 @@ transport.
 
 SMTP is NOT removed. ``FallbackEmailBackend`` keeps every transport in a list
 and tries them in order, so the existing SMTP setup keeps working locally, on a
-VPS, on Render paid instances and on Railway Pro:
+VPS and on paid Render instances:
 
     1. Brevo HTTPS API  -- works on every plan (needs BREVO_API_KEY)
     2. SMTP             -- used whenever the API is unavailable (EMAIL_HOST_*)
@@ -75,8 +75,8 @@ class EmailDeliveryError(Exception):
 class BrevoAPIBackend(BaseEmailBackend):
     """Send mail through Brevo's transactional email API over HTTPS.
 
-    This is what makes email work on Railway Free/Trial/Hobby and on Render
-    free instances, where outbound SMTP is blocked. It needs ``BREVO_API_KEY``
+    This is what makes email work on Render free instances, where outbound
+    SMTP is blocked. It needs ``BREVO_API_KEY``
     and a sender address verified inside Brevo.
     """
 
@@ -200,7 +200,7 @@ class FallbackEmailBackend(BaseEmailBackend):
     This is what keeps the project resilient: Brevo's HTTPS API is tried
     first, and SMTP is only used when that fails -- so the SMTP settings that
     already exist stay valid and take over automatically wherever SMTP is
-    actually reachable (local development, a VPS, Railway Pro).
+    actually reachable (local development, a VPS, paid Render instances).
     """
 
     def __init__(self, backend_paths=None, **kwargs):

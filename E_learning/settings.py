@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load local secrets from the .env file (git-ignored — never committed).
-# On Railway the variables are injected straight into the environment, so
+# On Render the variables are injected straight into the environment, so
 # this is a harmless no-op there.
 load_dotenv(BASE_DIR / ".env")
 
@@ -39,29 +39,37 @@ SECRET_KEY = os.environ.get(
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
 
 # Comma-separated list of hosts allowed to serve this site.
-# Includes Railway's default *.up.railway.app domains.
+# Includes Render's default *.onrender.com domains.
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get(
         'DJANGO_ALLOWED_HOSTS',
-        'localhost,127.0.0.1,.up.railway.app',
+        'localhost,127.0.0.1,.onrender.com'
     ).split(',')
     if host.strip()
 ]
 
-# Railway terminates HTTPS at its proxy and forwards the original scheme in
-# the X-Forwarded-Proto header. Trusting it lets Django know requests are
+# Automatically append Render's external hostname if present
+render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if render_hostname and render_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_hostname)
+
+# Render terminates HTTPS at its load balancer and forwards the original
+# scheme in the X-Forwarded-Proto header. Trusting it lets Django know requests are
 # HTTPS, which also fixes CSRF verification on login and registration forms.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
-    for origin in os.environ.get(
-        "DJANGO_CSRF_TRUSTED_ORIGINS",
-        "",
-    ).split(",")
+    for origin in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
     if origin.strip()
 ]
+
+# Automatically prepend scheme and add Render domain to CSRF trusted origins
+if render_hostname:
+    render_origin = f"https://{render_hostname}"
+    if render_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(render_origin)
 
 # Application definition
 
@@ -183,8 +191,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Everything comes from environment variables — nothing is hard-coded.
 #
 # Free cloud plans BLOCK outbound SMTP (ports 25/465/587):
-#   * Railway Free/Trial/Hobby - SMTP is disabled entirely (Pro and up only);
-#   * Render free instances    - those same ports are blocked.
+#   * Render free instances    - those same ports are blocked;
+#   * Railway Free/Trial/Hobby - SMTP is disabled entirely (Pro and up only).
 # SMTP alone can therefore never deliver from those hosts: the connection
 # just times out, which is exactly the "SMTP error / not responding" symptom.
 # HTTPS (port 443) is always allowed, so Brevo's transactional email API is
@@ -321,8 +329,8 @@ SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountAdapter"
 # Google OAuth ("Continue with Google").
 # Get OAuth client credentials from the Google Cloud Console:
 #   https://console.cloud.google.com/apis/credentials
-# Then supply them as environment variables (on Railway add them under
-# Variables; locally set them in your terminal, for example):
+# Then supply them as environment variables (on Render add them under
+# Environment; locally set them in your terminal, for example):
 #   GOOGLE_OAUTH_CLIENT_ID=xxxxx.apps.googleusercontent.com
 #   GOOGLE_OAUTH_CLIENT_SECRET=GOCSPX-xxxxx
 # Alternative: create the app record in Django admin at
@@ -349,8 +357,8 @@ if _google_client_id and _google_client_secret:
 # Stripe payments ("Buy this course" via Stripe Checkout)
 # ---------------------------------------------------------------------------
 # All keys are read from the environment ONLY — never hard-code them, never
-# commit them. Locally they live in .env (git-ignored); on Railway add them
-# under Variables. The keys are used purely server-side; the hosted Checkout
+# commit them. Locally they live in .env (git-ignored); on Render add them
+# under Environment. The keys are used purely server-side; the hosted Checkout
 # page keeps card details off this server, so the publishable key is never
 # sent to the browser either.
 #   STRIPE_PUBLISHABLE_KEY=pk_test_...

@@ -2,7 +2,7 @@
 
 These are registered from ``CoreConfig.ready()`` and therefore run with
 ``manage.py check`` — which means they also run on every ``manage.py`` command,
-including the ``migrate`` step Railway executes at start-up. A *warning* is
+including the ``migrate`` step Render executes at start-up. A *warning* is
 used rather than an error so a missing mail provider never blocks a
 deployment, but the problem is printed clearly in the deploy log.
 """
@@ -120,8 +120,8 @@ def email_delivery_check(app_configs, **kwargs):
                 "out instead of being delivered.",
                 hint=(
                     "Add BREVO_API_KEY so mail is sent over the Brevo HTTPS "
-                    "API on port 443. SMTP is only reachable on Railway Pro "
-                    "and on paid Render instances."
+                    "API on port 443. SMTP is only reachable on paid Render "
+                    "instances."
                 ),
                 id="elearning.W004",
             )

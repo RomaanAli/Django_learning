@@ -71,7 +71,7 @@ def _message(**overrides):
     EMAIL_TIMEOUT=5,
 )
 class BrevoAPIBackendTests(SimpleTestCase):
-    """The HTTPS transport that works on Railway/Render free plans."""
+    """The HTTPS transport that works on Render free plans."""
 
     @mock.patch("core.mail_backends.requests.post")
     def test_sends_through_the_https_api(self, post):
@@ -346,7 +346,7 @@ class DescribeEmailSetupTests(SimpleTestCase):
         {"EMAIL_BACKEND": "django.core.mail.backends.smtp.EmailBackend"},
     )
     def test_warns_when_the_backend_is_pinned_by_the_environment(self):
-        # The exact trap that made a Railway deploy keep using SMTP.
+        # The exact trap that made a cloud deploy keep using SMTP.
         line = describe_email_setup()
 
         self.assertIn("WARNING", line)
