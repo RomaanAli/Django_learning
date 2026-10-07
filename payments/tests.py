@@ -16,6 +16,7 @@ from unittest.mock import patch
 import stripe
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.test import Client, TestCase, override_settings
 
 from courses.models import Course, Enrollment
@@ -83,6 +84,39 @@ class StripeWebhookHandlingTests(TestCase):
             student=self.user, course=self.course
         ).exists())
         self.assertEqual(Payment.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)  # no confirmation without payment
+
+    def test_paid_session_emails_the_student_with_course_and_price(self):
+        StripeWebhookView._handle_session_completed(self._session())
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual(email.to, ["student@example.com"])
+        # The course title appears in subject AND body, the price in the body.
+        self.assertIn("Django Basics", email.subject)
+        self.assertIn("Django Basics", email.body)
+        self.assertIn("19.99", email.body)
+        self.assertIn("USD", email.body)
+
+    def test_duplicate_event_sends_only_one_email(self):
+        # Success page + webhook can BOTH fulfil the same session: exactly one
+        # confirmation email must go out.
+        StripeWebhookView._handle_session_completed(self._session())
+        StripeWebhookView._handle_session_completed(self._session())
+
+        self.assertEqual(len(mail.outbox), 1)
+
+    @patch("payments.views.send_mail", side_effect=OSError("SMTP down"))
+    def test_email_failure_does_not_block_enrollment(self, send_mail_mock):
+        # The money already moved — a failed confirmation email must never
+        # break fulfilment.
+        handled = StripeWebhookView._handle_session_completed(self._session())
+
+        self.assertTrue(handled)
+        self.assertTrue(Enrollment.objects.filter(
+            student=self.user, course=self.course
+        ).exists())
+        send_mail_mock.assert_called_once()
 
     @override_settings(STRIPE_WEBHOOK_SECRET="whsec_test_secret")
     def test_webhook_http_endpoint(self):

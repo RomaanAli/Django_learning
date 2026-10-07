@@ -36,7 +36,7 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'false'
 
 # Comma-separated list of hosts allowed to serve this site.
 # Includes Render's default *.onrender.com domains.

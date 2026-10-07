@@ -24,6 +24,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.mail import send_mail
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -63,6 +64,49 @@ def _as_dict(obj):
 def _redirect_with_message(request, course, level, text):
     messages.add_message(request, level, text)
     return redirect("course_detail", pk=course.pk)
+
+
+def _send_enrollment_email(user, course, amount, currency) -> bool:
+    """Email the student a purchase confirmation after a paid enrollment.
+
+    Includes the course title and the price actually charged. Called ONLY
+    when a new enrollment row was created, so the success page and the
+    optional webhook together still produce exactly ONE email.
+
+    Unlike the OTP mail, a failure here must never break the payment flow:
+    the money already moved and the course is already unlocked, so the
+    error is printed to the server log and swallowed.
+    """
+    recipient = (user.email or "").strip()
+    if not recipient:
+        print(
+            f"[email] Enrollment confirmation for {course.title!r} skipped: "
+            f"user {user.username} has no email address.",
+            flush=True,
+        )
+        return False
+
+    subject = f"You're enrolled in {course.title}"
+    message = (
+        f"Hi {user.username},\n\n"
+        "Thank you for your payment! Your enrollment is confirmed and the "
+        "course is now unlocked on your dashboard.\n\n"
+        f"Course : {course.title}\n"
+        f"Price  : {amount:.2f} {(currency or '').upper()}\n\n"
+        "Log in any time to continue learning where you left off.\n\n"
+        "Happy learning!\n"
+        "- The E-Learning Team"
+    )
+    try:
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [recipient])
+    except Exception as exc:
+        print(
+            f"[email] Could not send enrollment confirmation to "
+            f"{recipient}: {exc}",
+            flush=True,
+        )
+        return False
+    return True
 
 
 def fulfill_checkout_session(session):
@@ -116,7 +160,17 @@ def fulfill_checkout_session(session):
         },
     )
     # Unique constraint on (student, course) + get_or_create = idempotent.
-    Enrollment.objects.get_or_create(student=user, course=course)
+    _, enrolled_now = Enrollment.objects.get_or_create(student=user, course=course)
+    if enrolled_now:
+        # Exactly one confirmation email per enrollment: only when THIS call
+        # created the row, because the success page and the webhook may both
+        # run for the same Stripe session.
+        _send_enrollment_email(
+            user,
+            course,
+            amount,
+            session.get("currency") or settings.STRIPE_CURRENCY,
+        )
     return True
 
 
