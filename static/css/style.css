@@ -1,41 +1,28 @@
-/* ==========================================================================
-   E-Learning — professional platform stylesheet
-   --------------------------------------------------------------------------
-   A single, cohesive design system used by every page. Class names from the
-   original stylesheet are preserved so no template or backend behaviour
-   changes. Only presentation lives here.
-   ========================================================================== */
 
 :root {
-    /* Brand — deep, restrained indigo (primary) */
     --color-primary: #4338ca;
     --color-primary-dark: #3730a3;
     --color-primary-darker: #312e81;
     --color-primary-soft: #eef2ff;
     --color-primary-line: #d9defb;
 
-    /* Secondary — deep slate-navy for dark surfaces */
     --color-secondary: #1e293b;
     --color-secondary-dark: #0f172a;
 
-    /* Single accent — muted, calm teal */
     --color-accent: #0f766e;
     --color-accent-soft: #f0fdfa;
 
-    /* Surfaces — white / very light cool gray */
     --color-bg: #f6f7fa;
     --color-surface: #ffffff;
     --color-surface-alt: #f8fafc;
     --color-border: #e2e8f0;
     --color-border-strong: #cbd5e1;
 
-    /* Text — dark charcoal-navy headings, muted gray secondary */
     --color-text: #1e293b;
     --color-heading: #0f172a;
     --color-muted: #64748b;
     --color-muted-soft: #6f7d94;
 
-    /* Feedback */
     --color-success: #15803d;
     --color-success-dark: #065f46;
     --color-success-soft: #ecfdf5;
@@ -48,7 +35,6 @@
     --color-warning-soft: #fffbeb;
     --color-warning-line: #fde68a;
 
-    /* Shape & depth */
     --radius-sm: 8px;
     --radius: 12px;
     --radius-lg: 18px;
@@ -56,7 +42,6 @@
     --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 6px 18px rgba(15, 23, 42, 0.05);
     --shadow-lg: 0 8px 20px rgba(15, 23, 42, 0.08), 0 24px 48px rgba(15, 23, 42, 0.08);
 
-    /* Rhythm */
     --container: 1140px;
     --section-gap: 4.5rem;
 }
@@ -133,9 +118,6 @@ a:hover {
     text-decoration: underline;
 }
 
-/* --------------------------------------------------------------------------
-   Layout
-   -------------------------------------------------------------------------- */
 
 .container {
     width: 100%;
@@ -155,9 +137,6 @@ a:hover {
     color: var(--color-muted);
 }
 
-/* --------------------------------------------------------------------------
-   Buttons
-   -------------------------------------------------------------------------- */
 
 .btn {
     display: inline-flex;
@@ -244,9 +223,6 @@ a:hover {
     width: 100%;
 }
 
-/* --------------------------------------------------------------------------
-   Navbar
-   -------------------------------------------------------------------------- */
 
 .navbar {
     background: rgba(255, 255, 255, 0.92);
@@ -358,7 +334,6 @@ a:hover {
     text-decoration: none;
 }
 
-/* Hamburger — hidden on desktop, shown on small screens */
 .nav-toggle {
     display: none;
     align-items: center;
@@ -381,9 +356,6 @@ a:hover {
     height: 22px;
 }
 
-/* --------------------------------------------------------------------------
-   Footer
-   -------------------------------------------------------------------------- */
 
 .footer {
     border-top: none;
@@ -457,9 +429,6 @@ a:hover {
     font-size: 0.85rem;
 }
 
-/* --------------------------------------------------------------------------
-   Sections & headings
-   -------------------------------------------------------------------------- */
 
 .section {
     margin-bottom: var(--section-gap);
@@ -502,9 +471,6 @@ a:hover {
     margin: 0;
 }
 
-/* --------------------------------------------------------------------------
-   Hero (home page)
-   -------------------------------------------------------------------------- */
 
 .hero {
     position: relative;
@@ -583,7 +549,6 @@ a:hover {
     color: var(--color-muted);
 }
 
-/* Hero visual: a lightweight "learning dashboard" mock-up built from markup */
 .hero-visual {
     position: relative;
 }
@@ -691,9 +656,6 @@ a:hover {
     height: 18px;
 }
 
-/* --------------------------------------------------------------------------
-   Course grid & cards
-   -------------------------------------------------------------------------- */
 
 .course-grid {
     display: grid;
@@ -730,7 +692,6 @@ a:hover {
     outline-offset: 2px;
 }
 
-/* Thumbnail banner */
 .course-card-media {
     position: relative;
     display: flex;
@@ -876,9 +837,6 @@ a:hover {
     height: 15px;
 }
 
-/* --------------------------------------------------------------------------
-   Feature cards (Why choose us)
-   -------------------------------------------------------------------------- */
 
 .feature-grid {
     display: grid;
@@ -930,9 +888,6 @@ a:hover {
     margin: 0;
 }
 
-/* --------------------------------------------------------------------------
-   How it works — steps
-   -------------------------------------------------------------------------- */
 
 .steps {
     display: grid;
@@ -975,9 +930,6 @@ a:hover {
     margin: 0;
 }
 
-/* --------------------------------------------------------------------------
-   Learning areas (categories)
-   -------------------------------------------------------------------------- */
 
 .category-grid {
     display: grid;
@@ -1033,7 +985,6 @@ a:hover {
     font-size: 0.85rem;
 }
 
-/* Chip list (subject tags) */
 .chip-list {
     display: flex;
     flex-wrap: wrap;
@@ -1050,9 +1001,6 @@ a:hover {
     font-size: 0.9rem;
 }
 
-/* --------------------------------------------------------------------------
-   Call-to-action band
-   -------------------------------------------------------------------------- */
 
 .cta-band {
     position: relative;
@@ -1106,9 +1054,6 @@ a:hover {
     color: #ffffff;
 }
 
-/* --------------------------------------------------------------------------
-   Cards & page headers
-   -------------------------------------------------------------------------- */
 
 .card {
     background: var(--color-surface);
@@ -1136,7 +1081,6 @@ a:hover {
     max-width: 640px;
 }
 
-/* Breadcrumb */
 .breadcrumb {
     display: flex;
     align-items: center;
@@ -1160,9 +1104,6 @@ a:hover {
     font-weight: 600;
 }
 
-/* --------------------------------------------------------------------------
-   About page
-   -------------------------------------------------------------------------- */
 
 .about-hero {
     background: var(--color-surface);
@@ -1217,9 +1158,6 @@ a:hover {
     color: var(--color-heading);
 }
 
-/* --------------------------------------------------------------------------
-   Course detail
-   -------------------------------------------------------------------------- */
 
 .course-header {
     overflow: hidden;
@@ -1306,7 +1244,6 @@ a:hover {
     font-size: 0.9rem;
 }
 
-/* Lessons */
 .lessons-head {
     display: flex;
     align-items: center;
@@ -1398,7 +1335,6 @@ a:hover {
     color: var(--color-primary);
 }
 
-/* Locked-lessons notice */
 .locked-note {
     display: flex;
     align-items: center;
@@ -1421,9 +1357,6 @@ a:hover {
     color: var(--color-primary-dark);
 }
 
-/* --------------------------------------------------------------------------
-   Forms (login / register / OTP / profile / checkout)
-   -------------------------------------------------------------------------- */
 
 .form-panel {
     max-width: 480px;
@@ -1509,7 +1442,6 @@ a:hover {
     font-size: 0.95rem;
 }
 
-/* Social login (Continue with Google) */
 .btn-google {
     display: flex;
     align-items: center;
@@ -1558,15 +1490,11 @@ a:hover {
     background: var(--color-border);
 }
 
-/* OTP input hint */
 .otp-hint {
     font-size: 0.85rem;
     color: var(--color-muted);
 }
 
-/* --------------------------------------------------------------------------
-   Alerts (Django messages)
-   -------------------------------------------------------------------------- */
 
 .alert {
     display: flex;
@@ -1604,9 +1532,6 @@ a:hover {
     color: var(--color-warning);
 }
 
-/* --------------------------------------------------------------------------
-   Dashboard & profile
-   -------------------------------------------------------------------------- */
 
 .dashboard-head {
     display: flex;
@@ -1658,7 +1583,6 @@ a:hover {
     font-weight: 600;
 }
 
-/* Button/action rows under forms and cards */
 .form-actions {
     display: flex;
     flex-wrap: wrap;
@@ -1670,7 +1594,6 @@ a:hover {
     margin-top: 0;
 }
 
-/* Structured key/value stats (profile & dashboard) */
 .stats {
     margin: 1.5rem 0 0;
     padding: 0;
@@ -1726,9 +1649,6 @@ a:hover {
     font-weight: 600;
 }
 
-/* ==========================================================================
-   Stripe payments (course checkout, success & cancel pages)
-   ========================================================================== */
 
 .payment-summary {
     max-width: 620px;
@@ -1781,7 +1701,7 @@ a:hover {
 
 .stripe-mark {
     font-weight: 700;
-    color: #635bff; /* Stripe brand indigo */
+    color: #635bff;
 }
 
 .payment-actions {
@@ -1841,9 +1761,6 @@ a:hover {
     }
 }
 
-/* ==========================================================================
-   Logout confirmation modal
-   ========================================================================== */
 
 .modal-overlay {
     position: fixed;
@@ -1858,7 +1775,6 @@ a:hover {
     animation: modal-fade 0.18s ease;
 }
 
-/* The `hidden` attribute must win over `display: flex` above. */
 .modal-overlay[hidden] {
     display: none;
 }
@@ -1917,7 +1833,6 @@ a:hover {
     min-width: 130px;
 }
 
-/* Prevent the page behind the dialog from scrolling while it is open. */
 body.modal-open {
     overflow: hidden;
 }
@@ -1942,7 +1857,6 @@ body.modal-open {
     }
 }
 
-/* Centered empty state inside a card */
 .empty-state {
     text-align: center;
     padding: 2.5rem 1.5rem;
@@ -1953,27 +1867,21 @@ body.modal-open {
     margin-bottom: 1.1rem;
 }
 
-/* Centered chip row */
 .chip-list.center {
     justify-content: center;
 }
 
-/* Nudge the price pill to the right edge of a hero panel row */
 .hero-lesson .price {
     margin-left: auto;
     flex: 0 0 auto;
 }
 
-/* Section follow-up CTA (e.g. "Browse all courses" under a grid) */
 .section-cta {
     display: flex;
     justify-content: center;
     margin-top: 1.75rem;
 }
 
-/* ==========================================================================
-   Responsive
-   ========================================================================== */
 
 @media (max-width: 992px) {
     .hero {
@@ -2214,7 +2122,6 @@ body.modal-open {
     }
 }
 
-/* Respect users who prefer reduced motion. */
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;

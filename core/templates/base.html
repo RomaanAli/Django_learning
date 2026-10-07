@@ -100,7 +100,6 @@
     </footer>
 
     {% if user.is_authenticated %}
-        {# Logout confirmation dialog — logout only happens on the explicit POST. #}
         <div class="modal-overlay" id="logout-modal" hidden>
             <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="logout-modal-title" aria-describedby="logout-modal-desc">
                 <span class="modal-icon" aria-hidden="true">&#128274;</span>
@@ -118,7 +117,6 @@
     {% endif %}
 
     <script>
-        // Mobile navigation toggle.
         (function () {
             var toggle = document.getElementById("nav-toggle");
             var nav = document.getElementById("primary-nav");
@@ -140,7 +138,6 @@
                 setMenu(!nav.classList.contains("open"));
             });
 
-            // Close the menu when the viewport grows back to desktop size.
             window.addEventListener("resize", function () {
                 if (window.innerWidth > 820) {
                     setMenu(false);
@@ -148,7 +145,6 @@
             });
         })();
 
-        // Logout confirmation modal.
         (function () {
             var openBtn = document.getElementById("logout-open");
             var modal = document.getElementById("logout-modal");
@@ -173,14 +169,12 @@
             openBtn.addEventListener("click", openModal);
             cancelBtn.addEventListener("click", closeModal);
 
-            // Clicking the dark backdrop also closes the dialog.
             modal.addEventListener("click", function (event) {
                 if (event.target === modal) {
                     closeModal();
                 }
             });
 
-            // Pressing Escape closes the dialog too.
             document.addEventListener("keydown", function (event) {
                 if (event.key === "Escape" && !modal.hidden) {
                     closeModal();

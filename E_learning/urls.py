@@ -22,9 +22,6 @@ from payments import views as payments_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
-    # Custom auth pages first, so /accounts/login/, /accounts/register/ and
-    # /accounts/logout/ use the project's own views. allauth still owns the
-    # social-login endpoints (/accounts/google/...) and password flows.
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('allauth.urls')),
     path('courses/', include('courses.urls')),

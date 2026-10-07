@@ -18,7 +18,6 @@ from django.core.management.base import BaseCommand, CommandError
 
 from core.mail_backends import describe_email_setup
 
-# How many leading characters of a secret are shown when masking it.
 MASKED_PREFIX = 10
 
 
@@ -41,8 +40,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         recipient = options["recipient"]
 
-        # The shared one-liner also warns when EMAIL_BACKEND is pinned by an
-        # environment variable (which disables the fallback chain).
         self.stdout.write(describe_email_setup())
         self.stdout.write(
             "BREVO_API_KEY (masked) : "
@@ -68,7 +65,7 @@ class Command(BaseCommand):
                 [recipient],
                 fail_silently=False,
             )
-        except Exception as exc:  # noqa: BLE001 - surface the real reason
+        except Exception as exc:
             raise CommandError(
                 f"Could not send the test email: {type(exc).__name__}: {exc}"
             ) from exc

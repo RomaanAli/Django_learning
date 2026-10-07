@@ -28,9 +28,6 @@ from django.core.management.base import BaseCommand
 
 from courses.models import Course, Lesson
 
-# Each entry is one course: its own fields plus the ordered list of lessons.
-# The price is a simple Decimal string and ``is_published=True`` makes the
-# course visible on the public course listing page.
 COURSES = [
     {
         "title": "Computer Networks",

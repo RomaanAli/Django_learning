@@ -43,13 +43,10 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         if not apps:
             raise SocialApp.DoesNotExist()
 
-        # Same OAuth client registered twice (DB row + env-vars config).
         unique_by_client = {app.client_id: app for app in apps}
         if len(unique_by_client) == 1:
             return next(iter(unique_by_client.values()))
 
-        # Distinct clients: prefer the settings-backed app (pk is None because
-        # allauth builds it in memory without saving it to the database).
         settings_backed = [app for app in apps if app.pk is None]
         if settings_backed:
             return settings_backed[0]

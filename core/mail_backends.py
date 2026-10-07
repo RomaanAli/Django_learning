@@ -37,11 +37,8 @@ from django.core.mail.backends.base import BaseEmailBackend
 from django.utils.html import escape, strip_tags
 from django.utils.module_loading import import_string
 
-# Brevo's transactional email endpoint (HTTPS, port 443).
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
-# Brevo answers "201 Created" when it accepts a message; 200/202 are accepted
-# too so a future API change cannot break delivery.
 BREVO_SUCCESS_STATUSES = (200, 201, 202)
 
 
@@ -107,10 +104,6 @@ class BrevoAPIBackend(BaseEmailBackend):
         """Build the JSON body Brevo expects for one ``EmailMessage``."""
         body = message.body or ""
 
-        # EmailMessage keeps the plain text in ``body``; EmailMultiAlternatives
-        # keeps extra parts in ``alternatives``. Brevo needs at least one of
-        # textContent / htmlContent, so send both: clients that block HTML
-        # still show the plain-text version.
         if getattr(message, "content_subtype", "plain") == "html":
             html_content = body
             text_content = strip_tags(body)
@@ -125,8 +118,6 @@ class BrevoAPIBackend(BaseEmailBackend):
             html_content = f"<pre>{escape(text_content)}</pre>"
 
         payload = {
-            # Must be a sender VERIFIED inside Brevo, otherwise the API
-            # answers 400 with "sender not valid".
             "sender": self._address(
                 message.from_email or settings.DEFAULT_FROM_EMAIL
             ),
@@ -151,8 +142,6 @@ class BrevoAPIBackend(BaseEmailBackend):
                 self.api_url,
                 json=payload,
                 headers={
-                    # Brevo wants its API key here (it starts with "xkeysib-"),
-                    # NOT the SMTP key from the SMTP tab.
                     "api-key": self.api_key,
                     "accept": "application/json",
                     "content-type": "application/json",
@@ -160,8 +149,6 @@ class BrevoAPIBackend(BaseEmailBackend):
                 timeout=self.timeout,
             )
         except requests.RequestException as exc:
-            # Timeouts, DNS failures, TLS problems: report the reason and let
-            # the chain try the next transport.
             raise EmailDeliveryError(
                 f"Brevo API request failed: {exc}"
             ) from exc
@@ -206,8 +193,6 @@ class FallbackEmailBackend(BaseEmailBackend):
     def __init__(self, backend_paths=None, **kwargs):
         super().__init__(**kwargs)
         paths = backend_paths or getattr(settings, "EMAIL_BACKEND_CHAIN", [])
-        # fail_silently=False so each transport reports its error and the
-        # chain can move on to the next one.
         self.backends = [
             import_string(path)(fail_silently=False) for path in paths
         ]
@@ -227,7 +212,7 @@ class FallbackEmailBackend(BaseEmailBackend):
             name = self._name(backend)
             try:
                 return backend.send_messages(email_messages)
-            except Exception as exc:  # noqa: BLE001 - try the next transport
+            except Exception as exc:
                 errors.append(f"{name}: {exc}")
                 print(
                     f"[email] {name} failed ({exc}); trying the next "

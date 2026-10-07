@@ -123,10 +123,6 @@ def fulfill_checkout_session(session):
     """
     session = _as_dict(session)
 
-    # For one-time card payments the session is paid as soon as it is
-    # completed. Anything else (e.g. async payment methods) arrives with
-    # payment_status != paid and must be ignored — only enrol once the money
-    # has actually moved.
     if session.get("payment_status") != "paid":
         return False
 
@@ -159,12 +155,8 @@ def fulfill_checkout_session(session):
             "status": Payment.Status.PAID,
         },
     )
-    # Unique constraint on (student, course) + get_or_create = idempotent.
     _, enrolled_now = Enrollment.objects.get_or_create(student=user, course=course)
     if enrolled_now:
-        # Exactly one confirmation email per enrollment: only when THIS call
-        # created the row, because the success page and the webhook may both
-        # run for the same Stripe session.
         _send_enrollment_email(
             user,
             course,
@@ -222,14 +214,9 @@ class CourseCheckoutView(LoginRequiredMixin, View):
             )
 
         if course.price <= 0:
-            # Free course — the plain enroll button is the right path.
             return redirect("enroll_course", pk=course.pk)
 
         stripe.api_key = settings.STRIPE_SECRET_KEY
-        # Never trust a client-supplied price: bill exactly what the course
-        # costs in the database.
-        # Stripe rejects empty strings for product_data.description, so a course
-        # without a description must simply omit the field.
         product_data = {"name": course.title[:250] or f"Course #{course.pk}"}
         if (course.description or "").strip():
             product_data["description"] = course.description.strip()[:250]
@@ -256,8 +243,6 @@ class CourseCheckoutView(LoginRequiredMixin, View):
                 success_url=request.build_absolute_uri(
                     reverse("payments:success", args=[course.pk])
                 )
-                # Stripe replaces this placeholder with the real session id, so
-                # the success page can ask Stripe "was this one paid?".
                 + "?session_id={CHECKOUT_SESSION_ID}",
                 cancel_url=request.build_absolute_uri(
                     reverse("payments:cancel", args=[course.pk])
@@ -270,7 +255,6 @@ class CourseCheckoutView(LoginRequiredMixin, View):
                 f"The payment could not be started: {detail}",
             )
 
-        # Remember the pending payment so the webhook has the full picture.
         Payment.objects.get_or_create(
             stripe_session_id=session.id,
             defaults={
@@ -307,13 +291,10 @@ class PaymentSuccessView(LoginRequiredMixin, TemplateView):
         try:
             session = stripe.checkout.Session.retrieve(session_id)
         except stripe.error.StripeError:
-            # Unknown / expired id, network hiccup, ... never crash the page.
             return False
 
         data = _as_dict(session)
         metadata = _as_dict(data.get("metadata") or {})
-        # Only trust a session created for THIS user and THIS course, so an id
-        # cannot be replayed for someone else's account or a different course.
         if (
             metadata.get("user_id") != str(self.request.user.pk)
             or metadata.get("course_id") != str(course.pk)
@@ -352,7 +333,6 @@ class PaymentCancelView(LoginRequiredMixin, TemplateView):
         return context
 
 
-# --- Webhook ----------------------------------------------------------------
 
 
 @method_decorator(csrf_exempt, name="dispatch")

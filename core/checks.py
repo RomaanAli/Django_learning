@@ -12,7 +12,6 @@ import os
 from django.conf import settings
 from django.core.checks import Warning
 
-# Backend paths used to decide what is actually in use.
 FALLBACK_BACKEND = "core.mail_backends.FallbackEmailBackend"
 BREVO_BACKEND = "core.mail_backends.BrevoAPIBackend"
 
@@ -57,7 +56,6 @@ def email_delivery_check(app_configs, **kwargs):
         path for path in transports if path != console_backend
     ]
 
-    # W001 — nothing but the console backend is configured.
     if not real_transports and getattr(
         settings, "EMAIL_DELIVERY_REQUIRED", False
     ):
@@ -89,7 +87,6 @@ def email_delivery_check(app_configs, **kwargs):
             )
         )
 
-    # W003 — the Brevo API is in use but its key is missing.
     if brevo_backend in transports and not getattr(
         settings, "BREVO_API_KEY", ""
     ):
@@ -105,8 +102,6 @@ def email_delivery_check(app_configs, **kwargs):
             )
         )
 
-    # W004 — SMTP-only setup on a host that firewalls outbound SMTP. This is
-    # the exact situation that makes OTP emails time out in production.
     if (
         _smtp_is_blocked_here()
         and brevo_backend not in transports

@@ -62,7 +62,6 @@ class EnrollCourseView(LoginRequiredMixin, View):
         return redirect("course_detail", pk=course.pk)
 
     def get(self, request, pk):
-        # The original FBV accepted any HTTP method; keep GET working too.
         return self._enroll(request, pk)
 
     def post(self, request, pk):

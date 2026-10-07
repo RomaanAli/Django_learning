@@ -19,12 +19,10 @@ from allauth.socialaccount.adapter import get_adapter
 from .forms import ProfileForm, StudentRegistrationForm, UserEditForm
 from .models import EmailVerification, Profile
 
-# --- Email OTP configuration -------------------------------------------------
-OTP_LIFETIME_MINUTES = 5       # how long an OTP stays valid
-RESEND_COOLDOWN_SECONDS = 60   # minimum wait between OTP resends
+OTP_LIFETIME_MINUTES = 5
+RESEND_COOLDOWN_SECONDS = 60
 
 
-# --- Email OTP helpers -------------------------------------------------------
 
 
 def _generate_otp() -> str:
@@ -103,7 +101,6 @@ def _is_google_configured(request) -> bool:
         return False
 
 
-# --- Views -------------------------------------------------------------------
 
 
 class RegisterView(View):
@@ -122,11 +119,6 @@ class RegisterView(View):
         return self._render(request, StudentRegistrationForm())
 
     def post(self, request):
-        # A signup whose OTP email never arrived leaves an INACTIVE,
-        # unverified row behind, which would make this retry fail with
-        # "A user with that email already exists." Clear any such stale
-        # signup for this email first so registration can start fresh.
-        # Active or already-verified accounts are never touched.
         email = (request.POST.get("email") or "").strip()
         if email:
             stale_ids = [
@@ -141,12 +133,10 @@ class RegisterView(View):
         if not form.is_valid():
             return self._render(request, form)
 
-        user = form.save()  # created with is_active=False
+        user = form.save()
         try:
             otp = _create_or_refresh_otp(user)
         except Exception as e:
-            # Never leave the inactive row behind with no OTP on file: it
-            # would silently block the next registration for this email.
             print("otp generation failed:", e)
             user.delete()
             messages.error(
@@ -206,10 +196,6 @@ class LoginView(View):
                     next_url = "dashboard"
                 return redirect(next_url)
         else:
-            # Django's auth backend silently refuses INACTIVE accounts, so an
-            # unverified user would normally just see "invalid username or
-            # password". Detect correct credentials on an unverified account
-            # instead, and send the user to the OTP verification page.
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
             user = User.objects.filter(username=username).first() if username else None
@@ -279,7 +265,6 @@ class VerifyEmailView(View):
         verification = EmailVerification.objects.filter(user=user).first()
 
         if verification is None:
-            # No code on file (edge case) — issue a fresh one.
             otp = _create_or_refresh_otp(user)
             if _send_otp_email(user, otp):
                 messages.info(request, "A new OTP has been emailed to you.")
@@ -297,7 +282,6 @@ class VerifyEmailView(View):
         elif not secrets.compare_digest(entered, verification.otp):
             messages.error(request, "Invalid OTP.")
         else:
-            # Correct code: activate the account and burn the OTP.
             user.is_active = True
             user.save(update_fields=["is_active"])
             verification.is_verified = True
@@ -354,7 +338,6 @@ class ResendOtpView(View):
         return redirect("verify_email")
 
     def get(self, request):
-        # The original FBV did not restrict the HTTP method; keep GET working.
         return self._resend(request)
 
     def post(self, request):
@@ -449,7 +432,7 @@ def google_check(request):
     add("SITE_ID", getattr(settings, "SITE_ID", None))
     try:
         add("current Site domain", get_current_site(request).domain)
-    except Exception as exc:  # noqa: BLE001 - diagnostic page must not crash
+    except Exception as exc:
         add("current Site domain", f"ERROR {type(exc).__name__}: {exc}")
 
     add(
@@ -471,14 +454,9 @@ def google_check(request):
                 f"provider={app.provider} client_id={mask(app.client_id)}",
             )
         add("total google apps allauth sees", len(apps))
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         add("list_apps", f"ERROR {type(exc).__name__}: {exc}")
 
-    # allauth builds the OAuth redirect_uri from the host the visitor is
-    # browsing with, so opening the site as 127.0.0.1 instead of localhost
-    # (or another port) changes it.  Google only accepts a redirect_uri that
-    # was registered verbatim in the Google Cloud Console, so both loopback
-    # spellings should be registered — they differ only in the host name.
     redirect_uris = []
     try:
         callback_path = reverse("google_callback")
@@ -486,7 +464,7 @@ def google_check(request):
         redirect_uris.append(request.build_absolute_uri(callback_path))
         host = request.get_host()
         hostname = host.split(":")[0]
-        port = host[len(hostname):]  # ":8000", or "" when no port is present
+        port = host[len(hostname):]
         alternate = None
         if hostname == "localhost":
             alternate = "127.0.0.1" + port
@@ -500,7 +478,7 @@ def google_check(request):
         )
         for uri in redirect_uris[1:]:
             add("alternate loopback redirect_uri (register it too)", uri)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         add("callback URL", f"ERROR {type(exc).__name__}: {exc}")
 
     from django.utils.html import escape

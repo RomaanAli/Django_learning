@@ -1,6 +1,3 @@
-# Render Blueprint (Infrastructure as Code) — https://render.com/docs/yaml
-# Create the services from this file via Dashboard -> Blueprints, or keep your
-# dashboard-configured services and treat this file as reference.
 databases:
   - name: elearning
     plan: free

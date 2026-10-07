@@ -17,29 +17,19 @@ import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load local secrets from the .env file (git-ignored — never committed).
-# On Render the variables are injected straight into the environment, so
-# this is a harmless no-op there.
 load_dotenv(BASE_DIR / ".env")
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
     'django-insecure-@6zdb&f0f&@$7_z5faa6=4eep@_(a1!c$ylxk_$1fkgd72$$7('
 )
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'false'
 
-# Comma-separated list of hosts allowed to serve this site.
-# Includes Render's default *.onrender.com domains.
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get(
@@ -49,14 +39,10 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
-# Automatically append Render's external hostname if present
 render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
 if render_hostname and render_hostname not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(render_hostname)
 
-# Render terminates HTTPS at its load balancer and forwards the original
-# scheme in the X-Forwarded-Proto header. Trusting it lets Django know requests are
-# HTTPS, which also fixes CSRF verification on login and registration forms.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 CSRF_TRUSTED_ORIGINS = [
@@ -65,13 +51,11 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
-# Automatically prepend scheme and add Render domain to CSRF trusted origins
 if render_hostname:
     render_origin = f"https://{render_hostname}"
     if render_origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(render_origin)
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -123,22 +107,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'E_learning.wsgi.application'
 
 
-# Database — PostgreSQL ONLY
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-#
-# SQLite support has been removed on purpose: local development, the test
-# suite and the Render deployment all run against the same engine, so what
-# you build and test locally behaves exactly like production.
-#
-# DATABASE_URL must point at PostgreSQL:
-#   * locally   -> set it in .env (git-ignored), e.g.
-#       DATABASE_URL=postgresql://postgres:<password>@127.0.0.1:5432/elearning
-#   * on Render -> injected automatically by the managed Postgres instance
-#       (service -> Environment -> DATABASE_URL).
-#
-# A missing or non-PostgreSQL URL fails fast with a clear message instead of
-# silently falling back to an ephemeral SQLite file whose data disappears on
-# every redeploy.
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
 if not DATABASE_URL:
@@ -167,8 +135,6 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -186,32 +152,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Email (used to send the OTP during registration)
-# ---------------------------------------------------------------------------
-# Everything comes from environment variables — nothing is hard-coded.
-#
-# Free cloud plans BLOCK outbound SMTP (ports 25/465/587):
-#   * Render free instances    - those same ports are blocked;
-#   * Railway Free/Trial/Hobby - SMTP is disabled entirely (Pro and up only).
-# SMTP alone can therefore never deliver from those hosts: the connection
-# just times out, which is exactly the "SMTP error / not responding" symptom.
-# HTTPS (port 443) is always allowed, so Brevo's transactional email API is
-# the primary transport and SMTP is KEPT as the fallback.
-#
-# The transport is chosen in this order:
-#   1. an explicit EMAIL_BACKEND always wins (handy locally when you want the
-#      console backend);
-#   2. otherwise EMAIL_BACKEND_CHAIN is tried in order: the Brevo HTTPS API,
-#      then SMTP (only when its credentials are present), then the console;
-#   3. the console backend only PRINTS the email to the server log — it
-#      delivers nothing, which is why it is always last.
-#
-# EMAIL_DELIVERY_REQUIRED (default: True whenever DEBUG is off) makes the app
-# treat "no real transport configured" as a delivery FAILURE. That is the
-# important part: registration then reports a real error instead of telling
-# the user to check an inbox that will never receive anything. Only set
-# EMAIL_DELIVERY_REQUIRED=false if you deliberately want console output in a
-# deployed environment.
 CONSOLE_EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 SMTP_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 BREVO_EMAIL_BACKEND = "core.mail_backends.BrevoAPIBackend"
@@ -224,28 +164,17 @@ EMAIL_HOST_PASSWORD = (os.environ.get("EMAIL_HOST_PASSWORD") or "").strip()
 EMAIL_USE_TLS = (
     (os.environ.get("EMAIL_USE_TLS") or "true").strip().lower() == "true"
 )
-# Add a timeout so a dead SMTP server or API endpoint cannot hang the
-# registration request (the Brevo backend uses the same value).
 EMAIL_TIMEOUT = int((os.environ.get("EMAIL_TIMEOUT") or "15").strip())
-# If no explicit From address is given, send from the SMTP account itself —
-# many providers (e.g. Gmail) reject emails whose From address does not match
-# the authenticated sender. With Brevo this must be a VERIFIED sender.
 DEFAULT_FROM_EMAIL = (
     (os.environ.get("DEFAULT_FROM_EMAIL") or "").strip()
     or EMAIL_HOST_USER
     or "E-Learning <noreply@example.com>"
 )
 
-# Brevo transactional email API (HTTPS on port 443 — never blocked by the
-# free plans above). Create the key in Brevo: profile menu -> "SMTP & API" ->
-# "API Keys". It starts with "xkeysib-" and is NOT the SMTP key from the
-# "SMTP" tab; the two cannot be swapped.
 BREVO_API_KEY = (os.environ.get("BREVO_API_KEY") or "").strip()
 
 _smtp_configured = bool(EMAIL_HOST_USER and EMAIL_HOST_PASSWORD)
 
-# Transports that are usable in this environment, best first. The console
-# backend is always appended so an email can never silently disappear.
 EMAIL_BACKEND_CHAIN = []
 if BREVO_API_KEY:
     EMAIL_BACKEND_CHAIN.append(BREVO_EMAIL_BACKEND)
@@ -261,7 +190,6 @@ if not EMAIL_BACKEND:
         else CONSOLE_EMAIL_BACKEND
     )
 
-# Is this environment expected to actually deliver email?
 _delivery_required = (
     (os.environ.get("EMAIL_DELIVERY_REQUIRED") or "").strip().lower()
 )
@@ -270,8 +198,6 @@ EMAIL_DELIVERY_REQUIRED = (
 )
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -282,14 +208,10 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Extra locations Django's staticfiles finder will look in (served by
-# `runserver` in DEBUG and collected via `collectstatic` for production).
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 STORAGES = {
@@ -301,8 +223,6 @@ STORAGES = {
     },
 }
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -312,30 +232,13 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# django-allauth: where users land after login / logout.
 LOGIN_REDIRECT_URL = "dashboard"
 ACCOUNT_LOGOUT_REDIRECT_URL = "home"
 
-# Let "Continue with Google" redirect straight to Google instead of showing
-# allauth's intermediate "click to continue" page.
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# Custom adapter: keeps "Continue with Google" working even when the Google
-# OAuth app is configured both in the Django admin (SocialApp) and via the
-# GOOGLE_OAUTH_CLIENT_* environment variables. Without it, that duplicate
-# setup makes allauth raise MultipleObjectsReturned -> HTTP 500 on click.
 SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountAdapter"
 
-# Google OAuth ("Continue with Google").
-# Get OAuth client credentials from the Google Cloud Console:
-#   https://console.cloud.google.com/apis/credentials
-# Then supply them as environment variables (on Render add them under
-# Environment; locally set them in your terminal, for example):
-#   GOOGLE_OAUTH_CLIENT_ID=xxxxx.apps.googleusercontent.com
-#   GOOGLE_OAUTH_CLIENT_SECRET=GOCSPX-xxxxx
-# Alternative: create the app record in Django admin at
-#   /admin/socialaccount/socialapp/  (provider "Google", assigned to a site) —
-#   in that case leave the APP block below unset.
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
@@ -354,21 +257,6 @@ if _google_client_id and _google_client_secret:
     }
 
 
-# Stripe payments ("Buy this course" via Stripe Checkout)
-# ---------------------------------------------------------------------------
-# All keys are read from the environment ONLY — never hard-code them, never
-# commit them. Locally they live in .env (git-ignored); on Render add them
-# under Environment. The keys are used purely server-side; the hosted Checkout
-# page keeps card details off this server, so the publishable key is never
-# sent to the browser either.
-#   STRIPE_PUBLISHABLE_KEY=pk_test_...
-#   STRIPE_SECRET_KEY=sk_test_...
-#   STRIPE_WEBHOOK_SECRET=whsec_...     (OPTIONAL — see below)
-# Only the secret key is required: after payment the success page asks Stripe
-# whether the session was really paid and enrols the student itself, so no
-# webhook has to be configured. STRIPE_WEBHOOK_SECRET may be added later if you
-# create a webhook endpoint in Stripe's dashboard (it then runs the same code).
-# Switch the pk_test_/sk_test_ values for pk_live_/sk_live_ to take real money.
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "").strip()
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "").strip()

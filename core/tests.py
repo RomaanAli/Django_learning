@@ -23,7 +23,6 @@ SMTP_PATH = "django.core.mail.backends.smtp.EmailBackend"
 CONSOLE_PATH = "django.core.mail.backends.console.EmailBackend"
 CHAIN_PATH = "core.mail_backends.FallbackEmailBackend"
 
-# Backends defined in this module, used to build small test chains.
 FAILING_PATH = "core.tests.FailingBackend"
 RECORDING_PATH = "core.tests.RecordingBackend"
 
@@ -92,8 +91,6 @@ class BrevoAPIBackendTests(SimpleTestCase):
         self.assertEqual(payload["to"], [{"email": "student@example.com"}])
         self.assertEqual(payload["subject"], "Verify Your E-Learning Account")
         self.assertIn("123456", payload["textContent"])
-        # A plain-text mail still gets an HTML part, so clients that block
-        # plain text show something sensible.
         self.assertIn("123456", payload["htmlContent"])
 
     @mock.patch("core.mail_backends.requests.post")
@@ -264,7 +261,6 @@ class EmailCheckTests(SimpleTestCase):
     )
     @mock.patch.dict("os.environ", {"RAILWAY_ENVIRONMENT": "production"})
     def test_smtp_only_on_railway_is_flagged(self):
-        # This is the exact configuration that made OTP emails time out.
         self.assertIn("elearning.W004", self._ids())
 
     @override_settings(
@@ -334,7 +330,6 @@ class DescribeEmailSetupTests(SimpleTestCase):
         )
         self.assertIn("BREVO_API_KEY=set", line)
         self.assertIn("sender@example.com", line)
-        # It must never print the key itself.
         self.assertNotIn("xkeysib-test", line)
 
     @override_settings(BREVO_API_KEY="")
@@ -346,7 +341,6 @@ class DescribeEmailSetupTests(SimpleTestCase):
         {"EMAIL_BACKEND": "django.core.mail.backends.smtp.EmailBackend"},
     )
     def test_warns_when_the_backend_is_pinned_by_the_environment(self):
-        # The exact trap that made a cloud deploy keep using SMTP.
         line = describe_email_setup()
 
         self.assertIn("WARNING", line)
