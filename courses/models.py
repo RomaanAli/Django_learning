@@ -30,11 +30,6 @@ class Lesson(models.Model):
 
 
 class Enrollment(models.Model):
-    """Links a student to one course.
-
-    The unique constraint on (student, course) guarantees a student can
-    never enroll in the same course more than once.
-    """
 
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,

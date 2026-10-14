@@ -11,7 +11,7 @@
         <div class="hero-inner">
             <div class="hero-content">
                 <span class="eyebrow">E-Learning Platform</span>
-                <h1 class="hero-title">Learn programming skills that move you forward</h1>
+                <h1 class="hero-title">Learn programming skills that <span class="hero-em">move you forward</span></h1>
                 <p class="hero-lead">
                     Hi {{ name }}, welcome to E-Learning &mdash; practical courses in
                     Python, Django, Flask and SQL with structured lessons you can
@@ -71,7 +71,7 @@
         </div>
     </section>
 
-    <section class="section">
+    <section class="section section-soft">
         <div class="section-head center">
             <span class="eyebrow">What you can learn</span>
             <h2 class="section-title">In-demand topics, taught hands-on</h2>
@@ -96,7 +96,8 @@
             <div class="course-grid">
                 {% for course in featured %}
                     <a class="course-card" href="{% url 'course_detail' course.pk %}">
-                        <div class="course-card-media {% cycle 'acc-indigo' 'acc-violet' 'acc-teal' %}">
+                        <div class="course-card-media">
+                            <span class="badge-featured">Featured</span>
                             <span class="course-card-icon" aria-hidden="true">{{ course.title|slice:":1"|upper }}</span>
                         </div>
                         <div class="course-card-body">
@@ -124,7 +125,7 @@
         {% endif %}
     </section>
 
-    <section class="section">
+    <section class="section section-soft">
         <div class="section-head center">
             <span class="eyebrow">Why learn with us</span>
             <h2 class="section-title">Built for focused, self-paced learning</h2>

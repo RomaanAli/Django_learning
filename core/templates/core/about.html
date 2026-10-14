@@ -14,26 +14,28 @@
     </section>
 
     <section class="section">
-        <div class="about-body">
-            <div class="section-head center">
+        <div class="editorial">
+            <div class="editorial-head">
                 <span class="eyebrow">Our mission</span>
                 <h2 class="section-title">Make quality programming education accessible</h2>
             </div>
-            <p>
-                Our mission is to give every student a clear path into software
-                development. Instead of scattered tutorials, learners get courses
-                that are ordered, complete, and easy to follow &mdash; so it is always
-                obvious what to learn next and how far you have come.
-            </p>
-            <p>
-                The whole platform runs on Django, from the course catalog to
-                enrollment and payments, which keeps the experience fast,
-                consistent, and easy to extend with new content.
-            </p>
+            <div class="editorial-body">
+                <p>
+                    Our mission is to give every student a clear path into software
+                    development. Instead of scattered tutorials, learners get courses
+                    that are ordered, complete, and easy to follow &mdash; so it is always
+                    obvious what to learn next and how far you have come.
+                </p>
+                <p>
+                    The whole platform runs on Django, from the course catalog to
+                    enrollment and payments, which keeps the experience fast,
+                    consistent, and easy to extend with new content.
+                </p>
+            </div>
         </div>
     </section>
 
-    <section class="section">
+    <section class="section section-soft">
         <div class="section-head center">
             <span class="eyebrow">What students can learn</span>
             <h2 class="section-title">Skills that build on each other</h2>
@@ -91,7 +93,7 @@
         </div>
     </section>
 
-    <section class="section">
+    <section class="section section-soft">
         <div class="section-head center">
             <span class="eyebrow">Our approach</span>
             <h2 class="section-title">How we structure learning</h2>
@@ -117,15 +119,17 @@
     </section>
 
     <section class="section">
-        <div class="card payment-result-card">
-            <span class="eyebrow">Our vision</span>
-            <h2 class="section-title">A catalog students can trust</h2>
-            <p class="section-subtitle">
-                We want E-Learning to be the place where a beginner can start with
-                Python and grow into a confident web developer &mdash; with every
-                course held to the same clear, complete, self-paced standard.
-            </p>
-            <div class="section-cta">
+        <div class="vision-panel">
+            <div class="vision-body">
+                <span class="eyebrow">Our vision</span>
+                <h2 class="section-title">A catalog students can trust</h2>
+                <p>
+                    We want E-Learning to be the place where a beginner can start with
+                    Python and grow into a confident web developer &mdash; with every
+                    course held to the same clear, complete, self-paced standard.
+                </p>
+            </div>
+            <div class="vision-action">
                 <a class="btn btn-primary" href="{% url 'course_list' %}">Explore the catalog</a>
             </div>
         </div>

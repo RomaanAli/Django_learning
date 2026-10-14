@@ -23,18 +23,42 @@
     </div>
 
     {% if enrollments %}
-        <h2 class="section-title">Your Enrolled Courses</h2>
-        <div class="card">
-            <ul class="enrolled-list">
-                {% for enrollment in enrollments %}
-                    <li>
-                        <a href="{% url 'course_detail' enrollment.course.pk %}">
-                            {{ enrollment.course.title }}
-                        </a>
-                        <span class="muted">— ${{ enrollment.course.price }}</span>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
+        <section class="section section-soft">
+            <div class="lessons-head">
+                <h2 class="section-title">Your Enrolled Courses</h2>
+                <span class="count-badge">{{ enrollments|length }} enrolled</span>
+            </div>
+            <div class="card">
+                <ul class="enrolled-list">
+                    {% for enrollment in enrollments %}
+                        <li>
+                            <div class="enrolled-info">
+                                <a href="{% url 'course_detail' enrollment.course.pk %}">
+                                    {{ enrollment.course.title }}
+                                </a>
+                                <span class="enrolled-meta">
+                                    {{ enrollment.course.lessons.count }} lesson{{ enrollment.course.lessons.count|pluralize }}
+                                    &middot; Enrolled {{ enrollment.enrolled_at|date:"M Y" }}
+                                </span>
+                            </div>
+                            <div class="enrolled-side">
+                                <span class="price">${{ enrollment.course.price }}</span>
+                                <span class="status-pill">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Enrolled
+                                </span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+    {% else %}
+        <section class="section">
+            <div class="card empty-state">
+                <p>You are not enrolled in a course yet.</p>
+                <a class="btn btn-primary" href="{% url 'course_list' %}">Browse courses</a>
+            </div>
+        </section>
     {% endif %}
 {% endblock %}
