@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('core.urls')),
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('allauth.urls')),
+    path('api/', include('accounts.api_urls')),
     path('courses/', include('courses.urls')),
     path('payments/', include('payments.urls')),
     path('webhooks/stripe/', payments_views.stripe_webhook, name='stripe_webhook'),
