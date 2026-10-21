@@ -2,9 +2,17 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 
-from .models import Profile
+from .models import InstructorDocument, Profile
 
 User = get_user_model()
+
+MAX_DOCUMENT_SIZE_MB = 5
+ALLOWED_DOCUMENT_EXTENSIONS = (".pdf", ".png", ".jpg", ".jpeg")
+ALLOWED_DOCUMENT_CONTENT_TYPES = (
+    "application/pdf",
+    "image/png",
+    "image/jpeg",
+)
 
 
 class StudentRegistrationForm(UserCreationForm):
@@ -48,3 +56,38 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["age", "contact"]
+
+
+class InstructorDocumentForm(forms.ModelForm):
+    """Upload form for the proof-of-qualification an instructor applies with."""
+
+    class Meta:
+        model = InstructorDocument
+        fields = ["file"]
+        widgets = {
+            "file": forms.ClearableFileInput(attrs={"accept": ".pdf,.png,.jpg,.jpeg"}),
+        }
+
+    def clean_file(self):
+        uploaded = self.cleaned_data["file"]
+
+        name = (uploaded.name or "").lower()
+        if not any(name.endswith(ext) for ext in ALLOWED_DOCUMENT_EXTENSIONS):
+            raise forms.ValidationError(
+                "Only PDF, PNG or JPG documents are accepted "
+                f"({', '.join(ALLOWED_DOCUMENT_EXTENSIONS)})."
+            )
+
+        content_type = (uploaded.content_type or "").lower()
+        if content_type and content_type not in ALLOWED_DOCUMENT_CONTENT_TYPES:
+            raise forms.ValidationError(
+                "That file type is not supported. Please upload a PDF, PNG or JPG."
+            )
+
+        max_bytes = MAX_DOCUMENT_SIZE_MB * 1024 * 1024
+        if uploaded.size > max_bytes:
+            raise forms.ValidationError(
+                f"The file is too large (max {MAX_DOCUMENT_SIZE_MB} MB)."
+            )
+
+        return uploaded

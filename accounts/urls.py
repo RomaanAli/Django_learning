@@ -11,4 +11,14 @@ urlpatterns = [
     path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
     path("profile/", views.ProfileView.as_view(), name="profile"),
     path("profile/edit/", views.ProfileEditView.as_view(), name="profile_edit"),
+    path(
+        "instructor/apply/",
+        views.InstructorApplyView.as_view(),
+        name="instructor_apply",
+    ),
+    path(
+        "instructor/dashboard/",
+        views.InstructorDashboardView.as_view(),
+        name="instructor_dashboard",
+    ),
 ]

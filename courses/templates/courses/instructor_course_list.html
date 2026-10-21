@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}My Courses | E-Learning{% endblock %}
+
+{% block content %}
+    <div class="page-head">
+        <h1>My courses</h1>
+        <p class="page-subtitle">
+            Courses you own. Drafts are visible to you only until you publish them.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <h2>{{ courses|length }} course{{ courses|length|pluralize }}</h2>
+            <a class="btn btn-primary" href="{% url 'instructor_course_create' %}">New course</a>
+        </div>
+
+        {% if courses %}
+            <ul class="course-list">
+                {% for course in courses %}
+                    <li class="course-item">
+                        <div>
+                            <a class="course-title" href="{% url 'instructor_course_edit' course.pk %}">{{ course.title }}</a>
+                            <p class="course-meta">
+                                {% if course.is_published %}
+                                    <span class="badge badge-success">Published</span>
+                                {% else %}
+                                    <span class="badge badge-muted">Draft</span>
+                                {% endif %}
+                                &middot; {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}
+                                &middot; {{ course.enrollments.count }} student{{ course.enrollments.count|pluralize }}
+                            </p>
+                        </div>
+                        <a class="btn btn-ghost" href="{% url 'instructor_course_edit' course.pk %}">Manage</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">
+                You have no courses yet. <a href="{% url 'instructor_course_create' %}">Create your first course</a>.
+            </p>
+        {% endif %}
+    </div>
+{% endblock %}

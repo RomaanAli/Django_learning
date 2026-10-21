@@ -11,14 +11,25 @@ class User(AbstractUser):
     Starts identical to Django''s built-in User and gains role-based
     access control (student / instructor / admin).
     """
+
+    ROLE_STUDENT = "student"
+    ROLE_INSTRUCTOR = "instructor"
+    ROLE_ADMIN = "admin"
+
+
+    ROLE_CHOICES = [
+        (ROLE_STUDENT, "Student"),
+        (ROLE_INSTRUCTOR, "Instructor"),
+        (ROLE_ADMIN, "Admin"),
+    ]
+
+    # role field: controls what a user is allowed to do.
+    # - choices = only these values are allowed
+    # - default = existing/new users always start as "student"
     role = models.CharField(
         max_length=20,
-        choices=[
-            ("student", "Student"),
-            ("instructor", "Instructor"),
-            ("admin", "Admin"),
-        ],
-        default="student",
+        choices=ROLE_CHOICES,
+        default=ROLE_STUDENT,
         verbose_name="role",
     )
 
@@ -26,8 +37,24 @@ class User(AbstractUser):
         verbose_name = "user"
         verbose_name_plural = "users"
 
+    @property
+    def is_instructor(self) -> bool:
+        """True when this user may manage courses."""
+        return self.role == self.ROLE_INSTRUCTOR
+
+    @property
+    def is_admin(self) -> bool:
+        """True when this user has platform-wide admin rights."""
+        return self.role == self.ROLE_ADMIN
+
+    @property
+    def is_student(self) -> bool:
+        """True when this user is an ordinary learner."""
+        return self.role == self.ROLE_STUDENT
+
 
 class Profile(models.Model):
+    """Extra profile fields for a user, shared by the whole site."""
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -46,7 +73,7 @@ class Profile(models.Model):
     )
 
     def __str__(self):
-        return f"{self.user.username}'s profile"
+        return f"{self.user.username}\'s profile"
 
 
 class EmailVerification(models.Model):
@@ -77,6 +104,116 @@ class EmailVerification(models.Model):
     def __str__(self):
         state = "verified" if self.is_verified else "pending"
         return f"{self.user.username} - {state}"
+
+
+class InstructorDocument(models.Model):
+    """Uploaded proof that an instructor is allowed to manage courses.
+
+    A single row per user (one-to-one) keeps one document per user.
+    - status = pending / approved / denied
+    - user = who uploaded it
+    - document = the file itself
+    """
+
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_DENIED = "denied"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Pending approval"),
+        (STATUS_APPROVED, "Approved"),
+        (STATUS_DENIED, "Denied"),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="instructor_document",
+        verbose_name="user",
+    )
+    file = models.FileField(
+        upload_to="instructor_documents/",
+        verbose_name="document",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+        verbose_name="status",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(blank=True, null=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_documents",
+        verbose_name="approved by",
+    )
+
+    class Meta:
+        verbose_name = "instructor document"
+        verbose_name_plural = "instructor documents"
+
+    @property
+    def is_approved(self) -> bool:
+        """True once an admin has approved this document."""
+        return self.status == self.STATUS_APPROVED
+
+    @property
+    def is_pending(self) -> bool:
+        """True while the document is still waiting for review."""
+        return self.status == self.STATUS_PENDING
+
+    def _save_stamped(self, update_fields) -> None:
+        """Save only ``update_fields``, or everything for a brand new row."""
+        if self.pk:
+            self.save(update_fields=list(update_fields))
+        else:
+            self.save()
+
+    def approve(self, reviewer=None) -> bool:
+        """Approve this document and promote its owner to instructor.
+
+        This is the single place that decides what "approved" means, so the
+        Django admin, a management command and a plain shell session all
+        behave the same way.
+
+        Only a user who is currently a *student* is promoted; admins and
+        instructors keep the role they already have. Returns ``True`` when
+        the document was newly approved.
+        """
+        if self.status == self.STATUS_APPROVED and self.approved_at:
+            return False
+
+        self.status = self.STATUS_APPROVED
+        self.approved_at = self.approved_at or timezone.now()
+        self.approved_by = reviewer or self.approved_by
+        self._save_stamped(("status", "approved_at", "approved_by"))
+
+        user = self.user
+        if user.role == user.ROLE_STUDENT:
+            user.role = user.ROLE_INSTRUCTOR
+            user.save(update_fields=["role"])
+        return True
+
+    def deny(self, reviewer=None) -> bool:
+        """Mark this document as denied.
+
+        Denying never changes the user's role — a mistake in the review must
+        not take away access somebody already has. Returns ``True`` when the
+        document was newly denied.
+        """
+        if self.status == self.STATUS_DENIED:
+            return False
+
+        self.status = self.STATUS_DENIED
+        self._save_stamped(("status",))
+        return True
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_status_display()}"
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

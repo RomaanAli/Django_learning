@@ -1,10 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import DetailView, ListView
 
-from .models import Course, Enrollment
+from accounts.permissions import InstructorRequiredMixin
+
+from .forms import CourseForm, LessonForm
+from .models import Course, Enrollment, Lesson
 
 
 class CourseListView(ListView):
@@ -66,3 +69,185 @@ class EnrollCourseView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         return self._enroll(request, pk)
+
+
+class InstructorCourseListView(InstructorRequiredMixin, ListView):
+    """List the courses the signed-in instructor manages."""
+
+    model = Course
+    template_name = "courses/instructor_course_list.html"
+    context_object_name = "courses"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_admin:
+            return Course.objects.select_related("instructor").all()
+        return Course.objects.filter(instructor=user).select_related("instructor")
+
+
+class InstructorCourseCreateView(InstructorRequiredMixin, View):
+    """Let an instructor create a new course (unpublished until they publish)."""
+
+    template_name = "courses/instructor_course_form.html"
+
+    def get(self, request):
+        return render(request, self.template_name, {"form": CourseForm()})
+
+    def post(self, request):
+        form = CourseForm(request.POST)
+        if not form.is_valid():
+            return render(request, self.template_name, {"form": form})
+
+        course = form.save(commit=False)
+        course.instructor = request.user
+        course.is_published = False
+        course.save()
+
+        messages.success(request, f'"{course.title}" was created as a draft.')
+        return redirect("instructor_course_edit", pk=course.pk)
+
+
+class InstructorCourseEditView(InstructorRequiredMixin, View):
+    """Edit a course — only by the instructor who owns it (or an admin)."""
+
+    template_name = "courses/instructor_course_form.html"
+
+    def _get_course(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        if not course.is_managed_by(request.user):
+            messages.error(request, "You do not manage this course.")
+            return None
+        return course
+
+    def get(self, request, pk):
+        course = self._get_course(request, pk)
+        if course is None:
+            return redirect("instructor_course_list")
+        return render(
+            request,
+            self.template_name,
+            {"form": CourseForm(instance=course), "course": course},
+        )
+
+    def post(self, request, pk):
+        course = self._get_course(request, pk)
+        if course is None:
+            return redirect("instructor_course_list")
+
+        form = CourseForm(request.POST, instance=course)
+        if not form.is_valid():
+            return render(
+                request,
+                self.template_name,
+                {"form": form, "course": course},
+            )
+
+        form.save()
+        messages.success(request, "The course was updated.")
+        return redirect("instructor_course_edit", pk=course.pk)
+
+
+class InstructorCoursePublishView(InstructorRequiredMixin, View):
+    """Publish or unpublish one of the instructor's courses."""
+
+    def post(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        if not course.is_managed_by(request.user):
+            messages.error(request, "You do not manage this course.")
+            return redirect("instructor_course_list")
+
+        course.is_published = not course.is_published
+        course.save(update_fields=["is_published"])
+        if course.is_published:
+            messages.success(request, f'"{course.title}" is now published.')
+        else:
+            messages.info(request, f'"{course.title}" was unpublished.')
+        return redirect("instructor_course_edit", pk=course.pk)
+
+
+class InstructorLessonCreateView(InstructorRequiredMixin, View):
+    """Add a lesson to one of the instructor's courses."""
+
+    template_name = "courses/instructor_lesson_form.html"
+
+    def _get_course(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        if not course.is_managed_by(request.user):
+            messages.error(request, "You do not manage this course.")
+            return None
+        return course
+
+    def get(self, request, pk):
+        course = self._get_course(request, pk)
+        if course is None:
+            return redirect("instructor_course_list")
+        return render(
+            request,
+            self.template_name,
+            {"form": LessonForm(), "course": course},
+        )
+
+    def post(self, request, pk):
+        course = self._get_course(request, pk)
+        if course is None:
+            return redirect("instructor_course_list")
+
+        form = LessonForm(request.POST)
+        if not form.is_valid():
+            return render(
+                request,
+                self.template_name,
+                {"form": form, "course": course},
+            )
+
+        lesson = form.save(commit=False)
+        lesson.course = course
+        lesson.save()
+
+        messages.success(request, f'Lesson "{lesson.title}" was added.')
+        return redirect("instructor_course_edit", pk=course.pk)
+
+
+class InstructorLessonEditView(InstructorRequiredMixin, View):
+    """Edit or delete a lesson of one of the instructor's courses."""
+
+    template_name = "courses/instructor_lesson_form.html"
+
+    def _get_lesson(self, request, pk):
+        lesson = get_object_or_404(Lesson, pk=pk)
+        if not lesson.course.is_managed_by(request.user):
+            messages.error(request, "You do not manage this lesson.")
+            return None, None
+        return lesson, lesson.course
+
+    def get(self, request, pk):
+        lesson, course = self._get_lesson(request, pk)
+        if lesson is None:
+            return redirect("instructor_course_list")
+        return render(
+            request,
+            self.template_name,
+            {"form": LessonForm(instance=lesson), "course": course, "lesson": lesson},
+        )
+
+    def post(self, request, pk):
+        lesson, course = self._get_lesson(request, pk)
+        if lesson is None:
+            return redirect("instructor_course_list")
+
+        if request.POST.get("action") == "delete":
+            lesson.delete()
+            messages.success(request, "The lesson was deleted.")
+            return redirect("instructor_course_edit", pk=course.pk)
+
+        form = LessonForm(request.POST, instance=lesson)
+        if not form.is_valid():
+            return render(
+                request,
+                self.template_name,
+                {"form": form, "course": course, "lesson": lesson},
+            )
+
+        form.save()
+        messages.success(request, "The lesson was updated.")
+        return redirect("instructor_course_edit", pk=course.pk)

@@ -15,8 +15,14 @@ from django.views.generic import TemplateView
 
 from allauth.socialaccount.adapter import get_adapter
 
-from .forms import ProfileForm, StudentRegistrationForm, UserEditForm
-from .models import EmailVerification, Profile
+from .forms import (
+    InstructorDocumentForm,
+    ProfileForm,
+    StudentRegistrationForm,
+    UserEditForm,
+)
+from .models import EmailVerification, InstructorDocument, Profile
+from .permissions import InstructorRequiredMixin
 
 User = get_user_model()
 
@@ -518,4 +524,80 @@ class ProfileEditView(LoginRequiredMixin, View):
             self.template_name,
             {"user_form": user_form, "profile_form": profile_form},
         )
+
+
+class InstructorApplyView(LoginRequiredMixin, View):
+    """Let a logged-in learner apply to become an instructor.
+
+    Applying uploads one document (a certificate, ID or similar). The upload
+    is stored as ``pending``; an admin approves it from the Django admin,
+    which promotes the user to the ``instructor`` role.
+    """
+
+    template_name = "accounts/instructor_apply.html"
+
+    def _document(self, user):
+        return InstructorDocument.objects.filter(user=user).first()
+
+    def get(self, request):
+        if request.user.is_instructor:
+            messages.info(request, "You are already an instructor.")
+            return redirect("instructor_dashboard")
+
+        document = self._document(request.user)
+        form = InstructorDocumentForm(
+            instance=document,
+            initial={"file": document.file if document else None},
+        )
+        return render(
+            request,
+            self.template_name,
+            {"form": form, "document": document},
+        )
+
+    def post(self, request):
+        if request.user.is_instructor:
+            messages.info(request, "You are already an instructor.")
+            return redirect("instructor_dashboard")
+
+        document = self._document(request.user)
+        form = InstructorDocumentForm(request.POST, request.FILES, instance=document)
+
+        if not form.is_valid():
+            return render(
+                request,
+                self.template_name,
+                {"form": form, "document": document},
+            )
+
+        document = form.save(commit=False)
+        document.user = request.user
+        # Every new upload goes back to "pending" for review, and the old
+        # approval details are cleared so a re-upload is reviewed again.
+        document.status = InstructorDocument.STATUS_PENDING
+        document.approved_at = None
+        document.approved_by = None
+        document.save()
+
+        messages.success(
+            request,
+            "Thanks! Your document was uploaded and is waiting for approval.",
+        )
+        return redirect("instructor_apply")
+
+
+class InstructorDashboardView(InstructorRequiredMixin, TemplateView):
+    """Landing page for instructors: their courses and student counts."""
+
+    template_name = "accounts/instructor_dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        courses = self.request.user.courses_taught.select_related("instructor")
+        context["courses"] = courses
+        context["student_count"] = sum(
+            course.enrollments.count() for course in courses
+        )
+        return context
+
 

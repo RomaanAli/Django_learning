@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if lesson %}Edit {{ lesson.title }}{% else %}Add lesson{% endif %} | E-Learning
+{% endblock %}
+
+{% block content %}
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'instructor_dashboard' %}">Instructor dashboard</a>
+        <span>/</span>
+        <a href="{% url 'instructor_course_list' %}">My courses</a>
+        <span>/</span>
+        <a href="{% url 'instructor_course_edit' course.pk %}">{{ course.title }}</a>
+        <span>/</span>
+        <span class="current">{% if lesson %}Edit lesson{% else %}Add lesson{% endif %}</span>
+    </nav>
+
+    <div class="page-head">
+        <h1>{% if lesson %}Edit lesson{% else %}Add a lesson{% endif %}</h1>
+        <p class="page-subtitle">Lesson in "{{ course.title }}".</p>
+    </div>
+
+    <div class="card form-panel">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Save</button>
+                <a class="btn btn-secondary" href="{% url 'instructor_course_edit' course.pk %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    {% if lesson %}
+        <div class="card">
+            <h2>Danger zone</h2>
+            <p class="muted">Deleting a lesson removes it for every enrolled student.</p>
+            <form method="post" action="{% url 'instructor_lesson_edit' lesson.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <button class="btn btn-danger" type="submit">Delete lesson</button>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,11 +1,15 @@
 from datetime import timedelta
 from unittest import mock
 
+from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
 from django.core import mail
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.urls import reverse
 from django.utils import timezone
+
+from .admin import InstructorDocumentAdmin
+from .models import InstructorDocument
 
 User = get_user_model()
 
@@ -243,3 +247,244 @@ class GoogleLoginDiagnosticsTests(TestCase):
         client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID") or ""
         if client_id:
             self.assertNotIn(client_id, content)
+
+
+class RolePermissionTests(TestCase):
+    """Role helpers and the role mixins guard the right pages."""
+
+    def setUp(self):
+        self.student = User.objects.create_user(
+            username="student1", email="student1@example.com", password=PASSWORD
+        )
+        self.instructor = User.objects.create_user(
+            username="instructor1",
+            email="instructor1@example.com",
+            password=PASSWORD,
+            role=User.ROLE_INSTRUCTOR,
+        )
+        self.admin = User.objects.create_user(
+            username="admin1",
+            email="admin1@example.com",
+            password=PASSWORD,
+            role=User.ROLE_ADMIN,
+        )
+        self.superuser = User.objects.create_superuser(
+            username="root", email="root@example.com", password=PASSWORD
+        )
+
+    def test_new_users_default_to_the_student_role(self):
+        self.assertEqual(self.student.role, User.ROLE_STUDENT)
+        self.assertTrue(self.student.is_student)
+        self.assertFalse(self.student.is_instructor)
+        self.assertFalse(self.student.is_admin)
+
+    def test_role_helpers_follow_the_role_field(self):
+        self.assertTrue(self.instructor.is_instructor)
+        self.assertFalse(self.instructor.is_student)
+        self.assertTrue(self.admin.is_admin)
+        self.assertFalse(self.admin.is_instructor)
+
+    def test_instructor_dashboard_is_closed_to_students(self):
+        self.client.force_login(self.student)
+        response = self.client.get(reverse("instructor_dashboard"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_instructor_dashboard_is_open_to_instructors(self):
+        self.client.force_login(self.instructor)
+        response = self.client.get(reverse("instructor_dashboard"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_instructor_dashboard_is_open_to_admins(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("instructor_dashboard"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_superusers_pass_the_role_check(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(reverse("instructor_dashboard"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_anonymous_visitors_are_redirected_to_login(self):
+        response = self.client.get(reverse("instructor_dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response["Location"])
+
+
+class InstructorApplicationTests(TestCase):
+    """Applying to teach uploads one document that stays pending until approved."""
+
+    def setUp(self):
+        self.student = User.objects.create_user(
+            username="student1", email="student1@example.com", password=PASSWORD
+        )
+        self.client.force_login(self.student)
+
+    def _upload(self, name="cv.pdf", content_type="application/pdf", content=b"%PDF-1.4"):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        upload = SimpleUploadedFile(name, content, content_type=content_type)
+        return self.client.post(reverse("instructor_apply"), {"file": upload})
+
+    def test_apply_page_requires_login(self):
+        self.client.logout()
+        response = self.client.get(reverse("instructor_apply"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response["Location"])
+
+    def test_apply_page_renders_for_a_student(self):
+        response = self.client.get(reverse("instructor_apply"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "instructor")
+
+    def test_upload_creates_a_pending_document(self):
+        response = self._upload()
+        self.assertRedirects(response, reverse("instructor_apply"))
+
+        document = InstructorDocument.objects.get(user=self.student)
+        self.assertEqual(document.status, InstructorDocument.STATUS_PENDING)
+        self.assertTrue(document.is_pending)
+        self.assertFalse(document.is_approved)
+        self.assertIsNone(document.approved_at)
+        self.assertIsNone(document.approved_by)
+
+    def test_upload_does_not_promote_the_user_to_instructor(self):
+        self._upload()
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.role, User.ROLE_STUDENT)
+        self.assertFalse(self.student.is_instructor)
+
+    def test_rejected_file_type_is_not_accepted(self):
+        response = self._upload(
+            name="malware.exe", content_type="application/octet-stream", content=b"MZ"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(InstructorDocument.objects.filter(user=self.student).exists())
+        self.assertFormError(
+            response.context["form"],
+            "file",
+            "Only PDF, PNG or JPG documents are accepted "
+            "(.pdf, .png, .jpg, .jpeg).",
+        )
+
+    def test_file_larger_than_five_megabytes_is_rejected(self):
+        response = self._upload(content=b"0" * (5 * 1024 * 1024 + 1))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(InstructorDocument.objects.filter(user=self.student).exists())
+        self.assertFormError(
+            response.context["form"],
+            "file",
+            "The file is too large (max 5 MB).",
+        )
+
+    def test_instructors_are_redirected_away_from_the_apply_page(self):
+        self.student.role = User.ROLE_INSTRUCTOR
+        self.student.save(update_fields=["role"])
+        response = self.client.get(reverse("instructor_apply"))
+        self.assertRedirects(response, reverse("instructor_dashboard"))
+
+
+
+class InstructorApprovalTests(TestCase):
+    """Approving a document in the admin promotes the applicant."""
+
+    def setUp(self):
+        self.student = User.objects.create_user(
+            username="student1", email="student1@example.com", password=PASSWORD
+        )
+        self.document = InstructorDocument.objects.create(
+            user=self.student,
+            file="instructor_documents/cv.pdf",
+            status=InstructorDocument.STATUS_PENDING,
+        )
+        self.admin = User.objects.create_superuser(
+            username="root", email="root@example.com", password=PASSWORD
+        )
+        self.model_admin = InstructorDocumentAdmin(InstructorDocument, AdminSite())
+
+    def _save(self, status):
+        request = RequestFactory().post("/admin/accounts/instructordocument/")
+        request.user = self.admin
+        self.document.status = status
+        self.model_admin.save_model(request, self.document, None, change=True)
+
+    def test_approval_stamps_the_reviewer_and_timestamp(self):
+        self._save(InstructorDocument.STATUS_APPROVED)
+        self.document.refresh_from_db()
+        self.assertEqual(self.document.status, InstructorDocument.STATUS_APPROVED)
+        self.assertTrue(self.document.is_approved)
+        self.assertIsNotNone(self.document.approved_at)
+        self.assertEqual(self.document.approved_by, self.admin)
+
+    def test_approval_promotes_the_user_to_instructor(self):
+        self._save(InstructorDocument.STATUS_APPROVED)
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.role, User.ROLE_INSTRUCTOR)
+        self.assertTrue(self.student.is_instructor)
+
+    def test_approval_does_not_downgrade_an_admin(self):
+        self.student.role = User.ROLE_ADMIN
+        self.student.save(update_fields=["role"])
+        self._save(InstructorDocument.STATUS_APPROVED)
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.role, User.ROLE_ADMIN)
+
+    def test_pending_document_does_not_promote_the_user(self):
+        self._save(InstructorDocument.STATUS_PENDING)
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.role, User.ROLE_STUDENT)
+        self.assertIsNone(self.document.approved_at)
+
+    def test_denial_keeps_the_user_a_student(self):
+        self._save(InstructorDocument.STATUS_DENIED)
+        self.student.refresh_from_db()
+        self.document.refresh_from_db()
+        self.assertEqual(self.document.status, InstructorDocument.STATUS_DENIED)
+        self.assertEqual(self.student.role, User.ROLE_STUDENT)
+
+
+class InstructorDocumentModelTests(TestCase):
+    """``InstructorDocument.approve``/``deny`` work outside the admin too."""
+
+    def setUp(self):
+        self.student = User.objects.create_user(
+            username="student1", email="student1@example.com", password=PASSWORD
+        )
+        self.document = InstructorDocument.objects.create(
+            user=self.student,
+            file="instructor_documents/cv.pdf",
+            status=InstructorDocument.STATUS_PENDING,
+        )
+        self.reviewer = User.objects.create_superuser(
+            username="root", email="root@example.com", password=PASSWORD
+        )
+
+    def test_approve_promotes_the_student(self):
+        self.assertTrue(self.document.approve(reviewer=self.reviewer))
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.role, User.ROLE_INSTRUCTOR)
+        self.assertTrue(self.document.is_approved)
+        self.assertEqual(self.document.approved_by, self.reviewer)
+        self.assertIsNotNone(self.document.approved_at)
+
+    def test_approve_is_idempotent(self):
+        self.document.approve(reviewer=self.reviewer)
+        first_approved_at = self.document.approved_at
+        self.assertFalse(self.document.approve(reviewer=self.reviewer))
+        self.assertEqual(self.document.approved_at, first_approved_at)
+
+    def test_approve_does_not_downgrade_an_admin(self):
+        self.student.role = User.ROLE_ADMIN
+        self.student.save(update_fields=["role"])
+        self.document.approve(reviewer=self.reviewer)
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.role, User.ROLE_ADMIN)
+
+    def test_deny_leaves_the_role_untouched(self):
+        self.assertTrue(self.document.deny(reviewer=self.reviewer))
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.role, User.ROLE_STUDENT)
+        self.assertEqual(self.document.status, InstructorDocument.STATUS_DENIED)
+
+    def test_deny_is_idempotent(self):
+        self.document.deny(reviewer=self.reviewer)
+        self.assertFalse(self.document.deny(reviewer=self.reviewer))

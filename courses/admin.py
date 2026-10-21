@@ -5,7 +5,10 @@ from .models import Course, Enrollment, Lesson
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ("title", "price", "is_published")
+    list_display = ("title", "instructor", "price", "is_published")
+    list_filter = ("is_published", "instructor")
+    search_fields = ("title", "instructor__username", "instructor__email")
+    autocomplete_fields = ("instructor",)
 
 
 @admin.register(Lesson)

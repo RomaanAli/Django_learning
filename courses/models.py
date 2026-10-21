@@ -7,9 +7,25 @@ class Course(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     is_published = models.BooleanField(default=False)
+    instructor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="courses_taught",
+        verbose_name="instructor",
+    )
 
     def __str__(self):
         return self.title
+
+    def is_managed_by(self, user) -> bool:
+        """True when ``user`` is allowed to manage this course."""
+        if not user or not user.is_authenticated:
+            return False
+        if user.is_admin:
+            return True
+        return self.instructor_id == user.pk
 
 
 class Lesson(models.Model):
