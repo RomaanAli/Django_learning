@@ -1,16 +1,13 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 
 from .models import Profile
 
+User = get_user_model()
+
 
 class StudentRegistrationForm(UserCreationForm):
-    """Lets a new student create an INACTIVE account (a Profile is auto-created).
-
-    The account only becomes active after the email OTP is verified, so a user
-    cannot log in before confirming their email address.
-    """
 
     class Meta:
         model = User

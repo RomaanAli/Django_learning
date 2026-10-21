@@ -3,10 +3,9 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -19,6 +18,8 @@ from allauth.socialaccount.adapter import get_adapter
 from .forms import ProfileForm, StudentRegistrationForm, UserEditForm
 from .models import EmailVerification, Profile
 
+User = get_user_model()
+
 OTP_LIFETIME_MINUTES = 5
 RESEND_COOLDOWN_SECONDS = 60
 
@@ -26,20 +27,11 @@ RESEND_COOLDOWN_SECONDS = 60
 
 
 def _generate_otp() -> str:
-    """Return a cryptographically random 6-digit code (may start with 0)."""
     return f"{secrets.randbelow(1_000_000):06d}"
 
 
 def _send_otp_email(user, otp: str) -> bool:
-    """Email the OTP to the user; return True on success.
 
-    Development: the console backend prints the whole email (OTP included) to
-    the runserver terminal instead of sending it.
-    Production: the SMTP backend really sends it using the EMAIL_* variables.
-
-    On failure the error is printed to the server console (so it is easy to
-    see in the terminal) and False is returned so the views can say so.
-    """
     subject = "Verify Your E-Learning Account"
     message = (
         f"Hi {user.username},\n\n"
@@ -56,11 +48,7 @@ def _send_otp_email(user, otp: str) -> bool:
 
 
 def _create_or_refresh_otp(user) -> str:
-    """Create (or replace) the user's OTP, store it, and return it.
 
-    A single row per user means a resend simply overwrites the old code,
-    so the previous OTP stops working immediately.
-    """
     now = timezone.now()
     otp = _generate_otp()
     EmailVerification.objects.update_or_create(
@@ -76,7 +64,7 @@ def _create_or_refresh_otp(user) -> str:
 
 
 def _is_email_verified(user) -> bool:
-    """True when the user has a verification record marked as verified."""
+
     try:
         return user.email_verification.is_verified
     except EmailVerification.DoesNotExist:
@@ -84,27 +72,18 @@ def _is_email_verified(user) -> bool:
 
 
 def _set_pending_user(request, user) -> None:
-    """Remember which account is being verified in this browser session."""
+
     request.session["pending_user_id"] = user.id
 
 
 def _is_google_configured(request) -> bool:
-    """True when Google OAuth credentials are available.
 
-    Mirrors allauth's own lookup: settings-backed apps (from the
-    GOOGLE_OAUTH_CLIENT_* environment variables) or a SocialApp record
-    in the database for the current site.
-    """
     try:
         return bool(get_adapter(request).list_apps(request, provider="google"))
     except Exception:
         return False
 
-
-
-
 class RegisterView(View):
-    """Let a new student create an account (activated by email OTP)."""
 
     template_name = "accounts/register.html"
 
@@ -164,7 +143,6 @@ class RegisterView(View):
 
 
 class LoginView(View):
-    """Log a student in, redirecting unverified users to the OTP page."""
 
     template_name = "accounts/login.html"
 
@@ -212,14 +190,12 @@ class LoginView(View):
         return self._render(request, form)
 
 
-
 class VerifyEmailView(View):
-    """OTP page: activate the account when the entered code matches."""
 
     template_name = "accounts/verify_otp.html"
 
     def _pending_user(self, request):
-        """Return the pending user, or None after telling them to register."""
+
         user_id = request.session.get("pending_user_id")
         if not user_id:
             messages.info(request, "No pending registration found. Please register first.")
@@ -232,7 +208,7 @@ class VerifyEmailView(View):
         return user
 
     def _verify_and_redirect(self, request, user):
-        """If the email is already verified take the user to login."""
+
         if _is_email_verified(user):
             user.is_active = True
             user.save(update_fields=["is_active"])
@@ -295,7 +271,6 @@ class VerifyEmailView(View):
 
 
 class ResendOtpView(View):
-    """Send a fresh OTP (invalidates the old one) with a 60s cooldown."""
 
     def _resend(self, request):
         user_id = request.session.get("pending_user_id")
@@ -345,11 +320,6 @@ class ResendOtpView(View):
 
 
 class LogoutView(View):
-    """Log the user out — but only on the confirmed POST from the modal.
-
-    A plain link (GET request) can never silently end a session; it just
-    shows a friendly message and takes the user to the home page instead.
-    """
 
     def get(self, request):
         messages.info(
@@ -366,7 +336,6 @@ class LogoutView(View):
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    """Show the logged-in student's dashboard and enrollments."""
 
     template_name = "accounts/dashboard.html"
 
@@ -379,7 +348,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
 
 class ProfileView(LoginRequiredMixin, TemplateView):
-    """Show the logged-in student's profile page."""
 
     template_name = "accounts/profile.html"
 
@@ -391,21 +359,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 
 
 def google_check(request):
-    """Diagnostic page for "Continue with Google" problems.
 
-    Two sections:
-
-    1. Raw diagnostics — environment variables, how many Google apps
-       allauth can see, the exact redirect_uri allauth sends to Google
-       for the current host plus the loopback alternates, and the
-       current host/site/CSRF/ALLOWED_HOSTS settings.  Secrets are
-       masked — only the first characters of the client id and the
-       length of the client secret are printed.
-    2. A fix-it checklist for Google's "Access blocked" error page.
-       That page is produced by Google's servers (not by this project)
-       and is resolved in the Google Cloud Console: authorized redirect
-       URIs and the consent-screen test-users list.
-    """
     import os as _os
     from allauth.socialaccount.adapter import get_adapter
     from django.contrib.sites.shortcuts import get_current_site
@@ -537,7 +491,6 @@ def google_check(request):
 
 
 class ProfileEditView(LoginRequiredMixin, View):
-    """Edit the logged-in student's profile (name, email, age, contact)."""
 
     template_name = "accounts/profile_edit.html"
 

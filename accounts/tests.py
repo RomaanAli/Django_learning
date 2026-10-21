@@ -1,11 +1,13 @@
 from datetime import timedelta
 from unittest import mock
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+
+User = get_user_model()
 
 PASSWORD = "StrongPass!123"
 

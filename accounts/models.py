@@ -1,12 +1,23 @@
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 
+class User(AbstractUser):
+    """Custom user model for this project.
+
+    Starts identical to Django built-in User so this step is a pure
+    model swap; role fields (student/instructor) arrive later as a
+    normal AddField migration (Milestone 2).
+    """
+
+    pass
+
+
 class Profile(models.Model):
-    """Extra per-student information stored alongside the auth User."""
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -60,13 +71,6 @@ class EmailVerification(models.Model):
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_profile(sender, instance, created, **kwargs):
-    """Automatically create a Profile whenever a new user is created.
 
-    The `raw` guard skips this during fixture loads (e.g. ``loaddata``), where
-    the Profile rows come from the fixture itself. Without it, importing users
-    from a backup would first auto-create a Profile for each user and then
-    collide with the Profile record stored in the fixture (unique constraint
-    on user).
-    """
     if created and not kwargs.get("raw", False):
         Profile.objects.get_or_create(user=instance)
