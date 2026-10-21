@@ -7,14 +7,24 @@ from django.utils import timezone
 
 
 class User(AbstractUser):
-    """Custom user model for this project.
-
-    Starts identical to Django built-in User so this step is a pure
-    model swap; role fields (student/instructor) arrive later as a
-    normal AddField migration (Milestone 2).
+    """Custom user model for the E-learning project.
+    Starts identical to Django''s built-in User and gains role-based
+    access control (student / instructor / admin).
     """
+    role = models.CharField(
+        max_length=20,
+        choices=[
+            ("student", "Student"),
+            ("instructor", "Instructor"),
+            ("admin", "Admin"),
+        ],
+        default="student",
+        verbose_name="role",
+    )
 
-    pass
+    class Meta:
+        verbose_name = "user"
+        verbose_name_plural = "users"
 
 
 class Profile(models.Model):
@@ -40,7 +50,7 @@ class Profile(models.Model):
 
 
 class EmailVerification(models.Model):
-    """One 6-digit OTP row per user, used to verify a new account's email.
+    """One 6-digit OTP row per user, used to verify a new account''s email.
 
     A single row per user (OneToOne) means "resend OTP" simply replaces the
     stored code, which also invalidates the previous code.
