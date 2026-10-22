@@ -21,6 +21,8 @@ from .forms import (
     StudentRegistrationForm,
     UserEditForm,
 )
+from allauth.account.models import EmailAddress
+
 from .models import EmailVerification, InstructorDocument, Profile
 from .permissions import InstructorRequiredMixin
 
@@ -119,6 +121,16 @@ class RegisterView(View):
             return self._render(request, form)
 
         user = form.save()
+        # Populate allauth's EmailAddress table so that password-reset
+        # lookups (and any allauth email-based flows) can find the user
+        # by email. Registration uses the custom RegisterView rather than
+        # allauth's signup flow, so setup_user_email() never runs here.
+        EmailAddress.objects.create(
+            user=user,
+            email=user.email,
+            primary=True,
+            verified=False,
+        )
         try:
             otp = _create_or_refresh_otp(user)
         except Exception as e:
@@ -182,7 +194,16 @@ class LoginView(View):
         else:
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
-            user = User.objects.filter(username=username).first() if username else None
+            user = None
+            if username:
+                # Accept either a username or an email address.
+                user = User.objects.filter(username=username).first()
+                if user is None:
+                    user = (
+                        User.objects.filter(email__iexact=username).first()
+                        if "@" in username
+                        else None
+                    )
             if (
                 user is not None
                 and password

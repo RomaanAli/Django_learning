@@ -11,6 +11,8 @@ from django.utils import timezone
 from .admin import InstructorDocumentAdmin
 from .models import InstructorDocument
 
+from allauth.account.models import EmailAddress
+
 User = get_user_model()
 
 PASSWORD = "StrongPass!123"
@@ -188,6 +190,81 @@ class EmailOtpRegistrationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(User.objects.filter(email="student2@example.com").exists())
         self.assertContains(response, "already exists")
+
+
+class DualLoginAndPasswordResetTests(TestCase):
+    """Regression tests for username/email dual login and allauth EmailAddress."""
+
+    def _register(self, username="student1", email="student1@example.com"):
+        return self.client.post(
+            reverse("register"),
+            {
+                "username": username,
+                "email": email,
+                "first_name": "",
+                "last_name": "",
+                "password1": PASSWORD,
+                "password2": PASSWORD,
+            },
+        )
+
+    def test_registration_creates_allauth_email_address(self):
+        """Registration must populate allauth's EmailAddress table."""
+        self._register()
+        user = User.objects.get(username="student1")
+        self.assertTrue(
+            EmailAddress.objects.filter(user=user, email="student1@example.com").exists(),
+            "Expected an EmailAddress row for the newly registered user.",
+        )
+        ea = EmailAddress.objects.get(user=user, email="student1@example.com")
+        self.assertTrue(ea.primary)
+        self.assertFalse(ea.verified)
+
+    def test_login_by_email(self):
+        """Logging in with the email address (instead of username) works."""
+        self._register()
+        user = User.objects.get(username="student1")
+        user.is_active = True
+        user.save(update_fields=["is_active"])
+
+        response = self.client.post(
+            reverse("login"),
+            {"username": "student1@example.com", "password": PASSWORD},
+        )
+        self.assertRedirects(response, reverse("dashboard"))
+
+    def test_unverified_email_login_redirects_to_verify_email(self):
+        """An unverified user logging in by email is sent to OTP verification."""
+        self._register()
+
+        response = self.client.post(
+            reverse("login"),
+            {"username": "student1@example.com", "password": PASSWORD},
+        )
+        self.assertRedirects(response, reverse("verify_email"))
+        user = User.objects.get(username="student1")
+        self.assertFalse(user.is_active)
+
+    def test_password_reset_known_email_finds_user(self):
+        """Password reset for a known, registered email must not say 'Unknown Account'."""
+        self._register()
+        user = User.objects.get(username="student1")
+        user.is_active = True
+        user.save(update_fields=["is_active"])
+
+        from django.test import Client
+        from django.core import mail as django_mail
+
+        # Clear the outbox (registration already sent an OTP email).
+        django_mail.outbox.clear()
+
+        c = Client()
+        r = c.post("/accounts/password/reset/", {"email": "student1@example.com"})
+        self.assertEqual(r.status_code, 302)
+        # One email should have been sent (the reset link, not "Unknown Account").
+        self.assertEqual(len(django_mail.outbox), 1)
+        self.assertNotIn("Unknown Account", django_mail.outbox[0].subject)
+        self.assertIn("student1@example.com", django_mail.outbox[0].to)
 
 
 class ExistingActiveUserTests(TestCase):

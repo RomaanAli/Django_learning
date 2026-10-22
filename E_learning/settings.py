@@ -250,6 +250,9 @@ SIMPLE_JWT = {
 LOGIN_REDIRECT_URL = "dashboard"
 ACCOUNT_LOGOUT_REDIRECT_URL = "home"
 
+# Allow login with either username or email.
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
+
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountAdapter"
