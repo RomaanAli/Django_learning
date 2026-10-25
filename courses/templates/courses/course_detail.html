@@ -27,7 +27,11 @@
             {% if is_enrolled %}
                 <p class="muted">You are enrolled! Your lessons are unlocked below.</p>
             {% elif user.is_authenticated %}
-                {% if course.price > 0 %}
+                {% if can_manage %}
+                    <a class="btn btn-ghost" href="{% url 'instructor_course_edit' course.pk %}">Manage this course</a>
+                {% elif is_instructor %}
+                    <p class="muted">Instructors cannot enroll in or purchase courses.</p>
+                {% elif course.price > 0 %}
                     <a class="btn btn-primary btn-lg" href="{% url 'payments:confirm' course.pk %}">
                         Buy this course &mdash; ${{ course.price }}
                     </a>

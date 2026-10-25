@@ -20,6 +20,7 @@ from .forms import (
     ProfileForm,
     StudentRegistrationForm,
     UserEditForm,
+    VALID_REGISTER_ROLES,
 )
 from allauth.account.models import EmailAddress
 
@@ -84,6 +85,21 @@ def _set_pending_user(request, user) -> None:
     request.session["pending_user_id"] = user.id
 
 
+def _activate_user(request, user) -> None:
+    """Activate a user after OTP verification, applying the role stored
+    server-side during registration (validated against the allowlist)."""
+    pending_role = request.session.get("pending_user_role")
+    if pending_role not in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR):
+        pending_role = getattr(user, "role", User.ROLE_STUDENT)
+    if pending_role not in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR):
+        pending_role = User.ROLE_STUDENT
+    user.role = pending_role
+    user.is_active = True
+    user.save(update_fields=["role", "is_active"])
+    request.session.pop("pending_user_id", None)
+    request.session.pop("pending_user_role", None)
+
+
 def _is_google_configured(request) -> bool:
 
     try:
@@ -95,15 +111,28 @@ class RegisterView(View):
 
     template_name = "accounts/register.html"
 
-    def _render(self, request, form):
+    def _selected_role(self, value):
+        value = (value or "").strip().lower()
+        if value not in dict(VALID_REGISTER_ROLES):
+            value = User.ROLE_STUDENT
+        return value
+
+    def _render(self, request, form, selected_role="student"):
+        selected_role = self._selected_role(selected_role)
         return render(
             request,
             self.template_name,
-            {"form": form, "google_configured": _is_google_configured(request)},
+            {
+                "form": form,
+                "google_configured": _is_google_configured(request),
+                "selected_role": selected_role,
+            },
         )
 
     def get(self, request):
-        return self._render(request, StudentRegistrationForm())
+        role = self._selected_role(request.GET.get("role"))
+        form = StudentRegistrationForm(initial={"role": role})
+        return self._render(request, form, selected_role=role)
 
     def post(self, request):
         email = (request.POST.get("email") or "").strip()
@@ -116,11 +145,19 @@ class RegisterView(View):
             if stale_ids:
                 User.objects.filter(pk__in=stale_ids).delete()
 
+        submitted_role = self._selected_role(request.POST.get("role"))
         form = StudentRegistrationForm(request.POST)
         if not form.is_valid():
-            return self._render(request, form)
+            return self._render(request, form, selected_role=submitted_role)
 
         user = form.save()
+        # Persist the chosen role server-side in the session so it survives
+        # the OTP step and cannot be tampered with during verification.
+        request.session["pending_user_role"] = (
+            user.role
+            if user.role in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR)
+            else User.ROLE_STUDENT
+        )
         # Populate allauth's EmailAddress table so that password-reset
         # lookups (and any allauth email-based flows) can find the user
         # by email. Registration uses the custom RegisterView rather than
@@ -182,8 +219,13 @@ class LoginView(View):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 request.session.pop("pending_user_id", None)
+                request.session.pop("pending_user_role", None)
                 login(request, user)
-                next_url = request.POST.get("next")
+                # Role-aware redirect: instructors/admins go to their dashboard;
+                # students honour a safe ?next, otherwise their dashboard.
+                if user.is_instructor or user.is_admin:
+                    return redirect("instructor_dashboard")
+                next_url = request.POST.get("next") or request.GET.get("next")
                 if not next_url or not url_has_allowed_host_and_scheme(
                     next_url,
                     allowed_hosts={request.get_host()},
@@ -237,9 +279,7 @@ class VerifyEmailView(View):
     def _verify_and_redirect(self, request, user):
 
         if _is_email_verified(user):
-            user.is_active = True
-            user.save(update_fields=["is_active"])
-            request.session.pop("pending_user_id", None)
+            _activate_user(request, user)
             messages.success(request, "Email verified successfully. You can now log in.")
             return redirect("login")
         return None
@@ -285,12 +325,10 @@ class VerifyEmailView(View):
         elif not secrets.compare_digest(entered, verification.otp):
             messages.error(request, "Invalid OTP.")
         else:
-            user.is_active = True
-            user.save(update_fields=["is_active"])
+            _activate_user(request, user)
             verification.is_verified = True
             verification.otp = ""
             verification.save(update_fields=["is_verified", "otp"])
-            request.session.pop("pending_user_id", None)
             messages.success(request, "Email verified successfully. You can now log in.")
             return redirect("login")
 

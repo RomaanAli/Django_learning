@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
@@ -15,79 +16,101 @@ ALLOWED_DOCUMENT_CONTENT_TYPES = (
 )
 
 
+# Valid roles a new user may self-select at registration. Admin is excluded
+# because it is reserved for staff provisioning and must never be settable
+# by a signed-up user (even via a tampered POST).
+VALID_REGISTER_ROLES = (
+    (User.ROLE_STUDENT, 'Student'),
+    (User.ROLE_INSTRUCTOR, 'Instructor'),
+)
+
+
 class StudentRegistrationForm(UserCreationForm):
+    role = forms.CharField(
+        required=False,
+        initial=User.ROLE_STUDENT,
+        widget=forms.HiddenInput(),
+    )
 
     class Meta:
         model = User
         fields = [
-            "username",
-            "first_name",
-            "last_name",
-            "email",
-            "password1",
-            "password2",
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'role',
+            'password1',
+            'password2',
         ]
 
     def clean_email(self):
-        email = self.cleaned_data["email"].strip()
+        email = self.cleaned_data['email'].strip()
         if email and User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("A user with that email already exists.")
+            raise forms.ValidationError('A user with that email already exists.')
         return email
+
+    def clean_role(self):
+        role = (self.cleaned_data.get('role') or '').strip().lower()
+        if role not in dict(VALID_REGISTER_ROLES):
+            role = User.ROLE_STUDENT
+        return role
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.is_active = False
+        user.role = self.cleaned_data.get('role') or User.ROLE_STUDENT
         if commit:
             user.save()
         return user
 
 
 class UserEditForm(forms.ModelForm):
-    """Edits the basic auth-user fields shown on the profile page."""
+    '''Edits the basic auth-user fields shown on the profile page.'''
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email"]
+        fields = ['first_name', 'last_name', 'email']
 
 
 class ProfileForm(forms.ModelForm):
-    """Edits the profile-specific fields (age, contact)."""
+    '''Edits the profile-specific fields (age, contact).'''
 
     class Meta:
         model = Profile
-        fields = ["age", "contact"]
+        fields = ['age', 'contact']
 
 
 class InstructorDocumentForm(forms.ModelForm):
-    """Upload form for the proof-of-qualification an instructor applies with."""
+    '''Upload form for the proof-of-qualification an instructor applies with.'''
 
     class Meta:
         model = InstructorDocument
-        fields = ["file"]
+        fields = ['file']
         widgets = {
-            "file": forms.ClearableFileInput(attrs={"accept": ".pdf,.png,.jpg,.jpeg"}),
+            'file': forms.ClearableFileInput(attrs={'accept': '.pdf,.png,.jpg,.jpeg'}),
         }
 
     def clean_file(self):
-        uploaded = self.cleaned_data["file"]
+        uploaded = self.cleaned_data['file']
 
-        name = (uploaded.name or "").lower()
+        name = (uploaded.name or '').lower()
         if not any(name.endswith(ext) for ext in ALLOWED_DOCUMENT_EXTENSIONS):
             raise forms.ValidationError(
-                "Only PDF, PNG or JPG documents are accepted "
-                f"({', '.join(ALLOWED_DOCUMENT_EXTENSIONS)})."
+                'Only PDF, PNG or JPG documents are accepted '
+                f'({', '.join(ALLOWED_DOCUMENT_EXTENSIONS)}).'
             )
 
-        content_type = (uploaded.content_type or "").lower()
+        content_type = (uploaded.content_type or '').lower()
         if content_type and content_type not in ALLOWED_DOCUMENT_CONTENT_TYPES:
             raise forms.ValidationError(
-                "That file type is not supported. Please upload a PDF, PNG or JPG."
+                'That file type is not supported. Please upload a PDF, PNG or JPG.'
             )
 
         max_bytes = MAX_DOCUMENT_SIZE_MB * 1024 * 1024
         if uploaded.size > max_bytes:
             raise forms.ValidationError(
-                f"The file is too large (max {MAX_DOCUMENT_SIZE_MB} MB)."
+                f'The file is too large (max {MAX_DOCUMENT_SIZE_MB} MB).'
             )
 
         return uploaded

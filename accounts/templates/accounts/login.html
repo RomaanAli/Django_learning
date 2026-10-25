@@ -1,33 +1,50 @@
-{% extends "base.html" %}
+{% extends 'accounts/auth_base.html' %}
+
 {% load socialaccount %}
 
-{% block title %}Login | E-Learning{% endblock %}
+{% block title %}Login — E-Learning{% endblock %}
 
-{% block content %}
-    <div class="card form-panel">
-        <h1>Login</h1>
+{% block header_title %}Welcome back{% endblock %}
 
-        {% if google_configured %}
-            <a class="btn btn-google" href="{% provider_login_url 'google' %}">
-                <span class="google-icon">G</span>
-                Continue with Google
-            </a>
+{% block header_subtitle %}Sign in to your account to continue{% endblock %}
 
-            <p class="divider"><span>or log in with your email</span></p>
-        {% endif %}
+{% block form_class %}login-form{% endblock %}
 
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="hidden" name="next" value="{{ request.GET.next }}">
-            <button class="btn btn-primary" type="submit">Login</button>
-        </form>
+{% block form_action %}{% url 'login' %}{% endblock %}
 
-        <p class="form-footer">
-            {% if request.session.pending_user_id %}
-                Need to verify your email? <a href="{% url 'verify_email' %}">Resend OTP</a>
-            {% endif %}
-            Don't have an account? <a href="{% url 'register' %}">Register here</a>
-        </p>
-    </div>
+{% block submit_text %}Sign in{% endblock %}
+
+{% block fields %}
+{% if form.non_field_errors %}
+<div class="field-group"><div class="field-error">{{ form.non_field_errors|join:', ' }}</div></div>
+{% endif %}
+
+<div class="field-group">
+  <label for="{{ form.username.id_for_label }}">Username or email</label>
+  {{ form.username }}
+  {% if form.username.errors %}<div class="field-error">{{ form.username.errors|join:', ' }}</div>{% endif %}
+</div>
+
+<div class="field-group">
+  <label for="{{ form.password.id_for_label }}">Password</label>
+  <div class="password-wrap">
+    <input type="password" id="{{ form.password.id_for_label }}" name="{{ form.password.name }}" autocomplete="current-password">
+    <button type="button" class="toggle-password" aria-label="Show password">
+                    <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+  </div>
+  {% if form.password.errors %}<div class="field-error">{{ form.password.errors|join:', ' }}</div>{% endif %}
+</div>
+
+<p class="muted auth-help">
+  Need to verify your email? <a href="{% url 'resend_otp' %}">Resend code</a>
+</p>
+{% endblock %}
+
+{% block footer %}
+<p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+<p><a href="#">Forgot password?</a></p>
 {% endblock %}

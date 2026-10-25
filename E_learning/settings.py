@@ -21,12 +21,12 @@ SECRET_KEY = os.environ.get(
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'false'
 
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.environ.get(
-        'DJANGO_ALLOWED_HOSTS',
-        'localhost,127.0.0.1,.onrender.com'
-    ).split(',')
-    if host.strip()
+    'testserver',
+    *[
+        host.strip()
+        for host in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,.onrender.com').split(',')
+        if host.strip()
+    ],
 ]
 
 render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()

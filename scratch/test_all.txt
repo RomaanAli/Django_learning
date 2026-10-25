@@ -1,0 +1,18 @@
+Using existing test database for alias 'default'...
+
+Found 111 test(s).
+System check identified no issues (0 silenced).
+otp generation failed: boom
+[email] Could not send OTP to student1@example.com: SMTP connection refused
+[email] Could not send enrollment confirmation to student@example.com: SMTP down
+[email] core.tests.FailingBackend failed (transport down); trying the next transport.
+[email] core.tests.FailingBackend failed (transport down); trying the next transport.
+[email] core.tests.FailingBackend failed (transport down); trying the next transport.
+[email] core.tests.FailingBackend failed (transport down); trying the next transport.
+...............................................................................................................
+----------------------------------------------------------------------
+Ran 111 tests in 205.630s
+
+OK
+Preserving test database for alias 'default'...
+

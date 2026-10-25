@@ -1,22 +1,3 @@
-"""Stripe Checkout views.
-
-Security model
---------------
-* Stripe keys live only in ``settings`` (read from environment variables).
-  Nothing secret is ever passed to templates — the publishable key is not even
-  needed because we use Stripe's hosted Checkout page (no card data touches
-  this server).
-* The price is always re-read from ``Course.price`` on the server. The client
-  can never set the amount.
-* When Stripe sends the student back, the success page asks the Stripe API
-  (server-side, secret key) whether that session was really paid — so nobody
-  can unlock a course just by visiting the URL. Enrolment is granted in one
-  place only: ``fulfill_checkout_session``.
-* An optional signature-verified webhook endpoint (``/webhooks/stripe/``)
-  calls the very same function, so it can be added later without any code
-  changes. It is inert until you create the endpoint in Stripe's dashboard.
-"""
-
 from decimal import Decimal
 
 import stripe
@@ -41,18 +22,11 @@ User = get_user_model()
 
 
 def _price_in_cents(course) -> int:
-    """Stripe charges in the smallest currency unit (e.g. cents for USD)."""
     return int(course.price * 100)
 
 
 def _as_dict(obj):
-    """Normalise a StripeObject (or dict) into a plain dict.
 
-    ``stripe.Webhook.construct_event`` returns ``StripeObject`` instances,
-    which are NOT dicts (``.get()`` raises ``AttributeError``). Converting to
-    a plain dict keeps the webhook handler working with both the real API
-    objects and the plain dicts used in tests.
-    """
     if isinstance(obj, dict):
         return obj
     to_dict = getattr(obj, "to_dict", None)
@@ -67,16 +41,7 @@ def _redirect_with_message(request, course, level, text):
 
 
 def _send_enrollment_email(user, course, amount, currency) -> bool:
-    """Email the student a purchase confirmation after a paid enrollment.
 
-    Includes the course title and the price actually charged. Called ONLY
-    when a new enrollment row was created, so the success page and the
-    optional webhook together still produce exactly ONE email.
-
-    Unlike the OTP mail, a failure here must never break the payment flow:
-    the money already moved and the course is already unlocked, so the
-    error is printed to the server log and swallowed.
-    """
     recipient = (user.email or "").strip()
     if not recipient:
         print(
@@ -176,6 +141,12 @@ class PaymentConfirmView(LoginRequiredMixin, TemplateView):
 
     template_name = "payments/confirm.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and not request.user.is_student:
+            messages.error(request, "Instructors cannot purchase courses.")
+            return redirect("course_detail", pk=kwargs.get("course_id"))
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course = get_object_or_404(
@@ -198,7 +169,9 @@ class CourseCheckoutView(LoginRequiredMixin, View):
         course = get_object_or_404(
             Course.objects.filter(is_published=True), pk=course_id
         )
-
+        if not request.user.is_student:
+            messages.error(request, "Instructors cannot purchase courses.")
+            return redirect("course_detail", pk=course.pk)
         if not settings.STRIPE_SECRET_KEY:
             return _redirect_with_message(
                 request,

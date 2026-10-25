@@ -33,6 +33,11 @@ class CourseDetailView(DetailView):
             self.request.user.is_authenticated
             and course.enrollments.filter(student=self.request.user).exists()
         )
+        context["can_manage"] = course.is_managed_by(self.request.user)
+        context["is_instructor"] = (
+            self.request.user.is_authenticated
+            and self.request.user.is_instructor
+        )
         return context
 
 
@@ -47,6 +52,9 @@ class EnrollCourseView(LoginRequiredMixin, View):
         course = get_object_or_404(
             Course.objects.filter(is_published=True), pk=pk
         )
+        if not request.user.is_student:
+            messages.error(request, "Instructors cannot enroll in courses.")
+            return redirect("course_detail", pk=course.pk)
         if course.price > 0:
             messages.info(
                 request,
@@ -181,10 +189,11 @@ class InstructorLessonCreateView(InstructorRequiredMixin, View):
         course = self._get_course(request, pk)
         if course is None:
             return redirect("instructor_course_list")
+        next_order = (course.lessons.order_by("-order").first().order + 1) if course.lessons.exists() else 1
         return render(
             request,
             self.template_name,
-            {"form": LessonForm(), "course": course},
+            {"form": LessonForm(initial={"order": next_order}), "course": course},
         )
 
     def post(self, request, pk):

@@ -1,0 +1,326 @@
+/* ==========================================================================
+   Auth pages — centred card, role toggle, polished form fields
+   Reuses the existing brand palette from style.css (no new framework).
+   ========================================================================== */
+
+/* ---------- Page / card layout ---------- */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: var(--color-beige);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2.25rem;
+}
+
+/* ---------- Header ---------- */
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--color-forest);
+  margin-bottom: 0.75rem;
+}
+
+.auth-brand svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-moss);
+}
+
+.auth-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--color-heading);
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--color-moss);
+}
+
+/* ---------- Role toggle ---------- */
+.role-toggle {
+  display: flex;
+  gap: 0.35rem;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.25rem;
+}
+
+.role-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.85rem 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.role-btn svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.role-btn .role-label {
+  font-size: 0.82rem;
+}
+
+.role-btn .role-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  opacity: 0.55;
+}
+
+.role-btn[aria-checked='true'] {
+  background: var(--color-surface);
+  color: var(--color-forest);
+}
+
+.role-btn[aria-checked='true'] .role-badge {
+  opacity: 1;
+}
+
+/* Per-role accent overrides (selected state) */
+.role-btn[data-role='student'][aria-checked='true'] {
+  border: 1px solid var(--color-success-line);
+  box-shadow: 0 0 0 2px rgba(61, 118, 84, 0.15);
+}
+
+.role-btn[data-role='instructor'][aria-checked='true'] {
+  border: 1px solid var(--color-accent-line);
+  box-shadow: 0 0 0 2px rgba(184, 138, 84, 0.15);
+}
+
+/* ---------- Form ---------- */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.field-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field-group input[type='text'],
+.field-group input[type='email'],
+.field-group input[type='password'] {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.95rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-group input:focus {
+  outline: none;
+  border-color: var(--color-forest);
+  box-shadow: 0 0 0 3px rgba(24, 42, 34, 0.12);
+}
+
+.field-group input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px rgba(182, 66, 66, 0.12);
+}
+
+.field-group .field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--color-danger-dark);
+  background: var(--color-error-background);
+  border: 1px solid var(--color-danger-line);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.6rem;
+  margin-top: 0.2rem;
+}
+
+/* ---------- Toggle hint (hidden when student selected) ---------- */
+.role-toggle-hint {
+  margin-top: 1.1rem;
+  padding: 0.85rem 1rem;
+  background: var(--color-secondary-soft);
+  border: 1px solid var(--color-secondary-line);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--color-moss);
+  display: none;
+}
+
+.role-toggle-hint.visible {
+  display: block;
+}
+
+.role-toggle-hint strong {
+  color: var(--color-forest);
+}
+
+/* ---------- Buttons ---------- */
+.btn-submit {
+  width: 100%;
+  padding: 0.85rem;
+  background: var(--color-forest);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.btn-submit:hover {
+  background: #183027;
+}
+
+.btn-submit:active {
+  transform: scale(0.98);
+}
+
+.btn-submit:disabled {
+  background: var(--color-moss);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-submit .btn-spinner {
+  display: none;
+}
+
+.btn-submit.loading .btn-text,
+.btn-submit.loading .btn-spinner {
+  display: none;
+}
+
+.btn-submit.loading::after {
+  content: '';
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-left: 0.5rem;
+}
+
+/* ---------- Alerts (Django messages, dismissible) ---------- */
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.messages .alert {
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.messages .alert .alert-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.messages .alert .alert-close:hover {
+  color: var(--color-text);
+}
+
+/* ---------- Login-specific tweaks ---------- */
+.login-form .field-group input[type='password'] {
+  position: relative;
+}
+
+.login-form .field-group .toggle-password {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-muted);
+  padding: 0.25rem;
+}
+
+.login-form .field-group .toggle-password:hover {
+  color: var(--color-text);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 520px) {
+  .auth-card {
+    padding: 1.75rem;
+    border-radius: var(--radius);
+  }
+
+  .auth-title {
+    font-size: 1.4rem;
+  }
+
+  .role-toggle {
+    flex-wrap: nowrap;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

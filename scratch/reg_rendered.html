@@ -1,0 +1,151 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register — E-learning</title>
+  <link rel="stylesheet" href="/static/css/auth.css">
+  
+</head>
+<body>
+  
+  <div class="auth-page">
+    <div class="auth-card">
+      <header class="auth-header">
+        <div class="auth-brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span>E-learning</span>
+        </div>
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-subtitle">Join the platform as a Student or Instructor</p>
+      </header>
+
+      <form class="auth-form" method="post" action="/accounts/register/" novalidate>
+        <input type="hidden" name="csrfmiddlewaretoken" value="dd0Wqi5BpcpuitRVNgLLLTX6v9exrlPZE34BOTCb8dTTfC6i3aqep0IxXwWYFn0s">
+        <input type="hidden" name="role" value="student" class="role-sync">
+
+        
+
+        
+
+        
+
+
+<div class="field-group">
+  <label for="id_username">Username</label>
+  <input type="text" name="username" maxlength="150" autofocus required aria-describedby="id_username_helptext" id="id_username">
+  
+</div>
+
+<div class="field-group">
+  <label for="id_first_name">First name</label>
+  <input type="text" name="first_name" maxlength="150" id="id_first_name">
+  
+</div>
+
+<div class="field-group">
+  <label for="id_last_name">Last name</label>
+  <input type="text" name="last_name" maxlength="150" id="id_last_name">
+  
+</div>
+
+<div class="field-group">
+  <label for="id_email">Email</label>
+  <input type="email" name="email" maxlength="254" id="id_email">
+  
+</div>
+
+<div class="field-group">
+  <label for="id_password1">Password</label>
+  <input
+    type="password"
+    id="id_password1"
+    name="password1"
+    autocomplete="new-password"
+  >
+  <button type="button" class="toggle-password" aria-label="Toggle password visibility">👁️</button>
+  
+</div>
+
+<div class="field-group">
+  <label for="id_password2">Confirm password</label>
+  <input
+    type="password"
+    id="id_password2"
+    name="password2"
+    autocomplete="new-password"
+  >
+  <button type="button" class="toggle-password" aria-label="Toggle password visibility">👁️</button>
+  
+</div>
+
+<div class="field-group">
+  <label for="id_role">Account type</label>
+  <input type="hidden" name="role" value="student" id="id_role">
+  
+</div>
+
+
+        <div class="role-toggle-hint">
+          <strong id="role-hint-text">Student account</strong>
+          <span id="role-hint-detail"></span>
+        </div>
+
+        <div class="role-toggle" role="radiogroup" aria-label="Account type">
+          <button
+            type="button"
+            class="role-btn"
+            data-role="student"
+            aria-checked="true"
+            aria-selected="true"
+            tabindex="0"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span class="role-label">Student</span>
+            <span class="role-badge">Default</span>
+          </button>
+          <button
+            type="button"
+            class="role-btn"
+            data-role="instructor"
+            aria-checked="false"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 1.5 5.5 3 8 3s5-1.5 8-3v-5"/>
+            </svg>
+            <span class="role-label">Instructor</span>
+            <span class="role-badge">Apply now</span>
+          </button>
+        </div>
+
+        <button class="btn btn-submit" type="submit">
+          <span class="btn-text">Register</span>
+          <span class="btn-spinner"></span>
+        </button>
+      </form>
+
+      <footer class="form-footer">
+        
+<p>Already have an account? <a href="/accounts/login/">Sign in</a></p>
+
+      </footer>
+    </div>
+  </div>
+  <script src="/static/js/auth.js" defer></script>
+  
+</body>
+</html>

@@ -931,6 +931,23 @@ class Command(BaseCommand):
         courses_created = 0
         lessons_created = 0
 
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        instructor, _ = User.objects.get_or_create(
+            username="demo_instructor",
+            defaults={
+                "email": "demo_instructor@example.com",
+                "role": "instructor",
+                "is_active": True,
+            },
+        )
+        if not instructor.is_active:
+            instructor.is_active = True
+            instructor.save(update_fields=["is_active"])
+        if not instructor.check_password("DemoPass123!"):
+            instructor.set_password("DemoPass123!")
+            instructor.save(update_fields=["password"])
+
         for course_data in COURSES:
             course, course_created = Course.objects.get_or_create(
                 title=course_data["title"],
@@ -938,8 +955,13 @@ class Command(BaseCommand):
                     "description": course_data["description"],
                     "price": Decimal(course_data["price"]),
                     "is_published": True,
+                    "instructor": instructor,
                 },
             )
+            # Keep ownership in sync for courses created before this change.
+            if course.instructor_id is None:
+                course.instructor = instructor
+                course.save(update_fields=["instructor"])
             courses_created += 1 if course_created else 0
 
             for position, lesson_data in enumerate(course_data["lessons"], start=1):
