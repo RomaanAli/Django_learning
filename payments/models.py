@@ -3,11 +3,6 @@ from django.db import models
 
 
 class Payment(models.Model):
-    """One Stripe Checkout Session per course purchase.
-
-    ``stripe_session_id`` is unique so the webhook can never enroll a student
-    twice for the same payment (idempotency), even if Stripe retries the event.
-    """
 
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"

@@ -20,7 +20,7 @@ class CoreConfig(AppConfig):
 
     @staticmethod
     def _log_email_setup():
-        """Print the active email transports into the deploy log.
+        """Print the active email transports into the log.
 
         Only when this environment must really deliver mail: on a cloud host a
         silent "the OTP never arrived" is very hard to debug, so state the

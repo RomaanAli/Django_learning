@@ -7,10 +7,6 @@ from django.utils import timezone
 
 
 class User(AbstractUser):
-    """Custom user model for the E-learning project.
-    Starts identical to Django''s built-in User and gains role-based
-    access control (student / instructor / admin).
-    """
 
     ROLE_STUDENT = "student"
     ROLE_INSTRUCTOR = "instructor"
@@ -23,9 +19,6 @@ class User(AbstractUser):
         (ROLE_ADMIN, "Admin"),
     ]
 
-    # role field: controls what a user is allowed to do.
-    # - choices = only these values are allowed
-    # - default = existing/new users always start as "student"
     role = models.CharField(
         max_length=20,
         choices=ROLE_CHOICES,
@@ -77,11 +70,6 @@ class Profile(models.Model):
 
 
 class EmailVerification(models.Model):
-    """One 6-digit OTP row per user, used to verify a new account''s email.
-
-    A single row per user (OneToOne) means "resend OTP" simply replaces the
-    stored code, which also invalidates the previous code.
-    """
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -107,13 +95,6 @@ class EmailVerification(models.Model):
 
 
 class InstructorDocument(models.Model):
-    """Uploaded proof that an instructor is allowed to manage courses.
-
-    A single row per user (one-to-one) keeps one document per user.
-    - status = pending / approved / denied
-    - user = who uploaded it
-    - document = the file itself
-    """
 
     STATUS_PENDING = "pending"
     STATUS_APPROVED = "approved"
@@ -174,16 +155,6 @@ class InstructorDocument(models.Model):
             self.save()
 
     def approve(self, reviewer=None) -> bool:
-        """Approve this document and promote its owner to instructor.
-
-        This is the single place that decides what "approved" means, so the
-        Django admin, a management command and a plain shell session all
-        behave the same way.
-
-        Only a user who is currently a *student* is promoted; admins and
-        instructors keep the role they already have. Returns ``True`` when
-        the document was newly approved.
-        """
         if self.status == self.STATUS_APPROVED and self.approved_at:
             return False
 
@@ -199,12 +170,7 @@ class InstructorDocument(models.Model):
         return True
 
     def deny(self, reviewer=None) -> bool:
-        """Mark this document as denied.
 
-        Denying never changes the user's role — a mistake in the review must
-        not take away access somebody already has. Returns ``True`` when the
-        document was newly denied.
-        """
         if self.status == self.STATUS_DENIED:
             return False
 

@@ -20,7 +20,6 @@ class Course(models.Model):
         return self.title
 
     def is_managed_by(self, user) -> bool:
-        """True when ``user`` is allowed to manage this course."""
         if not user or not user.is_authenticated:
             return False
         if user.is_admin:

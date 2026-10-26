@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Instructor Dashboard | E-Learning{% endblock %}
+
+{% block content %}
+    <div class="page-head">
+        <h1>Instructor dashboard</h1>
+        <p class="page-subtitle">Manage the courses you teach and track your students.</p>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-card">
+            <span class="stat-value">{{ courses|length }}</span>
+            <span class="stat-label">Courses</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ student_count }}</span>
+            <span class="stat-label">Enrolled students</span>
+        </div>
+    </div>
+
+    <div class="card">
+    {% if draft_courses|length > 0 %}
+        <!-- Quick actions card -->
+        <div class="card-head">
+            <h2>Quick actions</h2>
+        </div>
+        <div class="card-body">
+            <a class="btn btn-primary" href="{% url 'instructor_course_create' %}">New course</a>
+            <a class="btn btn-secondary" href="{% url 'instructor_course_list' %}">My courses</a>
+            <a class="btn btn-ghost" href="{% url 'course_list' %}">View public courses</a>
+        </div>
+        <!-- Drafts to finish card -->
+        <div class="card-head">
+            <h2>Drafts to finish</h2>
+        </div>
+        <div class="card-body">
+            {% for draft in draft_courses %}
+            <div class="course-item">
+                <div>
+                    <a class="course-title" href="{% url 'instructor_course_edit' draft.pk %}">{{ draft.title }}</a>
+                    <span class="badge">Draft</span>
+                </div>
+                <a class="btn btn-ghost" href="{% url 'instructor_course_edit' draft.pk %}">Manage</a>
+            </div>
+            {% endfor %}
+        </div>
+    {% elif courses|length > 0 %}
+        <!-- No drafts case - all courses published -->
+        <div class="card-head">
+            <h2>Quick actions</h2>
+        </div>
+        <div class="card-body">
+            <a class="btn btn-primary" href="{% url 'instructor_course_create' %}">New course</a>
+            <a class="btn btn-secondary" href="{% url 'instructor_course_list' %}">My courses</a>
+            <a class="btn btn-ghost" href="{% url 'course_list' %}">View public courses</a>
+        </div>
+        <p>No drafts. All your courses are published.</p>
+    {% else %}
+        <!-- Empty state - Issue 9: no courses at all -->
+        <div class="card-head">
+            <h2>Quick actions</h2>
+        </div>
+        <div class="card-body empty-state">
+            <p>You have no courses yet.</p>
+            <a class="btn btn-primary" href="{% url 'instructor_course_create' %}">Create your first course</a>
+        </div>
+    {% endif %}
+    </div>
+{% endblock %}
+
+{% block title %}Instructor Dashboard | E-Learning{% endblock %}
+
+{% block content %}
+    <div class="page-head">
+        <h1>Instructor dashboard</h1>
+        <p class="page-subtitle">Manage the courses you teach and track your students.</p>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-card">
+            <span class="stat-value">{{ courses|length }}</span>
+            <span class="stat-label">Courses</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ student_count }}</span>
+            <span class="stat-label">Enrolled students</span>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if draft_courses|length > 0 %}
+        <!-- Quick actions card -->
+        <div class="card-head">
+            <h2>Quick actions</h2>
+        </div>
+        <div class="card-body">
+            <a class="btn btn-primary" href="{% url 'instructor_course_create' %}">New course</a>
+            <a class="btn btn-secondary" href="{% url 'instructor_course_list' %}">My courses</a>
+            <a class="btn btn-ghost" href="{% url 'course_list' %}">View public courses</a>
+        </div>
+        <!-- Drafts to finish card -->
+        <div class="card-head">
+            <h2>Drafts to finish</h2>
+        </div>
+        <div class="card-body">
+            {% for draft in draft_courses %}
+            <div class="course-item">
+                <div>
+                    <a class="course-title" href="{% url 'instructor_course_edit' draft.pk %}">{{ draft.title }}</a>
+                    <span class="badge">Draft</span>
+                </div>
+                <a class="btn btn-ghost" href="{% url 'instructor_course_edit' draft.pk %}">Manage</a>
+            </div>
+            {% endfor %}
+            {% if courses|length > 0 and draft_courses|length == 0 %}
+                <p>No drafts. All your courses are published.</p>
+                <a class="btn btn-secondary" href="{% url 'instructor_course_list' %}">My courses</a>
+            {% endif %}
+        </div>
+        {% elif courses|length > 0 %}
+        <!-- No drafts case - all courses published -->
+        <div class="card-head">
+            <h2>Quick actions</h2>
+        </div>
+        <div class="card-body">
+            <a class="btn btn-primary" href="{% url 'instructor_course_create' %}">New course</a>
+            <a class="btn btn-secondary" href="{% url 'instructor_course_list' %}">My courses</a>
+            <a class="btn btn-ghost" href="{% url 'course_list' %}">View public courses</a>
+        </div>
+        {% else %}
+        <!-- Empty state - Issue 9: no courses at all -->
+        <div class="card-head">
+            <h2>Quick actions</h2>
+        </div>
+        <div class="card-body empty-state">
+            <p>You have no courses yet.</p>
+            <a class="btn btn-primary" href="{% url 'instructor_course_create' %}">Create your first course</a>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}
