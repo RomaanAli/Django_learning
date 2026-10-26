@@ -345,3 +345,167 @@ class DescribeEmailSetupTests(SimpleTestCase):
 
         self.assertIn("WARNING", line)
         self.assertIn("DISABLES the fallback chain", line)
+
+
+from django.http import HttpResponse
+from django.test import RequestFactory
+
+from core.middleware import (
+    MaintenanceMiddleware,
+    RequestTimingMiddleware,
+)
+
+
+class _FakeUser:
+    def __init__(self, authenticated=False, staff=False, superuser=False):
+        self.is_authenticated = authenticated
+        self.is_staff = staff
+        self.is_superuser = superuser
+
+
+def _ok_view(request):
+    _ok_view.called = True
+    return HttpResponse("ok")
+
+
+_ok_view.called = False
+
+
+class RequestTimingMiddlewareTests(SimpleTestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        _ok_view.called = False
+
+    def test_response_unchanged_and_timing_header_added(self):
+        request = self.factory.get("/courses/")
+        middleware = RequestTimingMiddleware(_ok_view)
+        response = middleware(request)
+
+        self.assertTrue(_ok_view.called)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"ok")
+        header = response["X-Response-Time-Ms"]
+        self.assertTrue(header.endswith("ms"))
+        self.assertTrue(header[:-2].isdigit())
+
+    def test_slow_request_logs_warning(self):
+        request = self.factory.get("/courses/")
+        with mock.patch(
+            "core.middleware.time.monotonic", side_effect=[0.0, 0.812]
+        ), self.assertLogs("core.middleware", level="WARNING") as logs:
+            middleware = RequestTimingMiddleware(_ok_view)
+            response = middleware(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(logs.output), 1)
+        self.assertIn("Slow request: GET /courses/ -> 200 in 812ms", logs.output[0])
+
+    def test_fast_request_produces_no_log(self):
+        request = self.factory.get("/courses/")
+        with mock.patch(
+            "core.middleware.time.monotonic", side_effect=[0.0, 0.01]
+        ), mock.patch("core.middleware.logger.warning") as warning:
+            middleware = RequestTimingMiddleware(_ok_view)
+            middleware(request)
+
+        warning.assert_not_called()
+
+
+class MaintenanceMiddlewareTests(SimpleTestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        _ok_view.called = False
+
+    def _request(self, path="/", user=None):
+        request = self.factory.get(path)
+        if user is not None:
+            request.user = user
+        return request
+
+    def _run(self, request):
+        return MaintenanceMiddleware(_ok_view)(request)
+
+    @mock.patch.dict("os.environ", {}, clear=True)
+    def test_maintenance_off_by_default_lets_requests_through(self):
+        response = self._run(self._request("/"))
+        self.assertTrue(_ok_view.called)
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "false"})
+    def test_maintenance_false_lets_requests_through(self):
+        response = self._run(self._request("/"))
+        self.assertTrue(_ok_view.called)
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "0"})
+    def test_maintenance_zero_lets_requests_through(self):
+        response = self._run(self._request("/"))
+        self.assertTrue(_ok_view.called)
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "true"})
+    def test_anonymous_home_gets_503_and_view_not_called(self):
+        response = self._run(self._request("/"))
+        self.assertFalse(_ok_view.called)
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response["Retry-After"], "3600")
+        body = response.content.decode()
+        self.assertIn("Site under maintenance", body)
+        self.assertIn("Please try again soon.", body)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "true"})
+    def test_staff_user_passes_through(self):
+        request = self._request("/", _FakeUser(authenticated=True, staff=True))
+        response = self._run(request)
+        self.assertTrue(_ok_view.called)
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "true"})
+    def test_superuser_passes_through(self):
+        request = self._request(
+            "/courses/1/", _FakeUser(authenticated=True, superuser=True)
+        )
+        response = self._run(request)
+        self.assertTrue(_ok_view.called)
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "true"})
+    def test_normal_logged_in_user_gets_503(self):
+        request = self._request(
+            "/courses/1/",
+            _FakeUser(authenticated=True, staff=False, superuser=False),
+        )
+        response = self._run(request)
+        self.assertFalse(_ok_view.called)
+        self.assertEqual(response.status_code, 503)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "true"})
+    def test_allowed_prefixes_pass_through_when_anonymous(self):
+        for path in (
+            "/admin/login/",
+            "/accounts/login/",
+            "/static/test.css",
+            "/webhooks/stripe/",
+        ):
+            _ok_view.called = False
+            response = self._run(self._request(path))
+            self.assertTrue(_ok_view.called, f"{path} was blocked")
+            self.assertEqual(response.status_code, 200)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "TRUE"})
+    def test_true_uppercase_turns_maintenance_on(self):
+        response = self._run(self._request("/"))
+        self.assertFalse(_ok_view.called)
+        self.assertEqual(response.status_code, 503)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "1"})
+    def test_one_turns_maintenance_on(self):
+        response = self._run(self._request("/"))
+        self.assertFalse(_ok_view.called)
+        self.assertEqual(response.status_code, 503)
+
+    @mock.patch.dict("os.environ", {"MAINTENANCE_MODE": "yes"})
+    def test_yes_turns_maintenance_on(self):
+        response = self._run(self._request("/"))
+        self.assertFalse(_ok_view.called)
+        self.assertEqual(response.status_code, 503)

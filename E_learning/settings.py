@@ -77,6 +77,8 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.RequestTimingMiddleware',
+    'core.middleware.MaintenanceMiddleware',
 ]
 
 ROOT_URLCONF = 'E_learning.urls'
