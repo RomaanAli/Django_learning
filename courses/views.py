@@ -193,7 +193,7 @@ class InstructorLessonCreateView(InstructorRequiredMixin, View):
         return render(
             request,
             self.template_name,
-            {"form": LessonForm(initial={"order": next_order}), "course": course},
+            {"form": LessonForm(initial={"order": next_order}, course=course), "course": course},
         )
 
     def post(self, request, pk):
@@ -201,7 +201,7 @@ class InstructorLessonCreateView(InstructorRequiredMixin, View):
         if course is None:
             return redirect("instructor_course_list")
 
-        form = LessonForm(request.POST)
+        form = LessonForm(request.POST, course=course)
         if not form.is_valid():
             return render(
                 request,
@@ -236,7 +236,7 @@ class InstructorLessonEditView(InstructorRequiredMixin, View):
         return render(
             request,
             self.template_name,
-            {"form": LessonForm(instance=lesson), "course": course, "lesson": lesson},
+            {"form": LessonForm(instance=lesson, course=course), "course": course, "lesson": lesson},
         )
 
     def post(self, request, pk):
@@ -249,7 +249,7 @@ class InstructorLessonEditView(InstructorRequiredMixin, View):
             messages.success(request, "The lesson was deleted.")
             return redirect("instructor_course_edit", pk=course.pk)
 
-        form = LessonForm(request.POST, instance=lesson)
+        form = LessonForm(request.POST, instance=lesson, course=course)
         if not form.is_valid():
             return render(
                 request,

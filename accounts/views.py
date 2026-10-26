@@ -221,11 +221,15 @@ class LoginView(View):
                 request.session.pop("pending_user_id", None)
                 request.session.pop("pending_user_role", None)
                 login(request, user)
-                # Role-aware redirect: instructors/admins go to their dashboard;
-                # students honour a safe ?next, otherwise their dashboard.
-                if user.is_instructor or user.is_admin:
-                    return redirect("instructor_dashboard")
                 next_url = request.POST.get("next") or request.GET.get("next")
+                if user.is_instructor or user.is_admin:
+                    if not next_url or not url_has_allowed_host_and_scheme(
+                        next_url,
+                        allowed_hosts={request.get_host()},
+                        require_https=request.is_secure(),
+                    ):
+                        next_url = "instructor_dashboard"
+                    return redirect(next_url)
                 if not next_url or not url_has_allowed_host_and_scheme(
                     next_url,
                     allowed_hosts={request.get_host()},
@@ -657,6 +661,7 @@ class InstructorDashboardView(InstructorRequiredMixin, TemplateView):
         context["student_count"] = sum(
             course.enrollments.count() for course in courses
         )
+        context["draft_courses"] = [c for c in courses if not c.is_published]
         return context
 
 
