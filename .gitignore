@@ -6,3 +6,7 @@ staticfiles/
 node_modules/
 *.log
 static/css/output.css
+tailwindcss
+media/
+*.sqlite3
+.coverage

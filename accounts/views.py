@@ -27,6 +27,8 @@ from allauth.account.models import EmailAddress
 from .models import EmailVerification, InstructorDocument, Profile
 from .permissions import InstructorRequiredMixin
 
+from courses.models import Course
+
 User = get_user_model()
 
 OTP_LIFETIME_MINUTES = 5
@@ -401,10 +403,33 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     template_name = "accounts/dashboard.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        # The student dashboard is for students only; instructors/admins
+        # have their own dashboard and were previously shown an empty
+        # student page here.
+        if request.user.is_authenticated and not request.user.is_student:
+            return redirect("instructor_dashboard")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
+        from django.db.models import Count, Prefetch
+
         context = super().get_context_data(**kwargs)
+        # Annotate the prefetched course so the template can use
+        # enrollment.course.lesson_count instead of .lessons.count()
+        # (one query per row); template now uses the annotated field.
         context["enrollments"] = (
-            self.request.user.enrollments.select_related("course").all()
+            self.request.user.enrollments.prefetch_related(
+                Prefetch(
+                    "course",
+                    queryset=Course.objects.annotate(
+                        lesson_count=Count("lessons", distinct=True),
+                        enrollment_count=Count(
+                            "enrollments", distinct=True
+                        ),
+                    ),
+                )
+            ).all()
         )
         return context
 
@@ -421,6 +446,16 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 
 
 def google_check(request):
+    # Diagnostics page: previously public to anyone, leaking settings,
+    # host/site details and masked OAuth client ids. Staff/superuser only.
+    from django.http import HttpResponseForbidden
+
+    if not request.user.is_authenticated or not (
+        request.user.is_staff or request.user.is_superuser
+    ):
+        return HttpResponseForbidden(
+            "Google login diagnostics are available to staff only."
+        )
 
     import os as _os
     from allauth.socialaccount.adapter import get_adapter
@@ -646,11 +681,25 @@ class InstructorDashboardView(InstructorRequiredMixin, TemplateView):
     template_name = "accounts/instructor_dashboard.html"
 
     def get_context_data(self, **kwargs):
+        from django.db.models import Count
+
         context = super().get_context_data(**kwargs)
-        courses = self.request.user.courses_taught.select_related("instructor")
+        user = self.request.user
+        # Mirror InstructorCourseListView: admins see all courses, not
+        # just the (usually empty) set they personally teach.
+        if user.is_admin or user.is_superuser:
+            qs = Course.objects.all()
+        else:
+            qs = user.courses_taught.all()
+        courses = list(
+            qs.select_related("instructor").annotate(
+                lesson_count=Count("lessons", distinct=True),
+                enrollment_count=Count("enrollments", distinct=True),
+            )
+        )
         context["courses"] = courses
         context["student_count"] = sum(
-            course.enrollments.count() for course in courses
+            course.enrollment_count for course in courses
         )
         context["draft_courses"] = [c for c in courses if not c.is_published]
         return context

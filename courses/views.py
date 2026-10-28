@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import DetailView, ListView
@@ -16,7 +17,10 @@ class CourseListView(ListView):
     model = Course
     template_name = "courses/course_list.html"
     context_object_name = "courses"
-    queryset = Course.objects.filter(is_published=True)
+    queryset = Course.objects.filter(is_published=True).annotate(
+        lesson_count=Count("lessons", distinct=True),
+        enrollment_count=Count("enrollments", distinct=True),
+    )
 
 
 class CourseDetailView(DetailView):
@@ -25,6 +29,19 @@ class CourseDetailView(DetailView):
     model = Course
     template_name = "courses/course_detail.html"
     context_object_name = "course"
+
+    def get_queryset(self):
+        # Previously any course (including drafts) was reachable by id.
+        # Now: published courses for everyone, plus the requester's own
+        # managed courses; admins/superusers see all.
+        user = self.request.user
+        if user.is_authenticated and (user.is_admin or user.is_superuser):
+            return Course.objects.all()
+        if user.is_authenticated:
+            return Course.objects.filter(
+                Q(is_published=True) | Q(instructor=user)
+            )
+        return Course.objects.filter(is_published=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -72,9 +89,9 @@ class EnrollCourseView(LoginRequiredMixin, View):
             messages.info(request, f'You are already enrolled in "{course.title}".')
         return redirect("course_detail", pk=course.pk)
 
-    def get(self, request, pk):
-        return self._enroll(request, pk)
-
+    # POST only. The old GET handler let enrolment happen from a plain
+    # link/prefetch/crawler visit; enrolment is a state change and must
+    # go through the CSRF-protected form. (GET now returns 405.)
     def post(self, request, pk):
         return self._enroll(request, pk)
 
@@ -89,8 +106,13 @@ class InstructorCourseListView(InstructorRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
         if user.is_admin:
-            return Course.objects.select_related("instructor").all()
-        return Course.objects.filter(instructor=user).select_related("instructor")
+            qs = Course.objects.all()
+        else:
+            qs = Course.objects.filter(instructor=user)
+        return qs.select_related("instructor").annotate(
+            lesson_count=Count("lessons", distinct=True),
+            enrollment_count=Count("enrollments", distinct=True),
+        )
 
 
 class InstructorCourseCreateView(InstructorRequiredMixin, View):

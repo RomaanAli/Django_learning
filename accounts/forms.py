@@ -41,8 +41,10 @@ class StudentRegistrationForm(UserCreationForm):
         ]
 
     def clean_email(self):
-        email = self.cleaned_data['email'].strip()
-        if email and User.objects.filter(email__iexact=email).exists():
+        email = (self.cleaned_data.get('email') or '').strip()
+        if not email:
+            raise forms.ValidationError('Email is required.')
+        if User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError('A user with that email already exists.')
         return email
 
@@ -67,6 +69,20 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
+
+    def clean_email(self):
+        # Previously any user could save another user's email (or blank
+        # it), breaking OTP/password-reset delivery for that account.
+        email = (self.cleaned_data.get('email') or '').strip()
+        if not email:
+            raise forms.ValidationError('Email is required.')
+        if (
+            User.objects.filter(email__iexact=email)
+            .exclude(pk=self.instance.pk)
+            .exists()
+        ):
+            raise forms.ValidationError('A user with that email already exists.')
+        return email
 
 
 class ProfileForm(forms.ModelForm):

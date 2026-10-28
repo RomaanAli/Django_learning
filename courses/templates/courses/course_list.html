@@ -30,9 +30,9 @@
                             {% else %}
                                 <span class="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">Free</span>
                             {% endif %}
-                            <span class="flex items-center gap-1.5 text-sm text-forest/60">
+                            <span class="flex items-center gap-1.5 text-sm text-forest/80">
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                                {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}
+                                {{ course.lesson_count }} lesson{{ course.lesson_count|pluralize }}
                             </span>
                         </div>
                     </div>

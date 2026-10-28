@@ -36,6 +36,11 @@ class MaintenanceMiddleware:
         "/media/",
         "/accounts/login/",
         "/accounts/logout/",
+        "/accounts/google/",
+        "/accounts/register/",
+        "/accounts/verify-email/",
+        "/accounts/resend-otp/",
+        "/accounts/password/",
         "/webhooks/stripe/",
     )
 

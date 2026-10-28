@@ -13,12 +13,22 @@ load_dotenv(BASE_DIR / ".env")
 
 
 
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-@6zdb&f0f&@$7_z5faa6=4eep@_(a1!c$ylxk_$1fkgd72$$7('
-)
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '').strip()
+if not SECRET_KEY:
+    # Fail closed: the old committed fallback key meant any deployment
+    # without the env var shared one public secret. Render already sets
+    # DJANGO_SECRET_KEY via generateValue; local runs must set it too.
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY is not set. Set it in .env (local) or in "
+        "Render (service -> Environment, generateValue)."
+    )
 
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'false'
+# Old expression was inverted: DJANGO_DEBUG='False' (the default) made
+# DEBUG True. This flips prod DEBUG True -> False, which also stops
+# Django serving media in prod (correct) and unmasks the W001 warning.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').strip().lower() in (
+    'true', '1', 'yes',
+)
 
 ALLOWED_HOSTS = [
     'testserver',
@@ -34,6 +44,18 @@ if render_hostname and render_hostname not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(render_hostname)
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Prod-gated HTTPS flags. Gated on actually running on Render (hostname
+# present) as well as DEBUG off, so local runs and Django's test suite
+# (which forces DEBUG=False) do not get SSL-redirect loops. HSTS preload
+# is deliberately NOT set: it is irreversible and is a separate decision.
+if not DEBUG and render_hostname:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
@@ -151,14 +173,24 @@ SMTP_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 BREVO_EMAIL_BACKEND = "core.mail_backends.BrevoAPIBackend"
 CHAIN_EMAIL_BACKEND = "core.mail_backends.FallbackEmailBackend"
 
+def _int_env(name, default):
+    raw = (os.environ.get(name) or str(default)).strip()
+    try:
+        return int(raw)
+    except ValueError:
+        raise ImproperlyConfigured(
+            f"{name} must be an integer, got {raw!r}."
+        )
+
+
 EMAIL_HOST = (os.environ.get("EMAIL_HOST") or "localhost").strip()
-EMAIL_PORT = int((os.environ.get("EMAIL_PORT") or "587").strip())
+EMAIL_PORT = _int_env("EMAIL_PORT", 587)
 EMAIL_HOST_USER = (os.environ.get("EMAIL_HOST_USER") or "").strip()
 EMAIL_HOST_PASSWORD = (os.environ.get("EMAIL_HOST_PASSWORD") or "").strip()
 EMAIL_USE_TLS = (
     (os.environ.get("EMAIL_USE_TLS") or "true").strip().lower() == "true"
 )
-EMAIL_TIMEOUT = int((os.environ.get("EMAIL_TIMEOUT") or "15").strip())
+EMAIL_TIMEOUT = _int_env("EMAIL_TIMEOUT", 15)
 DEFAULT_FROM_EMAIL = (
     (os.environ.get("DEFAULT_FROM_EMAIL") or "").strip()
     or EMAIL_HOST_USER
@@ -203,7 +235,7 @@ USE_TZ = True
 
 
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [BASE_DIR / 'static']

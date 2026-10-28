@@ -34,6 +34,16 @@
     });
   });
 
+  // ---------- Dismissible messages (auth pages) ----------
+  // Must run before the role-toggle early return below, so login
+  // pages (which have no role toggle) still get a working close button.
+  document.querySelectorAll('[data-message-close]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = btn.closest('.alert');
+      if (el) el.remove();
+    });
+  });
+
   // ---------- Role toggle (register page) ----------
   var toggle = document.querySelector('[data-role-toggle]');
   if (!toggle) return;

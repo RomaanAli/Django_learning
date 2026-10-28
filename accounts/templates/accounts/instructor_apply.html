@@ -21,12 +21,12 @@
         <form class="space-y-4" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
-            <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">
+            <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">
                 {% if document %}Replace document{% else %}Submit application{% endif %}
             </button>
         </form>
 
-        <p class="mt-6 border-t border-linen pt-4 text-sm text-forest/70"><a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'dashboard' %}">Back to dashboard</a></p>
+        <p class="mt-6 border-t border-linen pt-4 text-sm text-forest/70"><a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% if user.is_instructor or user.is_admin %}{% url 'instructor_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}">Back to dashboard</a></p>
     </div>
 </div>
 {% endblock %}

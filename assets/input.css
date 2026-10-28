@@ -94,10 +94,32 @@
 }
 
 .alert {
-  background: rgba(255, 255, 255, 0.65) !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* Message tints (same colours as the old .form-panel/.alert rules in
+   style.css). These sit after .alert/.glass so the tint wins for
+   background/border while the glass blur/shadow still apply. */
+.alert-success {
+  background: #e9f1ec;
+  border: 1px solid #c5dbcd;
+  color: #2f5f43;
+}
+.alert-error {
+  background: #f6e9e9;
+  border: 1px solid #e7cccc;
+  color: #933636;
+}
+.alert-info {
+  background: #e8e1d3;
+  border: 1px solid #d9cfbb;
+  color: #45604f;
+}
+.alert-warning {
+  background: #f8f0e2;
+  border: 1px solid #e9d5b4;
+  color: #a66f24;
 }
 
 .form-control,
@@ -129,6 +151,28 @@ select:focus {
   outline: none !important;
   border-color: #203d32 !important;
   box-shadow: 0 0 0 2px rgba(32, 61, 50, 0.2) !important;
+}
+
+/* Django {{ form.as_p }} errors/help, unscoped (no .form-panel needed). */
+.errorlist {
+  color: #933636;
+  background: #f6e9e9;
+  border: 1px solid #e7cccc;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  list-style: none;
+}
+.errorlist:empty {
+  display: none;
+}
+.helptext {
+  font-size: 0.85rem;
+  color: #6b756f;
+  margin: 0.3rem 0 0;
+  display: block;
 }
 
 input.error,
@@ -179,20 +223,32 @@ select.error {
   opacity: 0;
 }
 
-.role-btn:has(input:checked) {
+.role-toggle label.role-btn:has(input:checked) {
   background: #203d32;
   color: #ffffff;
   box-shadow: 0 4px 16px rgba(24, 42, 34, 0.25);
 }
 
-.role-btn:has(input:checked) .role-badge {
+.role-toggle label.role-btn:has(input:checked) .role-badge {
   opacity: 1;
+}
+
+.role-toggle label.role-btn:hover {
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .role-btn:focus-within {
   box-shadow: 0 0 0 3px rgba(32, 61, 50, 0.25);
 }
 
-.role-btn:has(input:checked):focus-within {
+.role-toggle label.role-btn:has(input:checked):focus-within {
   box-shadow: 0 4px 16px rgba(24, 42, 34, 0.25), 0 0 0 3px rgba(32, 61, 50, 0.25);
+}
+
+
+/* Primary-nav links carry no class when inactive, so give them a
+   visible focus ring via CSS (forest navbar -> beige ring). */
+.nav-links a:focus-visible {
+  outline: 2px solid #f7f3ea;
+  outline-offset: 2px;
 }

@@ -1,6 +1,7 @@
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 
@@ -43,7 +44,19 @@ class CourseListCreateView(generics.ListCreateAPIView):
         qs = Course.objects.filter(is_published=True)
         if user.is_authenticated:
             qs = qs | Course.objects.filter(instructor=user)
-        return qs.distinct().select_related("instructor")
+        return (
+            qs.distinct()
+            .select_related("instructor")
+            .annotate(
+                lesson_count=Count("lessons", distinct=True),
+                enrollment_count=Count("enrollments", distinct=True),
+            )
+        )
+
+    def perform_create(self, serializer):
+        # The serializer's instructor field is read-only, so the view must
+        # set ownership explicitly — otherwise creation failed / had no owner.
+        serializer.save(instructor=self.request.user)
 
 
 class CourseDetailView(generics.RetrieveUpdateAPIView):
@@ -85,10 +98,14 @@ class InstructorCourseListView(generics.ListAPIView):
         return [IsInstructor()]
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_admin:
-            return Course.objects.select_related("instructor").all()
-        return Course.objects.filter(instructor=user).select_related("instructor")
+        if self.request.user.is_admin:
+            qs = Course.objects.all()
+        else:
+            qs = Course.objects.filter(instructor=self.request.user)
+        return qs.select_related("instructor").annotate(
+            lesson_count=Count("lessons", distinct=True),
+            enrollment_count=Count("enrollments", distinct=True),
+        )
 
 
 class LessonListCreateView(generics.ListCreateAPIView):
@@ -157,6 +174,25 @@ class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["course_pk"] = self.kwargs["course_pk"]
+        return context
+
+    def retrieve(self, request, *args, **kwargs):
+        # Mirror list(): a lesson is visible only to an enrolled student
+        # or the course owner/admin. Previously any authenticated user
+        # could fetch a lesson by id, bypassing enrolment entirely.
+        course = get_object_or_404(Course, pk=self.kwargs["course_pk"])
+        if not (
+            course.is_managed_by(request.user)
+            or Enrollment.objects.filter(
+                student=request.user, course=course
+            ).exists()
+        ):
+            return Response(
+                {"detail": "Enroll to view lessons"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().retrieve(request, *args, **kwargs)
+
 
 class EnrollmentListCreateView(generics.ListCreateAPIView):
     """List the requesting user's enrollments or create a new one.
@@ -181,6 +217,9 @@ class EnrollmentListCreateView(generics.ListCreateAPIView):
         )
 
     def perform_create(self, serializer):
+        # Mirror the web flow: instructors/admins cannot enrol in courses.
+        if not self.request.user.is_student:
+            raise PermissionDenied("Instructors cannot enroll in courses.")
         serializer.save(student=self.request.user)
 
 

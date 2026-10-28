@@ -40,11 +40,11 @@
 </div>
 
 <p class="muted auth-help">
-  Need to verify your email? <a class="font-medium text-forest hover:text-bronze transition-colors" href="{% url 'resend_otp' %}">Resend code</a>
+  Need to verify your email? <a class="font-medium text-forest hover:text-bronze transition-colors rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'resend_otp' %}">Resend code</a>
 </p>
 {% endblock %}
 
 {% block footer %}
-<p>Don't have an account? <a class="font-medium text-forest hover:text-bronze transition-colors" href="{% url 'register' %}">Register here</a></p>
-<p><a class="font-medium text-forest hover:text-bronze transition-colors" href="{% url 'account_reset_password' %}">Forgot password?</a></p>
+<p>Don't have an account? <a class="font-medium text-forest hover:text-bronze transition-colors rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'register' %}">Register here</a></p>
+<p><a class="font-medium text-forest hover:text-bronze transition-colors rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'account_reset_password' %}">Forgot password?</a></p>
 {% endblock %}

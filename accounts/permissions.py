@@ -25,6 +25,12 @@ class RoleRequiredMixin(LoginRequiredMixin):
         user = self.request.user
         if not user.is_authenticated:
             return False
+        # Inactive (e.g. unverified) accounts must not pass a role check
+        # even via force-login style sessions. No existing test relies on
+        # an inactive user passing (checked: all force_login users in the
+        # test suite are active).
+        if not user.is_active:
+            return False
         if user.is_superuser:
             return True
         return user.role in self.get_allowed_roles()

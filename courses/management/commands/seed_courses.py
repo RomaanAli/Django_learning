@@ -933,7 +933,7 @@ class Command(BaseCommand):
 
         from django.contrib.auth import get_user_model
         User = get_user_model()
-        instructor, _ = User.objects.get_or_create(
+        instructor, instructor_created = User.objects.get_or_create(
             username="demo_instructor",
             defaults={
                 "email": "demo_instructor@example.com",
@@ -944,7 +944,11 @@ class Command(BaseCommand):
         if not instructor.is_active:
             instructor.is_active = True
             instructor.save(update_fields=["is_active"])
-        if not instructor.check_password("DemoPass123!"):
+        # NEVER reset an existing user's password: seed_courses runs on
+        # every Render deploy, so the old check_password block silently
+        # reverted any password rotation on the prod demo account.
+        # Only set a password when the demo user is created here.
+        if instructor_created:
             instructor.set_password("DemoPass123!")
             instructor.save(update_fields=["password"])
 

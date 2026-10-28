@@ -285,10 +285,23 @@ class ExistingActiveUserTests(TestCase):
 class GoogleLoginDiagnosticsTests(TestCase):
     """/accounts/google-check/ must show the exact redirect_uri(s) that have
     to be registered in the Google Cloud Console plus the fix checklist for
-    Google's "Access blocked" error page."""
+    Google's "Access blocked" error page. The page is now staff-only."""
+
+    def setUp(self):
+        self.staff = User.objects.create_user(
+            username="staff1",
+            email="staff1@example.com",
+            password=PASSWORD,
+            is_staff=True,
+        )
 
     def _get(self, host="localhost:8000"):
+        self.client.force_login(self.staff)
         return self.client.get(reverse("google_check"), SERVER_NAME=host)
+
+    def test_anonymous_is_forbidden(self):
+        response = self.client.get(reverse("google_check"))
+        self.assertEqual(response.status_code, 403)
 
     def test_page_lists_both_loopback_redirect_uris(self):
         response = self._get()

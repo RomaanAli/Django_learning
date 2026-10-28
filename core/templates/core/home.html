@@ -9,7 +9,7 @@
 
     <section class="grid gap-10 py-10 lg:grid-cols-2 lg:items-center lg:py-14">
         <div class="min-w-0">
-            <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-bronze">E-Learning Platform</span>
+            <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">E-Learning Platform</span>
             <h1 class="mt-5 text-4xl font-extrabold leading-tight text-forest sm:text-5xl">Learn programming skills that <span class="underline decoration-bronze decoration-4 underline-offset-4">move you forward</span></h1>
             <p class="mt-5 text-lg leading-relaxed text-forest/70">
                 Hi {{ name }}, welcome to E-Learning &mdash; practical courses in
@@ -17,21 +17,21 @@
                 follow at your own pace, on any device.
             </p>
             <div class="mt-7 flex flex-wrap gap-3">
-                <a class="inline-flex items-center justify-center rounded-xl bg-forest px-6 py-3 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_list' %}">Explore Courses</a>
+                <a class="inline-flex items-center justify-center rounded-xl bg-forest px-6 py-3 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_list' %}">Explore Courses</a>
                 <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-6 py-3 font-semibold text-forest shadow-sm backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'about' %}">Learn more</a>
             </div>
-            <div class="mt-8 flex divide-x divide-linen border-t border-linen pt-6">
-                <div class="pr-6">
+            <div class="mt-8 flex flex-wrap divide-x divide-linen border-t border-linen pt-6">
+                <div class="pr-4 sm:pr-6">
                     <div class="text-2xl font-bold text-forest">{{ stats.courses }}</div>
-                    <div class="text-sm text-forest/60">Published courses</div>
+                    <div class="text-sm text-forest/80">Published courses</div>
                 </div>
-                <div class="px-6">
+                <div class="px-4 sm:px-6">
                     <div class="text-2xl font-bold text-forest">{{ stats.lessons }}</div>
-                    <div class="text-sm text-forest/60">Lessons inside</div>
+                    <div class="text-sm text-forest/80">Lessons inside</div>
                 </div>
-                <div class="pl-6">
+                <div class="pl-4 sm:pl-6">
                     <div class="text-2xl font-bold text-forest">{{ stats.enrollments }}</div>
-                    <div class="text-sm text-forest/60">Student enrollments</div>
+                    <div class="text-sm text-forest/80">Student enrollments</div>
                 </div>
             </div>
         </div>
@@ -40,7 +40,7 @@
             <div class="glass rounded-3xl p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-4">
                     <span class="font-semibold text-forest">Featured courses</span>
-                    <span class="text-sm text-forest/60">{{ stats.courses }} published</span>
+                    <span class="text-sm text-forest/80">{{ stats.courses }} published</span>
                 </div>
                 <div class="mt-4 h-2 overflow-hidden rounded-full bg-linen"><span class="block h-full w-2/3 rounded-full bg-moss"></span></div>
                 <div class="mt-5 space-y-3">
@@ -51,7 +51,7 @@
                             </span>
                             <div class="min-w-0 flex-1">
                                 <div class="truncate font-semibold text-forest">{{ course.title }}</div>
-                                <div class="text-sm text-forest/60">{{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</div>
+                                <div class="text-sm text-forest/80">{{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</div>
                             </div>
                             {% if course.price %}
                                 <span class="shrink-0 rounded-full border border-linen bg-beige px-3 py-1 text-sm font-semibold text-forest">${{ course.price }}</span>
@@ -66,7 +66,7 @@
                             </span>
                             <div class="min-w-0 flex-1">
                                 <div class="truncate font-semibold text-forest">New courses are on the way</div>
-                                <div class="text-sm text-forest/60">Check back soon</div>
+                                <div class="text-sm text-forest/80">Check back soon</div>
                             </div>
                         </div>
                     {% endfor %}
@@ -76,7 +76,7 @@
     </section>
 
     <section class="py-12 text-center">
-        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-bronze">What you can learn</span>
+        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">What you can learn</span>
         <h2 class="mt-4 text-3xl font-bold text-forest">In-demand topics, taught hands-on</h2>
         <p class="mx-auto mt-3 max-w-xl text-forest/70">Pick a subject and go from fundamentals to building real projects.</p>
         <div class="mt-6 flex flex-wrap justify-center gap-2">
@@ -88,7 +88,7 @@
     </section>
 
     <section class="py-12">
-        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-bronze">Featured</span>
+        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">Featured</span>
         <h2 class="mt-4 text-3xl font-bold text-forest">Start with one of these courses</h2>
         <p class="mt-3 text-forest/70">Fresh from the catalog &mdash; every course includes a full lesson list.</p>
 
@@ -97,7 +97,7 @@
                 {% for course in featured %}
                     <a class="group flex flex-col overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-sm backdrop-blur transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">
                         <div class="dot-pattern relative bg-gradient-to-br from-forest via-moss to-bronze px-6 py-10">
-                            <span class="relative inline-flex rounded-full border border-white/40 bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur">Featured</span>
+                            <span class="relative inline-flex rounded-full border border-white/40 bg-forest/40 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur">Featured</span>
                             <span class="relative mt-6 block text-5xl font-extrabold text-white" aria-hidden="true">{{ course.title|slice:":1"|upper }}</span>
                         </div>
                         <div class="flex flex-1 flex-col p-6">
@@ -109,7 +109,7 @@
                                 {% else %}
                                     <span class="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">Free</span>
                                 {% endif %}
-                                <span class="flex items-center gap-1.5 text-sm text-forest/60">
+                                <span class="flex items-center gap-1.5 text-sm text-forest/80">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                                     {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}
                                 </span>
@@ -130,7 +130,7 @@
     </section>
 
     <section class="py-12 text-center">
-        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-bronze">Why learn with us</span>
+        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">Why learn with us</span>
         <h2 class="mt-4 text-3xl font-bold text-forest">Built for focused, self-paced learning</h2>
         <p class="mx-auto mt-3 max-w-xl text-forest/70">Everything you need to go from first lesson to finished project.</p>
         <div class="mt-8 grid gap-6 text-left sm:grid-cols-2 lg:grid-cols-3">
@@ -159,7 +159,7 @@
     </section>
 
     <section class="py-12 text-center">
-        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-bronze">How it works</span>
+        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">How it works</span>
         <h2 class="mt-4 text-3xl font-bold text-forest">Three steps to start learning</h2>
         <p class="mx-auto mt-3 max-w-xl text-forest/70">From signing up to your first completed lesson in minutes.</p>
         <div class="mt-8 grid gap-6 text-left sm:grid-cols-2 lg:grid-cols-3">
@@ -196,7 +196,7 @@
                 </p>
                 <div class="mt-7 flex flex-wrap justify-center gap-3">
                     {% if user.is_authenticated %}
-                        <a class="inline-flex items-center justify-center rounded-xl bg-beige px-5 py-2.5 font-semibold text-forest shadow-sm transition duration-200 hover:-translate-y-px hover:bg-white hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-beige" href="{% url 'dashboard' %}">Go to dashboard</a>
+                        <a class="inline-flex items-center justify-center rounded-xl bg-beige px-5 py-2.5 font-semibold text-forest shadow-sm transition duration-200 hover:-translate-y-px hover:bg-white hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-beige" href="{% if user.is_instructor or user.is_admin %}{% url 'instructor_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}">Go to dashboard</a>
                         <a class="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 font-semibold text-beige backdrop-blur transition duration-200 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-beige" href="{% url 'course_list' %}">Browse courses</a>
                     {% else %}
                         <a class="inline-flex items-center justify-center rounded-xl bg-beige px-5 py-2.5 font-semibold text-forest shadow-sm transition duration-200 hover:-translate-y-px hover:bg-white hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-beige" href="{% url 'register' %}">Create a free account</a>

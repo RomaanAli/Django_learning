@@ -16,13 +16,13 @@
 
 {% block role_toggle %}
 <div class="role-toggle bg-linen/60 rounded-xl shadow-sm" role="radiogroup" aria-label="Account type" data-role-toggle>
-  <label class="role-btn rounded-lg hover:bg-white/60 transition-colors" data-role="student">
+  <label class="role-btn rounded-lg transition-colors" data-role="student">
     <input type="radio" name="role" value="student" {% if selected_role == 'student' %}checked{% endif %}>
     <span class="role-icon" aria-hidden="true">🎓</span>
     <span class="role-label">Student</span>
     <span class="role-badge">Browse &amp; enroll</span>
   </label>
-  <label class="role-btn rounded-lg hover:bg-white/60 transition-colors" data-role="instructor">
+  <label class="role-btn rounded-lg transition-colors" data-role="instructor">
     <input type="radio" name="role" value="instructor" {% if selected_role == 'instructor' %}checked{% endif %}>
     <span class="role-icon" aria-hidden="true">🧑‍🏫</span>
     <span class="role-label">Instructor</span>
@@ -98,5 +98,5 @@
 {% endblock %}
 
 {% block footer %}
-<p>Already have an account? <a class="font-medium text-forest hover:text-bronze transition-colors" href="{% url 'login' %}">Sign in</a></p>
+<p>Already have an account? <a class="font-medium text-forest hover:text-bronze transition-colors rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'login' %}">Sign in</a></p>
 {% endblock %}

@@ -3,7 +3,7 @@
 {% block title %}{{ course.title }} | E-Learning{% endblock %}
 
 {% block content %}
-    <nav class="flex flex-wrap items-center gap-2 py-6 text-sm text-forest/60" aria-label="Breadcrumb">
+    <nav class="flex flex-wrap items-center gap-2 py-6 text-sm text-forest/80" aria-label="Breadcrumb">
         <a class="transition duration-200 hover:text-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'home' %}">Home</a>
         <span aria-hidden="true">/</span>
         <a class="transition duration-200 hover:text-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_list' %}">Courses</a>
@@ -37,19 +37,19 @@
                 {% elif is_instructor %}
                     <p class="text-forest/70">Instructors cannot enroll in or purchase courses.</p>
                 {% elif course.price > 0 %}
-                    <a class="inline-flex items-center justify-center rounded-xl bg-forest px-6 py-3 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'payments:confirm' course.pk %}">
+                    <a class="inline-flex items-center justify-center rounded-xl bg-forest px-6 py-3 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'payments:confirm' course.pk %}">
                         Buy this course &mdash; ${{ course.price }}
                     </a>
                 {% else %}
                     <form method="post" action="{% url 'enroll_course' course.pk %}">
                         {% csrf_token %}
-                        <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">Enroll for free</button>
+                        <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">Enroll for free</button>
                     </form>
                 {% endif %}
             {% else %}
                 <p class="text-forest/70">
                     <a class="font-semibold text-forest underline decoration-bronze underline-offset-2 transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'login' %}">Login</a> or
-                    <a class="font-semibold text-forest underline decoration-bronze underline-offset-2 transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'register' %}">register</a> to buy this course
+                    <a class="font-semibold text-forest underline decoration-bronze underline-offset-2 transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'register' %}">register</a> {% if course.price %}to buy this course{% else %}to enroll for free{% endif %}
                     and view its lessons.
                 </p>
             {% endif %}

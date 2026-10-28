@@ -23,8 +23,8 @@
         <form class="space-y-4" method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <div class="sticky bottom-0 flex flex-wrap gap-3 border-t border-linen bg-white/80 pt-4 backdrop-blur">
-                <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">Save</button>
+            <div class="flex flex-wrap gap-3 border-t border-linen bg-white/80 pt-4 backdrop-blur">
+                <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">Save</button>
                 <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_list' %}">Cancel</a>
             </div>
         </form>
@@ -34,7 +34,7 @@
         <div class="glass mx-auto w-full max-w-[720px] rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-xl font-bold text-forest">Lessons</h2>
-                <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_lesson_create' course.pk %}">Add lesson</a>
+                <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_lesson_create' course.pk %}">Add lesson</a>
             </div>
 
             {% if course.lessons.all %}
@@ -52,7 +52,7 @@
             {% else %}
                 <div class="mt-6 rounded-3xl border border-linen bg-beige/70 p-8 text-center">
                     <p class="font-semibold text-forest">This course has no lessons yet.</p>
-                    <a class="mt-4 inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_lesson_create' course.pk %}">Add lesson</a>
+                    <a class="mt-4 inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_lesson_create' course.pk %}">Add lesson</a>
                 </div>
             {% endif %}
         </div>
@@ -66,7 +66,7 @@
             {% endif %}
             <form class="mt-4" method="post" action="{% url 'instructor_course_publish' course.pk %}">
                 {% csrf_token %}
-                <button class="{% if course.is_published %}inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest{% else %}inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest{% endif %}" type="submit">
+                <button class="{% if course.is_published %}inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest{% else %}inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest{% endif %}" type="submit">
                     {% if course.is_published %}Unpublish{% else %}Publish{% endif %}
                 </button>
             </form>

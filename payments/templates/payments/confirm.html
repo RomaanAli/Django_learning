@@ -16,7 +16,7 @@
         <div class="glass mx-auto w-full max-w-2xl rounded-3xl border border-white/60 bg-white/70 p-6 text-center shadow-sm backdrop-blur sm:p-8">
             <p class="text-lg font-semibold text-forest">&#10003; You are already enrolled in <strong>{{ course.title }}</strong>.</p>
             <p class="mt-6">
-                <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">Go to the course</a>
+                <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">Go to the course</a>
             </p>
         </div>
     {% elif not stripe_ready %}
@@ -55,11 +55,11 @@
         <div class="mx-auto flex w-full max-w-2xl flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <form method="post" action="{% url 'payments:checkout' course.pk %}">
                 {% csrf_token %}
-                <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">
+                <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">
                     Continue to payment &rarr;
                 </button>
             </form>
-            <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">Cancel</a>
+            <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">Back to course</a>
         </div>
     {% endif %}
 </div>

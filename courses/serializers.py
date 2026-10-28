@@ -46,6 +46,12 @@ class CourseSerializer(serializers.ModelSerializer):
         ]
 
     def get_lesson_count(self, obj):
+        # Prefer the annotated count (see API list querysets) so a list
+        # response does not issue one query per course; fall back to the
+        # relation count for single objects without the annotation.
+        annotated = getattr(obj, "lesson_count", None)
+        if annotated is not None:
+            return annotated
         return obj.lessons.count()
 
     def validate_price(self, value):
@@ -108,21 +114,28 @@ class EnrollmentSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         """Paid courses are never created via the API.
 
-        The view only sends course and student, so validate against attrs
-        after the course has been resolved.
+        The ``course`` field uses ``source="course_id"``, so the resolved
+        Course instance arrives under the ``course_id`` key in validated
+        data — the old ``attrs.get("course")`` lookup was always None and
+        the paid-course check never fired.
         """
-        course = attrs.get("course")
-        request = self.context.get("request")
-        if request and hasattr(request, "user") and request.user.is_authenticated:
-            if course and course.price > 0:
-                raise serializers.ValidationError(
-                    "This is a paid course — complete payment through Stripe checkout."
-                )
+        course = attrs.get("course_id") or attrs.get("course")
+        if course and course.price > 0:
+            raise serializers.ValidationError(
+                "This is a paid course — complete payment through Stripe checkout."
+            )
         return attrs
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for the public course detail view."""
+    """Serializer for the course detail view.
+
+    GET keeps the lightweight public shape, but PUT/PATCH must be able to
+    change title/description/price — the old ``read_only_fields = fields``
+    made every update a no-op. id/is_published/instructor stay read-only:
+    publishing stays web-only and ownership is set by the view, never the
+    client.
+    """
 
     instructor = InstructorMiniSerializer(read_only=True)
 
@@ -136,4 +149,13 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             "is_published",
             "instructor",
         ]
-        read_only_fields = fields
+        read_only_fields = [
+            "id",
+            "is_published",
+            "instructor",
+        ]
+
+    def validate_price(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Price must be >= 0.")
+        return value

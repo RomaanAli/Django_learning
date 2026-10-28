@@ -11,13 +11,13 @@
                 Courses you own. Drafts are visible to you only until you publish them.
             </p>
         </div>
-        <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">New course</a>
+        <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">New course</a>
     </div>
 
     <div class="glass rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="text-xl font-bold text-forest">{{ courses|length }} course{{ courses|length|pluralize }}</h2>
-            <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">New course</a>
+            <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">New course</a>
         </div>
 
         {% if courses %}
@@ -32,8 +32,8 @@
                                 {% else %}
                                     <span class="rounded-full border border-linen bg-linen/60 px-2.5 py-0.5 text-xs font-semibold text-forest/70">Draft</span>
                                 {% endif %}
-                                <span>&middot; {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</span>
-                                <span>&middot; {{ course.enrollments.count }} student{{ course.enrollments.count|pluralize }}</span>
+                                <span>&middot; {{ course.lesson_count }} lesson{{ course.lesson_count|pluralize }}</span>
+                                <span>&middot; {{ course.enrollment_count }} student{{ course.enrollment_count|pluralize }}</span>
                             </p>
                         </div>
                         <a class="inline-flex shrink-0 items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_edit' course.pk %}">Manage</a>
@@ -45,7 +45,7 @@
                 <p class="font-semibold text-forest">
                     You have no courses yet. <a class="text-bronze transition duration-200 hover:text-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">Create your first course</a>.
                 </p>
-                <a class="mt-4 inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">Create your first course</a>
+                <a class="mt-4 inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">Create your first course</a>
             </div>
         {% endif %}
     </div>
