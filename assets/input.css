@@ -2,6 +2,7 @@
 
 @theme {
   --color-forest: #203d32;
+  --color-forest-dark: #183027;
   --color-moss: #557461;
   --color-beige: #f7f3ea;
   --color-linen: #e8e1d3;
@@ -50,6 +51,11 @@
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.dot-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px);
+  background-size: 18px 18px;
 }
 
 .navbar {
@@ -134,4 +140,59 @@ select.error {
   background: #f6e9e9 !important;
   border-color: #e7cccc !important;
   color: #933636 !important;
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 20px rgba(24, 42, 34, 0.08), 0 24px 48px rgba(24, 42, 34, 0.07);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 400ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Segmented role toggle: active state driven by the checked radio itself,
+   so it works with no JavaScript and still submits the chosen value. */
+.role-btn input {
+  position: absolute;
+  opacity: 0;
+}
+
+.role-btn:has(input:checked) {
+  background: #203d32;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(24, 42, 34, 0.25);
+}
+
+.role-btn:has(input:checked) .role-badge {
+  opacity: 1;
+}
+
+.role-btn:focus-within {
+  box-shadow: 0 0 0 3px rgba(32, 61, 50, 0.25);
+}
+
+.role-btn:has(input:checked):focus-within {
+  box-shadow: 0 4px 16px rgba(24, 42, 34, 0.25), 0 0 0 3px rgba(32, 61, 50, 0.25);
 }

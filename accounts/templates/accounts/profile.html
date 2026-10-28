@@ -3,24 +3,55 @@
 {% block title %}My Profile | E-Learning{% endblock %}
 
 {% block content %}
-    <div class="page-head">
-        <h1>{{ user.first_name|default:user.username }}'s Profile</h1>
-        <p class="page-subtitle">Your account details as stored on the platform.</p>
+<div class="space-y-8">
+    <div>
+        <h1 class="text-3xl font-bold tracking-tight text-forest sm:text-4xl">{{ user.first_name|default:user.username }}'s Profile</h1>
+        <p class="mt-2 text-forest/70">Your account details as stored on the platform.</p>
     </div>
 
-    <div class="card profile-card">
-        <ul class="stats">
-            <li><strong>Username:</strong> {{ user.username }}</li>
-            <li><strong>First name:</strong> {{ user.first_name|default:"—" }}</li>
-            <li><strong>Last name:</strong> {{ user.last_name|default:"—" }}</li>
-            <li><strong>Email:</strong> {{ user.email|default:"—" }}</li>
-            <li><strong>Age:</strong> {{ profile.age|default:"—" }}</li>
-            <li><strong>Contact:</strong> {{ profile.contact|default:"—" }}</li>
-        </ul>
+    <div class="glass mx-auto w-full max-w-2xl rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
+        <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+            <span class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-forest text-3xl font-bold text-beige" aria-hidden="true">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+            <div class="min-w-0">
+                <p class="text-2xl font-bold text-forest">{{ user.first_name|default:user.username }}</p>
+                <p class="break-all text-forest/70">{{ user.email|default:"—" }}</p>
+                {% if user.role %}
+                    <span class="mt-2 inline-block rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">{{ user.role }}</span>
+                {% endif %}
+            </div>
+        </div>
 
-        <div class="form-actions">
-            <a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit Profile</a>
-            <a class="btn btn-secondary" href="{% url 'dashboard' %}">Back to Dashboard</a>
+        <dl class="mt-8 divide-y divide-linen border-y border-linen">
+            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:justify-between">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-moss">Username</dt>
+                <dd class="font-semibold text-forest">{{ user.username }}</dd>
+            </div>
+            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:justify-between">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-moss">First name</dt>
+                <dd class="font-semibold text-forest">{{ user.first_name|default:"—" }}</dd>
+            </div>
+            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:justify-between">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-moss">Last name</dt>
+                <dd class="font-semibold text-forest">{{ user.last_name|default:"—" }}</dd>
+            </div>
+            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:justify-between">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-moss">Email</dt>
+                <dd class="break-all font-semibold text-forest">{{ user.email|default:"—" }}</dd>
+            </div>
+            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:justify-between">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-moss">Age</dt>
+                <dd class="font-semibold text-forest">{{ profile.age|default:"—" }}</dd>
+            </div>
+            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:justify-between">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-moss">Contact</dt>
+                <dd class="font-semibold text-forest">{{ profile.contact|default:"—" }}</dd>
+            </div>
+        </dl>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+            <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'profile_edit' %}">Edit Profile</a>
+            <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'dashboard' %}">Back to Dashboard</a>
         </div>
     </div>
+</div>
 {% endblock %}

@@ -20,16 +20,16 @@
 {% endif %}
 
 <div class="field-group">
-  <label for="{{ form.username.id_for_label }}">Username or email</label>
+  <label class="text-forest" for="{{ form.username.id_for_label }}">Username or email</label>
   {{ form.username }}
   {% if form.username.errors %}<div class="field-error">{{ form.username.errors|join:', ' }}</div>{% endif %}
 </div>
 
 <div class="field-group">
-  <label for="{{ form.password.id_for_label }}">Password</label>
+  <label class="text-forest" for="{{ form.password.id_for_label }}">Password</label>
   <div class="password-wrap">
     <input type="password" id="{{ form.password.id_for_label }}" name="{{ form.password.name }}" autocomplete="current-password">
-    <button type="button" class="toggle-password" aria-label="Show password">
+    <button type="button" class="toggle-password text-moss hover:text-forest transition-colors focus-visible:outline-2 focus-visible:outline-forest rounded" aria-label="Show password">
                     <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
@@ -40,11 +40,11 @@
 </div>
 
 <p class="muted auth-help">
-  Need to verify your email? <a href="{% url 'resend_otp' %}">Resend code</a>
+  Need to verify your email? <a class="font-medium text-forest hover:text-bronze transition-colors" href="{% url 'resend_otp' %}">Resend code</a>
 </p>
 {% endblock %}
 
 {% block footer %}
-<p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
-<p><a href="{% url 'account_reset_password' %}">Forgot password?</a></p>
+<p>Don't have an account? <a class="font-medium text-forest hover:text-bronze transition-colors" href="{% url 'register' %}">Register here</a></p>
+<p><a class="font-medium text-forest hover:text-bronze transition-colors" href="{% url 'account_reset_password' %}">Forgot password?</a></p>
 {% endblock %}

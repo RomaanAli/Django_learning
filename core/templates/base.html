@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/output.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 <body class="bg-beige text-slate-900 font-sans antialiased min-h-screen flex flex-col">
     <div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
@@ -20,7 +20,7 @@
     </div>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <header class="navbar sticky top-0 z-40 bg-forest/85 backdrop-blur border-b border-white/10 shadow-sm">
+    <header class="navbar sticky top-0 z-40 bg-forest/85 backdrop-blur border-b border-white/10 shadow-md">
         <div class="container navbar-inner">
             <a class="brand text-beige" href="{% url 'home' %}">
                 <span class="brand-mark" aria-hidden="true">
@@ -65,7 +65,7 @@
         </div>
     </header>
 
-    <main class="container main" id="main-content">
+    <main class="container main animate-fade-up" id="main-content">
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} glass rounded-lg px-4 py-3 mb-4 border border-white/20 shadow-sm" role="alert">{{ message }}</div>
@@ -76,7 +76,7 @@
         {% endblock %}
     </main>
 
-    <footer class="footer mt-auto bg-forest text-beige py-8">
+    <footer class="footer mt-auto bg-forest text-beige py-8 border-t border-white/10">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">

@@ -3,28 +3,30 @@
 {% block title %}Become an Instructor | E-Learning{% endblock %}
 
 {% block content %}
-    <div class="page-head">
-        <h1>Become an instructor</h1>
-        <p class="page-subtitle">Upload a document that proves your expertise. An admin reviews it before you can publish courses.</p>
+<div class="space-y-8">
+    <div>
+        <h1 class="text-3xl font-bold tracking-tight text-forest sm:text-4xl">Become an instructor</h1>
+        <p class="mt-2 max-w-2xl text-forest/70">Upload a document that proves your expertise. An admin reviews it before you can publish courses.</p>
     </div>
 
-    <div class="card form-panel">
+    <div class="glass mx-auto w-full max-w-[720px] rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
         {% if document %}
-            <p class="alert alert-info">
+            <p class="mb-6 rounded-2xl border border-moss/20 bg-moss/10 px-4 py-3 text-forest">
                 Current status:
                 <strong>{{ document.get_status_display }}</strong>
                 {% if document.created_at %} &middot; uploaded {{ document.created_at|date:"M j, Y" }}{% endif %}
             </p>
         {% endif %}
 
-        <form method="post" enctype="multipart/form-data">
+        <form class="space-y-4" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
-            <button class="btn btn-primary" type="submit">
+            <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-[#183027] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">
                 {% if document %}Replace document{% else %}Submit application{% endif %}
             </button>
         </form>
 
-        <p class="form-footer"><a href="{% url 'dashboard' %}">Back to dashboard</a></p>
+        <p class="mt-6 border-t border-linen pt-4 text-sm text-forest/70"><a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'dashboard' %}">Back to dashboard</a></p>
     </div>
+</div>
 {% endblock %}
