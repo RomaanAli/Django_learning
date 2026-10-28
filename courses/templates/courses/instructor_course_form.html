@@ -5,72 +5,67 @@
 {% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <nav class="flex flex-wrap items-center gap-2 text-sm text-forest/70" aria-label="Breadcrumb">
-        <a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_dashboard' %}">Instructor dashboard</a>
-        <span aria-hidden="true">/</span>
-        <a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_list' %}">My courses</a>
-        <span aria-hidden="true">/</span>
-        <span>{% if course %}Edit{% else %}New{% endif %}</span>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'instructor_dashboard' %}">Instructor dashboard</a>
+        <span>/</span>
+        <a href="{% url 'instructor_course_list' %}">My courses</a>
+        <span>/</span>
+        <span class="current">{% if course %}Edit{% else %}New{% endif %}</span>
     </nav>
 
-    <div>
-        <h1 class="text-3xl font-bold tracking-tight text-forest sm:text-4xl">{% if course %}Edit course{% else %}Create a course{% endif %}</h1>
-        <p class="mt-2 text-forest/70">Courses start as a draft; publish it when it is ready for students.</p>
+    <div class="page-head">
+        <h1>{% if course %}Edit course{% else %}Create a course{% endif %}</h1>
+        <p class="page-subtitle">Courses start as a draft; publish it when it is ready for students.</p>
     </div>
 
-    <div class="glass mx-auto w-full max-w-[720px] rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
-        <form class="space-y-4" method="post">
+    <div class="card form-panel">
+        <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <div class="flex flex-wrap gap-3 border-t border-linen bg-white/80 pt-4 backdrop-blur">
-                <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">Save</button>
-                <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_list' %}">Cancel</a>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Save</button>
+                <a class="btn btn-secondary" href="{% url 'instructor_course_list' %}">Cancel</a>
             </div>
         </form>
     </div>
 
     {% if course %}
-        <div class="glass mx-auto w-full max-w-[720px] rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-xl font-bold text-forest">Lessons</h2>
-                <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_lesson_create' course.pk %}">Add lesson</a>
+        <div class="card">
+            <div class="card-head">
+                <h2>Lessons</h2>
+                <a class="btn btn-primary" href="{% url 'instructor_lesson_create' course.pk %}">Add lesson</a>
             </div>
 
             {% if course.lessons.all %}
-                <ul class="mt-6 divide-y divide-linen border-t border-linen">
+                <ul class="course-list">
                     {% for lesson in course.lessons.all %}
-                        <li class="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
-                            <div class="min-w-0">
-                                <a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_lesson_edit' lesson.pk %}">{{ lesson.title }}</a>
-                                <p class="mt-1 text-sm text-forest/70">Order {{ lesson.order }}</p>
+                        <li class="course-item">
+                            <div>
+                                <a class="course-title" href="{% url 'instructor_lesson_edit' lesson.pk %}">{{ lesson.title }}</a>
+                                <p class="course-meta">Order {{ lesson.order }}</p>
                             </div>
-                            <a class="inline-flex shrink-0 items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_lesson_edit' lesson.pk %}">Edit</a>
+                            <a class="btn btn-ghost" href="{% url 'instructor_lesson_edit' lesson.pk %}">Edit</a>
                         </li>
                     {% endfor %}
                 </ul>
             {% else %}
-                <div class="mt-6 rounded-3xl border border-linen bg-beige/70 p-8 text-center">
-                    <p class="font-semibold text-forest">This course has no lessons yet.</p>
-                    <a class="mt-4 inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_lesson_create' course.pk %}">Add lesson</a>
-                </div>
+                <p class="empty-state">This course has no lessons yet.</p>
             {% endif %}
         </div>
 
-        <div class="glass mx-auto w-full max-w-[720px] rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
-            <h2 class="text-xl font-bold text-forest">Visibility</h2>
+        <div class="card">
+            <h2>Visibility</h2>
             {% if course.is_published %}
-                <p class="mt-2 text-forest/70">This course is published and visible to students.</p>
+                <p class="muted">This course is published and visible to students.</p>
             {% else %}
-                <p class="mt-2 text-forest/70">This course is a draft and is not visible to students yet.</p>
+                <p class="muted">This course is a draft and is not visible to students yet.</p>
             {% endif %}
-            <form class="mt-4" method="post" action="{% url 'instructor_course_publish' course.pk %}">
+            <form method="post" action="{% url 'instructor_course_publish' course.pk %}">
                 {% csrf_token %}
-                <button class="{% if course.is_published %}inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest{% else %}inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest{% endif %}" type="submit">
+                <button class="btn {% if course.is_published %}btn-secondary{% else %}btn-primary{% endif %}" type="submit">
                     {% if course.is_published %}Unpublish{% else %}Publish{% endif %}
                 </button>
             </form>
         </div>
     {% endif %}
-</div>
 {% endblock %}

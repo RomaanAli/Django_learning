@@ -3,20 +3,16 @@
 {% block title %}Edit Profile | E-Learning{% endblock %}
 
 {% block content %}
-<div class="glass mx-auto w-full max-w-2xl rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
-    <h1 class="text-2xl font-bold tracking-tight text-forest sm:text-3xl">Edit Profile</h1>
-    <p class="mt-2 text-forest/70">Update your account details below.</p>
+    <div class="card form-panel">
+        <h1>Edit Profile</h1>
 
-    <form class="mt-6 space-y-4" method="post">
-        {% csrf_token %}
-        {{ user_form.as_p }}
-        {{ profile_form.as_p }}
-        <div class="flex flex-wrap gap-3 pt-2">
-            <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">Save changes</button>
-            <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'profile' %}">Cancel</a>
-        </div>
-    </form>
+        <form method="post">
+            {% csrf_token %}
+            {{ user_form.as_p }}
+            {{ profile_form.as_p }}
+            <button class="btn btn-primary" type="submit">Save changes</button>
+        </form>
 
-    <p class="mt-6 border-t border-linen pt-4 text-sm text-forest/70"><a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'profile' %}">Back to profile</a></p>
-</div>
+        <p class="form-footer"><a href="{% url 'profile' %}">Back to profile</a></p>
+    </div>
 {% endblock %}

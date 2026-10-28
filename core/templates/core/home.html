@@ -7,66 +7,62 @@
     {% site_stats as stats %}
     {% featured_courses 3 as featured %}
 
-    <section class="grid gap-10 py-10 lg:grid-cols-2 lg:items-center lg:py-14">
-        <div class="min-w-0">
-            <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">E-Learning Platform</span>
-            <h1 class="mt-5 text-4xl font-extrabold leading-tight text-forest sm:text-5xl">Learn programming skills that <span class="underline decoration-bronze decoration-4 underline-offset-4">move you forward</span></h1>
-            <p class="mt-5 text-lg leading-relaxed text-forest/70">
-                Hi {{ name }}, welcome to E-Learning &mdash; practical courses in
-                Python, Django, Flask and SQL with structured lessons you can
-                follow at your own pace, on any device.
-            </p>
-            <div class="mt-7 flex flex-wrap gap-3">
-                <a class="inline-flex items-center justify-center rounded-xl bg-forest px-6 py-3 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_list' %}">Explore Courses</a>
-                <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-6 py-3 font-semibold text-forest shadow-sm backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'about' %}">Learn more</a>
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-content">
+                <span class="eyebrow">E-Learning Platform</span>
+                <h1 class="hero-title">Learn programming skills that <span class="hero-em">move you forward</span></h1>
+                <p class="hero-lead">
+                    Hi {{ name }}, welcome to E-Learning &mdash; practical courses in
+                    Python, Django, Flask and SQL with structured lessons you can
+                    follow at your own pace, on any device.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary btn-lg" href="{% url 'course_list' %}">Explore Courses</a>
+                    <a class="btn btn-secondary btn-lg" href="{% url 'about' %}">Learn more</a>
+                </div>
+                <div class="hero-stats">
+                    <div>
+                        <div class="hero-stat-value">{{ stats.courses }}</div>
+                        <div class="hero-stat-label">Published courses</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-value">{{ stats.lessons }}</div>
+                        <div class="hero-stat-label">Lessons inside</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-value">{{ stats.enrollments }}</div>
+                        <div class="hero-stat-label">Student enrollments</div>
+                    </div>
+                </div>
             </div>
-            <div class="mt-8 flex flex-wrap divide-x divide-linen border-t border-linen pt-6">
-                <div class="pr-4 sm:pr-6">
-                    <div class="text-2xl font-bold text-forest">{{ stats.courses }}</div>
-                    <div class="text-sm text-forest/80">Published courses</div>
-                </div>
-                <div class="px-4 sm:px-6">
-                    <div class="text-2xl font-bold text-forest">{{ stats.lessons }}</div>
-                    <div class="text-sm text-forest/80">Lessons inside</div>
-                </div>
-                <div class="pl-4 sm:pl-6">
-                    <div class="text-2xl font-bold text-forest">{{ stats.enrollments }}</div>
-                    <div class="text-sm text-forest/80">Student enrollments</div>
-                </div>
-            </div>
-        </div>
 
-        <div class="min-w-0" aria-hidden="true">
-            <div class="glass rounded-3xl p-6 shadow-sm">
-                <div class="flex items-center justify-between gap-4">
-                    <span class="font-semibold text-forest">Featured courses</span>
-                    <span class="text-sm text-forest/80">{{ stats.courses }} published</span>
-                </div>
-                <div class="mt-4 h-2 overflow-hidden rounded-full bg-linen"><span class="block h-full w-2/3 rounded-full bg-moss"></span></div>
-                <div class="mt-5 space-y-3">
+            <div class="hero-visual" aria-hidden="true">
+                <div class="hero-panel">
+                    <div class="hero-panel-head">
+                        <span class="hero-panel-title">Featured courses</span>
+                        <span class="hero-progress-label">{{ stats.courses }} published</span>
+                    </div>
+                    <div class="hero-bar"><span></span></div>
                     {% for course in featured %}
-                        <div class="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/70 p-3 backdrop-blur">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest text-white">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <div class="hero-lesson">
+                            <span class="hero-lesson-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                             </span>
-                            <div class="min-w-0 flex-1">
-                                <div class="truncate font-semibold text-forest">{{ course.title }}</div>
-                                <div class="text-sm text-forest/80">{{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</div>
+                            <div class="hero-lesson-text">
+                                <div class="hero-lesson-name">{{ course.title }}</div>
+                                <div class="hero-lesson-meta">{{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</div>
                             </div>
-                            {% if course.price %}
-                                <span class="shrink-0 rounded-full border border-linen bg-beige px-3 py-1 text-sm font-semibold text-forest">${{ course.price }}</span>
-                            {% else %}
-                                <span class="shrink-0 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">Free</span>
-                            {% endif %}
+                            <span class="price">${{ course.price }}</span>
                         </div>
                     {% empty %}
-                        <div class="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/70 p-3 backdrop-blur">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest text-white">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        <div class="hero-lesson">
+                            <span class="hero-lesson-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                             </span>
-                            <div class="min-w-0 flex-1">
-                                <div class="truncate font-semibold text-forest">New courses are on the way</div>
-                                <div class="text-sm text-forest/80">Check back soon</div>
+                            <div class="hero-lesson-text">
+                                <div class="hero-lesson-name">New courses are on the way</div>
+                                <div class="hero-lesson-meta">Check back soon</div>
                             </div>
                         </div>
                     {% endfor %}
@@ -75,134 +71,134 @@
         </div>
     </section>
 
-    <section class="py-12 text-center">
-        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">What you can learn</span>
-        <h2 class="mt-4 text-3xl font-bold text-forest">In-demand topics, taught hands-on</h2>
-        <p class="mx-auto mt-3 max-w-xl text-forest/70">Pick a subject and go from fundamentals to building real projects.</p>
-        <div class="mt-6 flex flex-wrap justify-center gap-2">
-            <span class="rounded-full border border-linen bg-white/70 px-4 py-2 font-medium text-forest backdrop-blur">Python</span>
-            <span class="rounded-full border border-linen bg-white/70 px-4 py-2 font-medium text-forest backdrop-blur">Django</span>
-            <span class="rounded-full border border-linen bg-white/70 px-4 py-2 font-medium text-forest backdrop-blur">Flask</span>
-            <span class="rounded-full border border-linen bg-white/70 px-4 py-2 font-medium text-forest backdrop-blur">SQL</span>
+    <section class="section section-soft">
+        <div class="section-head center">
+            <span class="eyebrow">What you can learn</span>
+            <h2 class="section-title">In-demand topics, taught hands-on</h2>
+            <p class="section-subtitle">Pick a subject and go from fundamentals to building real projects.</p>
+        </div>
+        <div class="chip-list center">
+            <span class="chip">Python</span>
+            <span class="chip">Django</span>
+            <span class="chip">Flask</span>
+            <span class="chip">SQL</span>
         </div>
     </section>
 
-    <section class="py-12">
-        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">Featured</span>
-        <h2 class="mt-4 text-3xl font-bold text-forest">Start with one of these courses</h2>
-        <p class="mt-3 text-forest/70">Fresh from the catalog &mdash; every course includes a full lesson list.</p>
+    <section class="section">
+        <div class="section-head">
+            <span class="eyebrow">Featured</span>
+            <h2 class="section-title">Start with one of these courses</h2>
+            <p class="section-subtitle">Fresh from the catalog &mdash; every course includes a full lesson list.</p>
+        </div>
 
         {% if featured %}
-            <div class="mt-8 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="course-grid">
                 {% for course in featured %}
-                    <a class="group flex flex-col overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-sm backdrop-blur transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">
-                        <div class="dot-pattern relative bg-gradient-to-br from-forest via-moss to-bronze px-6 py-10">
-                            <span class="relative inline-flex rounded-full border border-white/40 bg-forest/40 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur">Featured</span>
-                            <span class="relative mt-6 block text-5xl font-extrabold text-white" aria-hidden="true">{{ course.title|slice:":1"|upper }}</span>
+                    <a class="course-card" href="{% url 'course_detail' course.pk %}">
+                        <div class="course-card-media">
+                            <span class="badge-featured">Featured</span>
+                            <span class="course-card-icon" aria-hidden="true">{{ course.title|slice:":1"|upper }}</span>
                         </div>
-                        <div class="flex flex-1 flex-col p-6">
-                            <h3 class="font-semibold text-forest">{{ course.title }}</h3>
-                            <p class="mt-2 flex-1 text-forest/70">{{ course.description|truncatewords:18 }}</p>
-                            <div class="mt-4 flex items-center justify-between gap-3">
-                                {% if course.price %}
-                                    <span class="rounded-full border border-linen bg-beige px-3 py-1 text-sm font-semibold text-forest">${{ course.price }}</span>
-                                {% else %}
-                                    <span class="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">Free</span>
-                                {% endif %}
-                                <span class="flex items-center gap-1.5 text-sm text-forest/80">
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        <div class="course-card-body">
+                            <h3 class="course-card-title">{{ course.title }}</h3>
+                            <p class="course-card-desc">{{ course.description|truncatewords:18 }}</p>
+                            <div class="course-card-footer">
+                                <span class="price">${{ course.price }}</span>
+                                <span class="lesson-count">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                                     {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}
                                 </span>
                             </div>
                         </div>
-                        <span class="border-t border-linen px-6 py-4 font-semibold text-forest transition duration-200 group-hover:text-bronze">View course &rarr;</span>
+                        <span class="course-card-cta">View course &rarr;</span>
                     </a>
                 {% endfor %}
             </div>
-            <div class="mt-8 text-center">
-                <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest shadow-sm backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_list' %}">Browse all courses</a>
+            <div class="section-cta">
+                <a class="btn btn-secondary" href="{% url 'course_list' %}">Browse all courses</a>
             </div>
         {% else %}
-            <div class="glass mt-8 rounded-3xl p-6 shadow-sm">
-                <p class="text-forest/70">No courses are published yet &mdash; check back soon.</p>
+            <div class="card">
+                <p>No courses are published yet &mdash; check back soon.</p>
             </div>
         {% endif %}
     </section>
 
-    <section class="py-12 text-center">
-        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">Why learn with us</span>
-        <h2 class="mt-4 text-3xl font-bold text-forest">Built for focused, self-paced learning</h2>
-        <p class="mx-auto mt-3 max-w-xl text-forest/70">Everything you need to go from first lesson to finished project.</p>
-        <div class="mt-8 grid gap-6 text-left sm:grid-cols-2 lg:grid-cols-3">
-            <div class="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur transition duration-200 hover:-translate-y-1 hover:shadow-md">
-                <span class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-moss/10 text-moss" aria-hidden="true">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+    <section class="section section-soft">
+        <div class="section-head center">
+            <span class="eyebrow">Why learn with us</span>
+            <h2 class="section-title">Built for focused, self-paced learning</h2>
+            <p class="section-subtitle">Everything you need to go from first lesson to finished project.</p>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <span class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                 </span>
-                <h3 class="font-semibold text-forest">Structured curriculum</h3>
-                <p class="mt-2 text-forest/70">Every course is an ordered list of lessons &mdash; you always know what to learn next.</p>
+                <h3>Structured curriculum</h3>
+                <p>Every course is an ordered list of lessons &mdash; you always know what to learn next.</p>
             </div>
-            <div class="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur transition duration-200 hover:-translate-y-1 hover:shadow-md">
-                <span class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-moss/10 text-moss" aria-hidden="true">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div class="feature-card">
+                <span class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </span>
-                <h3 class="font-semibold text-forest">Learn at your own pace</h3>
-                <p class="mt-2 text-forest/70">No schedules and no deadlines &mdash; start a course today and pick it up whenever suits you.</p>
+                <h3>Learn at your own pace</h3>
+                <p>No schedules and no deadlines &mdash; start a course today and pick it up whenever suits you.</p>
             </div>
-            <div class="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur transition duration-200 hover:-translate-y-1 hover:shadow-md">
-                <span class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-moss/10 text-moss" aria-hidden="true">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div class="feature-card">
+                <span class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </span>
-                <h3 class="font-semibold text-forest">Progress you can see</h3>
-                <p class="mt-2 text-forest/70">Your dashboard keeps every enrollment in one place so your learning never gets lost.</p>
+                <h3>Progress you can see</h3>
+                <p>Your dashboard keeps every enrollment in one place so your learning never gets lost.</p>
             </div>
         </div>
     </section>
 
-    <section class="py-12 text-center">
-        <span class="inline-flex items-center rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">How it works</span>
-        <h2 class="mt-4 text-3xl font-bold text-forest">Three steps to start learning</h2>
-        <p class="mx-auto mt-3 max-w-xl text-forest/70">From signing up to your first completed lesson in minutes.</p>
-        <div class="mt-8 grid gap-6 text-left sm:grid-cols-2 lg:grid-cols-3">
-            <div class="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur">
-                <span class="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-forest font-bold text-white">1</span>
-                <h3 class="font-semibold text-forest">Create your account</h3>
-                <p class="mt-2 text-forest/70">Register for free and confirm your email so your progress can be saved.</p>
+    <section class="section">
+        <div class="section-head center">
+            <span class="eyebrow">How it works</span>
+            <h2 class="section-title">Three steps to start learning</h2>
+            <p class="section-subtitle">From signing up to your first completed lesson in minutes.</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <span class="step-num">1</span>
+                <h3>Create your account</h3>
+                <p>Register for free and confirm your email so your progress can be saved.</p>
             </div>
-            <div class="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur">
-                <span class="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-forest font-bold text-white">2</span>
-                <h3 class="font-semibold text-forest">Pick a course</h3>
-                <p class="mt-2 text-forest/70">Browse the catalog, open a course page, and enroll &mdash; free courses unlock instantly.</p>
+            <div class="step">
+                <span class="step-num">2</span>
+                <h3>Pick a course</h3>
+                <p>Browse the catalog, open a course page, and enroll &mdash; free courses unlock instantly.</p>
             </div>
-            <div class="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur">
-                <span class="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-forest font-bold text-white">3</span>
-                <h3 class="font-semibold text-forest">Learn lesson by lesson</h3>
-                <p class="mt-2 text-forest/70">Work through the lessons in order and track everything from your dashboard.</p>
+            <div class="step">
+                <span class="step-num">3</span>
+                <h3>Learn lesson by lesson</h3>
+                <p>Work through the lessons in order and track everything from your dashboard.</p>
             </div>
         </div>
     </section>
 
-    <section class="py-12">
-        <div class="relative overflow-hidden rounded-3xl bg-forest px-6 py-12 text-center shadow-sm sm:px-12">
-            <div class="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-bronze/30 blur-3xl" aria-hidden="true"></div>
-            <div class="pointer-events-none absolute -bottom-20 -right-10 h-64 w-64 rounded-full bg-moss/40 blur-3xl" aria-hidden="true"></div>
-            <div class="relative">
-                <h2 class="text-3xl font-bold text-white">{% if user.is_authenticated %}Ready for your next lesson?{% else %}Start learning today{% endif %}</h2>
-                <p class="mx-auto mt-3 max-w-xl text-beige/80">
-                    {% if user.is_authenticated %}
-                        Jump back into your dashboard and pick up exactly where you left off.
-                    {% else %}
-                        Create a free account, pick a course, and follow the lessons at your own pace.
-                    {% endif %}
-                </p>
-                <div class="mt-7 flex flex-wrap justify-center gap-3">
-                    {% if user.is_authenticated %}
-                        <a class="inline-flex items-center justify-center rounded-xl bg-beige px-5 py-2.5 font-semibold text-forest shadow-sm transition duration-200 hover:-translate-y-px hover:bg-white hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-beige" href="{% if user.is_instructor or user.is_admin %}{% url 'instructor_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}">Go to dashboard</a>
-                        <a class="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 font-semibold text-beige backdrop-blur transition duration-200 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-beige" href="{% url 'course_list' %}">Browse courses</a>
-                    {% else %}
-                        <a class="inline-flex items-center justify-center rounded-xl bg-beige px-5 py-2.5 font-semibold text-forest shadow-sm transition duration-200 hover:-translate-y-px hover:bg-white hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-beige" href="{% url 'register' %}">Create a free account</a>
-                        <a class="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 font-semibold text-beige backdrop-blur transition duration-200 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-beige" href="{% url 'course_list' %}">Browse courses</a>
-                    {% endif %}
-                </div>
+    <section class="section">
+        <div class="cta-band">
+            <h2>{% if user.is_authenticated %}Ready for your next lesson?{% else %}Start learning today{% endif %}</h2>
+            <p>
+                {% if user.is_authenticated %}
+                    Jump back into your dashboard and pick up exactly where you left off.
+                {% else %}
+                    Create a free account, pick a course, and follow the lessons at your own pace.
+                {% endif %}
+            </p>
+            <div class="cta-actions">
+                {% if user.is_authenticated %}
+                    <a class="btn btn-primary" href="{% url 'dashboard' %}">Go to dashboard</a>
+                    <a class="btn btn-secondary" href="{% url 'course_list' %}">Browse courses</a>
+                {% else %}
+                    <a class="btn btn-primary" href="{% url 'register' %}">Create a free account</a>
+                    <a class="btn btn-secondary" href="{% url 'course_list' %}">Browse courses</a>
+                {% endif %}
             </div>
         </div>
     </section>

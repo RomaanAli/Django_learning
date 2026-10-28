@@ -5,43 +5,41 @@
 {% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <nav class="flex flex-wrap items-center gap-2 text-sm text-forest/70" aria-label="Breadcrumb">
-        <a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_dashboard' %}">Instructor dashboard</a>
-        <span aria-hidden="true">/</span>
-        <a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_list' %}">My courses</a>
-        <span aria-hidden="true">/</span>
-        <a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_edit' course.pk %}">{{ course.title }}</a>
-        <span aria-hidden="true">/</span>
-        <span>{% if lesson %}Edit lesson{% else %}Add lesson{% endif %}</span>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'instructor_dashboard' %}">Instructor dashboard</a>
+        <span>/</span>
+        <a href="{% url 'instructor_course_list' %}">My courses</a>
+        <span>/</span>
+        <a href="{% url 'instructor_course_edit' course.pk %}">{{ course.title }}</a>
+        <span>/</span>
+        <span class="current">{% if lesson %}Edit lesson{% else %}Add lesson{% endif %}</span>
     </nav>
 
-    <div>
-        <h1 class="text-3xl font-bold tracking-tight text-forest sm:text-4xl">{% if lesson %}Edit lesson{% else %}Add a lesson{% endif %}</h1>
-        <p class="mt-2 text-forest/70">Lesson in "{{ course.title }}".</p>
+    <div class="page-head">
+        <h1>{% if lesson %}Edit lesson{% else %}Add a lesson{% endif %}</h1>
+        <p class="page-subtitle">Lesson in "{{ course.title }}".</p>
     </div>
 
-    <div class="glass mx-auto w-full max-w-[720px] rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
-        <form class="space-y-4" method="post">
+    <div class="card form-panel">
+        <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <div class="flex flex-wrap gap-3 border-t border-linen bg-white/80 pt-4 backdrop-blur">
-                <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">Save</button>
-                <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_edit' course.pk %}">Cancel</a>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Save</button>
+                <a class="btn btn-secondary" href="{% url 'instructor_course_edit' course.pk %}">Cancel</a>
             </div>
         </form>
     </div>
 
     {% if lesson %}
-        <div class="glass mx-auto w-full max-w-[720px] rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
-            <h2 class="text-xl font-bold text-forest">Danger zone</h2>
-            <p class="mt-2 text-forest/70">Deleting a lesson removes it for every enrolled student.</p>
-            <form class="mt-4" method="post" action="{% url 'instructor_lesson_edit' lesson.pk %}">
+        <div class="card">
+            <h2>Danger zone</h2>
+            <p class="muted">Deleting a lesson removes it for every enrolled student.</p>
+            <form method="post" action="{% url 'instructor_lesson_edit' lesson.pk %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="delete">
-                <button class="inline-flex items-center justify-center rounded-xl bg-[#b64242] px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:bg-[#933636] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b64242]" type="submit">Delete lesson</button>
+                <button class="btn btn-danger" type="submit">Delete lesson</button>
             </form>
         </div>
     {% endif %}
-</div>
 {% endblock %}

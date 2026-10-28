@@ -3,30 +3,30 @@
 {% block title %}Payment successful | E-Learning{% endblock %}
 
 {% block content %}
-<div class="glass mx-auto w-full max-w-xl rounded-3xl border border-white/60 bg-white/70 p-6 text-center shadow-sm backdrop-blur sm:p-10">
-    {% if is_enrolled %}
-        <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-moss/15 text-4xl font-bold text-moss" aria-hidden="true">&#10003;</div>
-        <h1 class="mt-6 text-3xl font-bold tracking-tight text-forest">Payment successful!</h1>
-        <p class="mt-3 text-forest/70">
-            Thank you! Your payment for <strong class="text-forest">{{ course.title }}</strong>
-            has been received and your lessons are unlocked.
-        </p>
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">Go to the course</a>
-            <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'dashboard' %}">Go to my dashboard</a>
-        </div>
-    {% else %}
-        <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-bronze/15 text-4xl font-bold text-bronze" aria-hidden="true">&#8987;</div>
-        <h1 class="mt-6 text-3xl font-bold tracking-tight text-forest">Confirming your payment&hellip;</h1>
-        <p class="mt-3 text-forest/70">
-            We could not confirm your payment for
-            <strong class="text-forest">{{ course.title }}</strong> yet. If you were charged,
-            wait a moment and check again.
-        </p>
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{{ request.get_full_path }}">Check again</a>
-            <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">Back to the course</a>
-        </div>
-    {% endif %}
-</div>
+    <div class="card payment-result-card">
+        {% if is_enrolled %}
+            <div class="payment-result-icon" aria-hidden="true">&#10003;</div>
+            <h1>Payment successful!</h1>
+            <p class="muted">
+                Thank you! Your payment for <strong>{{ course.title }}</strong>
+                has been received and your lessons are unlocked.
+            </p>
+            <div class="payment-actions">
+                <a class="btn btn-primary" href="{% url 'course_detail' course.pk %}">Go to the course</a>
+                <a class="btn btn-secondary" href="{% url 'dashboard' %}">Go to my dashboard</a>
+            </div>
+        {% else %}
+            <div class="payment-result-icon payment-warning" aria-hidden="true">&#8987;</div>
+            <h1>Confirming your payment&hellip;</h1>
+            <p class="muted">
+                We could not confirm your payment for
+                <strong>{{ course.title }}</strong> yet. If you were charged,
+                wait a moment and check again.
+            </p>
+            <div class="payment-actions">
+                <a class="btn btn-primary" href="{{ request.get_full_path }}">Check again</a>
+                <a class="btn btn-secondary" href="{% url 'course_detail' course.pk %}">Back to the course</a>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

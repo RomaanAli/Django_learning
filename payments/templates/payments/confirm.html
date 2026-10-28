@@ -3,64 +3,62 @@
 {% block title %}Checkout | E-Learning{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <div class="mx-auto w-full max-w-2xl text-center">
-        <h1 class="text-3xl font-bold tracking-tight text-forest sm:text-4xl">Secure Checkout</h1>
-        <p class="mt-2 text-forest/70">
+    <div class="page-head">
+        <h1>Secure Checkout</h1>
+        <p class="page-subtitle">
             Review your order. Payment is handled securely by Stripe — we never
             see your card details.
         </p>
     </div>
 
     {% if is_enrolled %}
-        <div class="glass mx-auto w-full max-w-2xl rounded-3xl border border-white/60 bg-white/70 p-6 text-center shadow-sm backdrop-blur sm:p-8">
-            <p class="text-lg font-semibold text-forest">&#10003; You are already enrolled in <strong>{{ course.title }}</strong>.</p>
-            <p class="mt-6">
-                <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">Go to the course</a>
+        <div class="card">
+            <p>&#10003; You are already enrolled in <strong>{{ course.title }}</strong>.</p>
+            <p>
+                <a class="btn btn-primary" href="{% url 'course_detail' course.pk %}">Go to the course</a>
             </p>
         </div>
     {% elif not stripe_ready %}
-        <div class="glass mx-auto w-full max-w-2xl rounded-3xl border border-white/60 bg-white/70 p-6 text-center shadow-sm backdrop-blur sm:p-8">
-            <p class="text-forest">Payments are not configured yet (<code class="rounded bg-beige px-1.5 py-0.5">STRIPE_SECRET_KEY</code> is missing on the server).</p>
-            <p class="mt-4"><a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">&larr; Back to the course</a></p>
+        <div class="card">
+            <p>Payments are not configured yet (<code>STRIPE_SECRET_KEY</code> is missing on the server).</p>
+            <p><a class="back-link" href="{% url 'course_detail' course.pk %}">&larr; Back to the course</a></p>
         </div>
     {% else %}
-        <div class="glass mx-auto w-full max-w-2xl rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
-            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <span class="text-xs font-semibold uppercase tracking-wider text-moss">Course</span>
-                <span class="font-semibold text-forest">{{ course.title }}</span>
+        <div class="card payment-summary">
+            <div class="payment-summary-row">
+                <span class="payment-summary-label">Course</span>
+                <span class="payment-summary-value">{{ course.title }}</span>
             </div>
-            <div class="flex flex-col gap-1 border-t border-linen py-4 sm:flex-row sm:items-center sm:justify-between">
-                <span class="text-xs font-semibold uppercase tracking-wider text-moss">Included</span>
-                <span class="font-semibold text-forest">
+            <div class="payment-summary-row">
+                <span class="payment-summary-label">Included</span>
+                <span class="payment-summary-value">
                     {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}
                 </span>
             </div>
-            <div class="flex flex-col gap-1 border-t border-linen py-4 sm:flex-row sm:items-center sm:justify-between">
-                <span class="text-xs font-semibold uppercase tracking-wider text-moss">Duration</span>
-                <span class="font-semibold text-forest">Lifetime access</span>
+            <div class="payment-summary-row">
+                <span class="payment-summary-label">Duration</span>
+                <span class="payment-summary-value">Lifetime access</span>
             </div>
-            <div class="flex flex-col gap-1 rounded-2xl bg-beige px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
-                <span class="text-xs font-semibold uppercase tracking-wider text-moss">Total due</span>
-                <span class="text-3xl font-bold text-forest">${{ course.price }}</span>
+            <div class="payment-summary-row payment-summary-total">
+                <span class="payment-summary-label">Total due</span>
+                <span class="payment-summary-value price price-lg">${{ course.price }}</span>
             </div>
         </div>
 
-        <div class="mx-auto w-full max-w-2xl rounded-2xl border border-moss/20 bg-moss/10 px-4 py-3 text-center text-sm text-forest">
-            &#128274; Card details never touch our servers — payment is handled by Stripe. Secured by <span class="font-semibold">Stripe</span> — Visa,
+        <div class="payment-secure-note">
+            &#128274; Secured by <span class="stripe-mark">Stripe</span> — Visa,
             Mastercard, Amex, PayPal and more are accepted. You will leave this
             site to complete payment and will be brought back automatically.
         </div>
 
-        <div class="mx-auto flex w-full max-w-2xl flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <div class="payment-actions">
             <form method="post" action="{% url 'payments:checkout' course.pk %}">
                 {% csrf_token %}
-                <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">
+                <button class="btn btn-primary btn-lg" type="submit">
                     Continue to payment &rarr;
                 </button>
             </form>
-            <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">Back to course</a>
+            <a class="btn btn-secondary" href="{% url 'course_detail' course.pk %}">Cancel</a>
         </div>
     {% endif %}
-</div>
 {% endblock %}

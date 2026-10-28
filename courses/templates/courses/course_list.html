@@ -3,9 +3,9 @@
 {% block title %}Courses | E-Learning{% endblock %}
 
 {% block content %}
-    <div class="py-10 lg:py-12">
-        <h1 class="text-4xl font-extrabold text-forest sm:text-5xl">Explore Courses</h1>
-        <p class="mt-4 max-w-2xl text-lg text-forest/70">
+    <div class="page-head">
+        <h1>Explore Courses</h1>
+        <p class="page-subtitle">
             Browse our collection of beginner-friendly courses and start learning
             today.
             {% if courses %}
@@ -15,35 +15,31 @@
     </div>
 
     {% if courses %}
-        <div class="grid items-stretch gap-6 pb-12 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="course-grid">
             {% for course in courses %}
-                <a class="group flex flex-col overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-sm backdrop-blur transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_detail' course.pk %}">
-                    <div class="dot-pattern relative bg-gradient-to-br from-forest via-moss to-bronze px-6 py-10">
-                        <span class="relative block text-5xl font-extrabold text-white" aria-hidden="true">{{ course.title|slice:":1"|upper }}</span>
+                <a class="course-card" href="{% url 'course_detail' course.pk %}">
+                    <div class="course-card-media">
+                        <span class="course-card-icon" aria-hidden="true">{{ course.title|slice:":1"|upper }}</span>
                     </div>
-                    <div class="flex flex-1 flex-col p-6">
-                        <h2 class="font-semibold text-forest">{{ course.title }}</h2>
-                        <p class="mt-2 flex-1 text-forest/70">{{ course.description|truncatewords:22 }}</p>
-                        <div class="mt-4 flex items-center justify-between gap-3">
-                            {% if course.price %}
-                                <span class="rounded-full border border-linen bg-beige px-3 py-1 text-sm font-semibold text-forest">${{ course.price }}</span>
-                            {% else %}
-                                <span class="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">Free</span>
-                            {% endif %}
-                            <span class="flex items-center gap-1.5 text-sm text-forest/80">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                                {{ course.lesson_count }} lesson{{ course.lesson_count|pluralize }}
+                    <div class="course-card-body">
+                        <h2 class="course-card-title">{{ course.title }}</h2>
+                        <p class="course-card-desc">{{ course.description|truncatewords:22 }}</p>
+                        <div class="course-card-footer">
+                            <span class="price">${{ course.price }}</span>
+                            <span class="lesson-count">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                                {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}
                             </span>
                         </div>
                     </div>
-                    <span class="border-t border-linen px-6 py-4 font-semibold text-forest transition duration-200 group-hover:text-bronze">View Course &rarr;</span>
+                    <span class="course-card-cta">View Course &rarr;</span>
                 </a>
             {% endfor %}
         </div>
     {% else %}
-        <div class="glass rounded-3xl p-8 text-center shadow-sm">
-            <p class="text-forest/70">No courses are available right now. Please check back later.</p>
-            <a class="mt-6 inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest shadow-sm backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'home' %}">Back to home</a>
+        <div class="card empty-state">
+            <p>No courses are available right now. Please check back later.</p>
+            <a class="btn btn-secondary" href="{% url 'home' %}">Back to home</a>
         </div>
     {% endif %}
 {% endblock %}

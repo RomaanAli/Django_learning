@@ -3,93 +3,88 @@
 {% block title %}{{ course.title }} | E-Learning{% endblock %}
 
 {% block content %}
-    <nav class="flex flex-wrap items-center gap-2 py-6 text-sm text-forest/80" aria-label="Breadcrumb">
-        <a class="transition duration-200 hover:text-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'home' %}">Home</a>
-        <span aria-hidden="true">/</span>
-        <a class="transition duration-200 hover:text-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_list' %}">Courses</a>
-        <span aria-hidden="true">/</span>
-        <span class="font-medium text-forest" aria-current="page">{{ course.title }}</span>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}">Home</a>
+        <span>/</span>
+        <a href="{% url 'course_list' %}">Courses</a>
+        <span>/</span>
+        <span class="current">{{ course.title }}</span>
     </nav>
 
-    <div class="relative overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
-        <div class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-forest via-moss to-bronze" aria-hidden="true"></div>
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <h1 class="min-w-0 break-words text-3xl font-extrabold text-forest sm:text-4xl">{{ course.title }}</h1>
-            <div class="flex shrink-0 flex-wrap items-center gap-2">
-                {% if course.price %}
-                    <span class="rounded-full border border-linen bg-beige px-4 py-1.5 text-base font-semibold text-forest">${{ course.price }}</span>
-                {% else %}
-                    <span class="rounded-full border border-emerald-100 bg-emerald-50 px-4 py-1.5 text-base font-semibold text-emerald-800">Free</span>
-                {% endif %}
+    <div class="card course-header">
+        <div class="course-header-top">
+            <h1>{{ course.title }}</h1>
+            <div class="course-badges">
+                <span class="price price-lg">${{ course.price }}</span>
                 {% if is_enrolled %}
-                    <span class="inline-flex items-center gap-1 rounded-full border border-moss/20 bg-moss/10 px-3 py-1 text-sm font-semibold text-forest">&#10003; Enrolled</span>
+                    <span class="badge-success">&#10003; Enrolled</span>
                 {% endif %}
             </div>
         </div>
-        <p class="mt-4 text-lg text-forest/70">{{ course.description }}</p>
+        <p class="muted course-description">{{ course.description }}</p>
 
-        <div class="mt-6 border-t border-linen pt-6">
+        <div class="course-header-cta">
             {% if is_enrolled %}
-                <p class="text-forest/70">You are enrolled! Your lessons are unlocked below.</p>
+                <p class="muted">You are enrolled! Your lessons are unlocked below.</p>
             {% elif user.is_authenticated %}
                 {% if can_manage %}
-                    <a class="inline-flex items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest shadow-sm backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_edit' course.pk %}">Manage this course</a>
+                    <a class="btn btn-ghost" href="{% url 'instructor_course_edit' course.pk %}">Manage this course</a>
                 {% elif is_instructor %}
-                    <p class="text-forest/70">Instructors cannot enroll in or purchase courses.</p>
+                    <p class="muted">Instructors cannot enroll in or purchase courses.</p>
                 {% elif course.price > 0 %}
-                    <a class="inline-flex items-center justify-center rounded-xl bg-forest px-6 py-3 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'payments:confirm' course.pk %}">
+                    <a class="btn btn-primary btn-lg" href="{% url 'payments:confirm' course.pk %}">
                         Buy this course &mdash; ${{ course.price }}
                     </a>
                 {% else %}
                     <form method="post" action="{% url 'enroll_course' course.pk %}">
                         {% csrf_token %}
-                        <button class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" type="submit">Enroll for free</button>
+                        <button class="btn btn-primary" type="submit">Enroll for free</button>
                     </form>
                 {% endif %}
             {% else %}
-                <p class="text-forest/70">
-                    <a class="font-semibold text-forest underline decoration-bronze underline-offset-2 transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'login' %}">Login</a> or
-                    <a class="font-semibold text-forest underline decoration-bronze underline-offset-2 transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'register' %}">register</a> {% if course.price %}to buy this course{% else %}to enroll for free{% endif %}
+                <p class="muted">
+                    <a href="{% url 'login' %}">Login</a> or
+                    <a href="{% url 'register' %}">register</a> to buy this course
                     and view its lessons.
                 </p>
             {% endif %}
         </div>
     </div>
 
-    <div class="mb-4 mt-10 flex flex-wrap items-center justify-between gap-3">
-        <h2 class="text-2xl font-bold text-forest">Lessons</h2>
-        <span class="rounded-full border border-linen bg-white/70 px-3 py-1 text-sm font-semibold text-forest backdrop-blur">{{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</span>
+    <div class="lessons-head">
+        <h2 class="section-title">Lessons</h2>
+        <span class="count-badge">{{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}</span>
     </div>
 
     {% if is_enrolled %}
         {% if course.lessons.all %}
-            <ol class="space-y-4">
+            <ol class="lesson-list">
                 {% for lesson in course.lessons.all %}
-                    <li class="glass flex gap-4 rounded-3xl p-5 shadow-sm sm:p-6">
-                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest font-bold text-white" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</span>
-                        <div class="min-w-0 flex-1">
-                            <h3 class="font-semibold text-forest">{{ lesson.title }}</h3>
+                    <li class="card lesson-item">
+                        <span class="lesson-marker" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</span>
+                        <div class="lesson-body">
+                            <h3 class="lesson-title">{{ lesson.title }}</h3>
                             {% if lesson.content %}
-                                <div class="mt-1 text-forest/70">{{ lesson.content|linebreaks }}</div>
+                                <div class="lesson-content">{{ lesson.content|linebreaks }}</div>
                             {% endif %}
                         </div>
                     </li>
                 {% endfor %}
             </ol>
         {% else %}
-            <div class="glass rounded-3xl p-6 shadow-sm">
-                <p class="text-forest/70">No lessons have been added for this course yet.</p>
+            <div class="card">
+                <p>No lessons have been added for this course yet.</p>
             </div>
         {% endif %}
     {% else %}
-        <div class="flex gap-4 rounded-3xl border border-moss/20 bg-moss/10 p-6 backdrop-blur">
-            <svg class="h-6 w-6 shrink-0 text-moss" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <p class="text-forest">
+        <div class="locked-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <p>
                 Lessons are only visible to enrolled students.
                 Enroll above to unlock them.
             </p>
         </div>
     {% endif %}
 
-    <a class="mt-8 inline-flex items-center gap-1 font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'course_list' %}">&larr; Back to all courses</a>
+    <a class="back-link" href="{% url 'course_list' %}">&larr; Back to all courses</a>
 {% endblock %}

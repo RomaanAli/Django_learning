@@ -3,68 +3,50 @@
 {% block title %}Instructor Dashboard | E-Learning{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-            <h1 class="text-3xl font-bold tracking-tight text-forest sm:text-4xl">Instructor dashboard</h1>
-            <p class="mt-2 text-forest/70">Manage the courses you teach and track your students.</p>
-        </div>
-        <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">New course</a>
+    <div class="page-head">
+        <h1>Instructor dashboard</h1>
+        <p class="page-subtitle">Manage the courses you teach and track your students.</p>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2">
-        <div class="glass rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur">
-            <div class="flex items-center gap-4">
-                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-moss/15 text-xl text-moss" aria-hidden="true">&#127891;</span>
-                <div>
-                    <span class="block text-3xl font-bold text-forest">{{ courses|length }}</span>
-                    <span class="text-xs font-semibold uppercase tracking-wider text-forest/80">Courses</span>
-                </div>
-            </div>
+    <div class="stat-row">
+        <div class="stat-card">
+            <span class="stat-value">{{ courses|length }}</span>
+            <span class="stat-label">Courses</span>
         </div>
-        <div class="glass rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur">
-            <div class="flex items-center gap-4">
-                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-moss/15 text-xl text-moss" aria-hidden="true">&#128101;</span>
-                <div>
-                    <span class="block text-3xl font-bold text-forest">{{ student_count }}</span>
-                    <span class="text-xs font-semibold uppercase tracking-wider text-forest/80">Enrolled students</span>
-                </div>
-            </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ student_count }}</span>
+            <span class="stat-label">Enrolled students</span>
         </div>
     </div>
 
-    <div class="glass rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur sm:p-8">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="text-xl font-bold text-forest">My courses</h2>
-            <a class="inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">New course</a>
+    <div class="card">
+        <div class="card-head">
+            <h2>My courses</h2>
+            <a class="btn btn-primary" href="{% url 'instructor_course_create' %}">New course</a>
         </div>
 
         {% if courses %}
-            <ul class="mt-6 divide-y divide-linen border-t border-linen">
+            <ul class="course-list">
                 {% for course in courses %}
-                    <li class="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
-                        <div class="min-w-0">
-                            <a class="font-semibold text-forest transition duration-200 hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_edit' course.pk %}">{{ course.title }}</a>
-                            <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-forest/70">
+                    <li class="course-item">
+                        <div>
+                            <a class="course-title" href="{% url 'instructor_course_edit' course.pk %}">{{ course.title }}</a>
+                            <p class="course-meta">
                                 {% if course.is_published %}
-                                    <span class="rounded-full border border-moss/20 bg-moss/10 px-2.5 py-0.5 text-xs font-semibold text-forest">Published</span>
+                                    <span class="badge badge-success">Published</span>
                                 {% else %}
-                                    <span class="rounded-full border border-linen bg-linen/60 px-2.5 py-0.5 text-xs font-semibold text-forest/70">Draft</span>
+                                    <span class="badge badge-muted">Draft</span>
                                 {% endif %}
-                                <span>&middot; {{ course.lesson_count }} lesson{{ course.lesson_count|pluralize }}</span>
-                                <span>&middot; {{ course.enrollment_count }} student{{ course.enrollment_count|pluralize }}</span>
+                                &middot; {{ course.lessons.count }} lesson{{ course.lessons.count|pluralize }}
+                                &middot; {{ course.enrollments.count }} student{{ course.enrollments.count|pluralize }}
                             </p>
                         </div>
-                        <a class="inline-flex shrink-0 items-center justify-center rounded-xl border border-forest/20 bg-white/70 px-5 py-2.5 font-semibold text-forest backdrop-blur transition duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_edit' course.pk %}">Manage</a>
+                        <a class="btn btn-ghost" href="{% url 'instructor_course_edit' course.pk %}">Manage</a>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <div class="mt-6 rounded-3xl border border-linen bg-beige/70 p-8 text-center">
-                <p class="font-semibold text-forest">You have no courses yet. Create your first one to get started.</p>
-                <a class="mt-4 inline-flex items-center justify-center rounded-xl bg-forest px-5 py-2.5 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-px hover:bg-forest-dark hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest" href="{% url 'instructor_course_create' %}">New course</a>
-            </div>
+            <p class="empty-state">You have no courses yet. Create your first one to get started.</p>
         {% endif %}
     </div>
-</div>
 {% endblock %}
