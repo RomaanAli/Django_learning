@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 path = r'd:\Grayphite\Django_learning\E_learning\settings.py'
 with open(path, 'rb') as f:
     content = f.read()

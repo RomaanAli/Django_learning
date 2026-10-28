@@ -151,17 +151,11 @@ class RegisterView(View):
             return self._render(request, form, selected_role=submitted_role)
 
         user = form.save()
-        # Persist the chosen role server-side in the session so it survives
-        # the OTP step and cannot be tampered with during verification.
         request.session["pending_user_role"] = (
             user.role
             if user.role in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR)
             else User.ROLE_STUDENT
         )
-        # Populate allauth's EmailAddress table so that password-reset
-        # lookups (and any allauth email-based flows) can find the user
-        # by email. Registration uses the custom RegisterView rather than
-        # allauth's signup flow, so setup_user_email() never runs here.
         EmailAddress.objects.create(
             user=user,
             email=user.email,
@@ -242,7 +236,6 @@ class LoginView(View):
             password = form.cleaned_data.get("password")
             user = None
             if username:
-                # Accept either a username or an email address.
                 user = User.objects.filter(username=username).first()
                 if user is None:
                     user = (
@@ -635,8 +628,6 @@ class InstructorApplyView(LoginRequiredMixin, View):
 
         document = form.save(commit=False)
         document.user = request.user
-        # Every new upload goes back to "pending" for review, and the old
-        # approval details are cleared so a re-upload is reviewed again.
         document.status = InstructorDocument.STATUS_PENDING
         document.approved_at = None
         document.approved_by = None

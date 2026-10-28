@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 path = r'd:\Grayphite\Django_learning\E_learning\settings.py'
 content = open(path, encoding='utf-8').read()
 
-# Find the ALLOWED_HOSTS block and rewrite it cleanly
 old_start = content.find('ALLOWED_HOSTS = [')
 if old_start == -1:
     print('ALLOWED_HOSTS not found')
 else:
-    # Find the matching closing bracket
     depth = 0
     old_end = None
     i = old_start

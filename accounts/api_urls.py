@@ -8,10 +8,13 @@ from rest_framework_simplejwt.views import (
 from . import api_views
 
 urlpatterns = [
-
     path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
-
-    path("me/", api_views.me, name="api_me"),
+    path(
+        "me/",
+        api_views.MeSerializerView.as_view(),
+        name="api_me",
+    ),
 ]
+

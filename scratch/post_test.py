@@ -6,7 +6,6 @@ from django.test import Client
 from django.urls import reverse
 
 c = Client()
-# Register
 resp = c.post(reverse('register'), {
     'username': 'testuser123',
     'first_name': 'Test',
@@ -17,7 +16,6 @@ resp = c.post(reverse('register'), {
     'role': 'student',
 })
 print('Register POST status:', resp.status_code, resp.url if hasattr(resp,'url') else '')
-# Check user created
 from django.contrib.auth import get_user_model
 U = get_user_model()
 u = U.objects.filter(username='testuser123').first()

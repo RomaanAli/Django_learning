@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 path = r'd:\Grayphite\Django_learning\E_learning\settings.py'
 content = open(path, encoding='utf-8').read()
 
-# Find ALLOWED_HOSTS block
 start = content.find('ALLOWED_HOSTS = [')
 if start == -1:
     print('Not found')
 else:
-    # Find end bracket
     depth = 0
     end = None
     i = start
@@ -21,7 +18,6 @@ else:
                 break
         i += 1
 
-    # Build the new block WITHOUT the broken testserver line
     new_block = """ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,.onrender.com').split(',')
@@ -31,7 +27,6 @@ else:
 
     content = content[:start] + new_block + content[end:]
 
-    # Ensure testserver is added to the list
     if "'testserver'" not in content:
         content = content.replace(
             'ALLOWED_HOSTS = [',

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from pathlib import Path
 
 path = Path(r'd:\Grayphite\Django_learning\accounts\templates\accounts\login.html')

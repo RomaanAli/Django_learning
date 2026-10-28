@@ -9,7 +9,7 @@ services:
     name: e-learning
     runtime: python
     plan: free
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    buildCommand: "pip install -r requirements.txt && mkdir -p static/css && if [ ! -f tailwindcss ]; then curl -sL --fail -o tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.7/tailwindcss-linux-x64 && chmod +x tailwindcss; fi && ./tailwindcss -i static/css/input.css -o static/css/output.css --minify && python manage.py collectstatic --noinput"
     startCommand: "python manage.py migrate && python manage.py seed_courses && gunicorn E_learning.wsgi --bind 0.0.0.0:$PORT"
     envVars:
       - key: DJANGO_SECRET_KEY

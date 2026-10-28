@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 path = r'd:\Grayphite\Django_learning\E_learning\settings.py'
@@ -28,7 +27,6 @@ if old in content:
     print('Fixed (CRLF)')
 else:
     print('Old block not found')
-    # Try with \n
     old2 = old.replace(b'\r\n', b'\n')
     if old2 in content:
         content = content.replace(old2, new.replace(b'\r\n', b'\n'))

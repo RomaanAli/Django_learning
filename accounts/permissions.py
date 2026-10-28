@@ -15,13 +15,6 @@ from django.core.exceptions import PermissionDenied
 
 
 class RoleRequiredMixin(LoginRequiredMixin):
-    """Allow the view only for the roles listed in ``allowed_roles``.
-
-    Usage::
-
-        class MyView(RoleRequiredMixin, TemplateView):
-            allowed_roles = ("instructor", "admin")
-    """
 
     allowed_roles = ()
 
@@ -37,8 +30,6 @@ class RoleRequiredMixin(LoginRequiredMixin):
         return user.role in self.get_allowed_roles()
 
     def dispatch(self, request, *args, **kwargs):
-        # ``LoginRequiredMixin.dispatch`` only checks that somebody is logged
-        # in, so the role check has to happen here.
         if request.user.is_authenticated and not self.has_permission():
             self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)

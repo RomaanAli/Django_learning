@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 path = r'd:\Grayphite\Django_learning\accounts\templates\accounts\register.html'
 content = """{% extends 'accounts/auth_base.html' %}
 

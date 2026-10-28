@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
@@ -16,9 +15,6 @@ ALLOWED_DOCUMENT_CONTENT_TYPES = (
 )
 
 
-# Valid roles a new user may self-select at registration. Admin is excluded
-# because it is reserved for staff provisioning and must never be settable
-# by a signed-up user (even via a tampered POST).
 VALID_REGISTER_ROLES = (
     (User.ROLE_STUDENT, 'Student'),
     (User.ROLE_INSTRUCTOR, 'Instructor'),

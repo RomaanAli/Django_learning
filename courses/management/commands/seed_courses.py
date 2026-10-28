@@ -958,7 +958,6 @@ class Command(BaseCommand):
                     "instructor": instructor,
                 },
             )
-            # Keep ownership in sync for courses created before this change.
             if course.instructor_id is None:
                 course.instructor = instructor
                 course.save(update_fields=["instructor"])

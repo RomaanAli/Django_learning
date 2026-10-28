@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import os
 
 path = r'd:\Grayphite\Django_learning\E_learning\settings.py'
 with open(path, 'rb') as f:
     content = f.read()
 
-# Build old block using bytes concat
 CRLF = b'\r\n'
 SSP = b"'testserver',"
 host_strip = b'host.strip()'

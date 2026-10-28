@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 path = r'd:\Grayphite\Django_learning\E_learning\settings.py'
 
 with open(path, 'rb') as f:
@@ -6,12 +5,10 @@ with open(path, 'rb') as f:
 
 CRLF = b'\r\n'
 
-# The broken block from the file
 broken = b'ALLOWED_HOSTS = [\r\n    ' + b"'testserver'," + CRLF + CRLF
 broken += CRLF + b'    for host in os.environ.get(' + b"'DJANGO_ALLOWED_HOSTS'" + b', ' + b"'localhost,127.0.0.1,.onrender.com'" + b').split(' + b"'" + b',' + b"'" + b')' + CRLF + CRLF
 broken += CRLF + b'    if host.strip()' + CRLF + b']' + CRLF
 
-# The correct block
 fixed = b'ALLOWED_HOSTS = [\r\n    ' + b"'testserver'," + CRLF
 fixed += CRLF + b'    for host in os.environ.get(' + b"'DJANGO_ALLOWED_HOSTS'" + b', ' + b"'localhost,127.0.0.1,.onrender.com'" + b').split(' + b"'" + b',' + b"'" + b')' + CRLF + CRLF
 fixed += CRLF + b'    if host.strip()' + CRLF + b']' + CRLF

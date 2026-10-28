@@ -1,6 +1,0 @@
-Creating test database for alias 'default'...
-
-Got an error creating the test database: database "test_elearning" already exists
-
-Found 52 test(s).
-Type 'yes' if you would like to try deleting the test database 'test_elearning', or 'no' to cancel: 

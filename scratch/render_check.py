@@ -13,6 +13,5 @@ print('name=role count:', html.count('name="role"'))
 print('Account type:', 'Account type' in html)
 print('role-toggle:', 'role-toggle' in html)
 print('len:', len(html))
-# save
 open('scratch/reg_rendered.html','w',encoding='utf-8').write(html)
 print('saved')

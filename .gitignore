@@ -5,3 +5,4 @@ __pycache__/
 staticfiles/
 node_modules/
 *.log
+static/css/output.css

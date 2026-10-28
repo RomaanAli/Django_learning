@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 path = r'd:\Grayphite\Django_learning\E_learning\settings.py'
 content = open(path, encoding='utf-8').read()
 new_content = content.replace(

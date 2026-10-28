@@ -255,13 +255,11 @@ class DualLoginAndPasswordResetTests(TestCase):
         from django.test import Client
         from django.core import mail as django_mail
 
-        # Clear the outbox (registration already sent an OTP email).
         django_mail.outbox.clear()
 
         c = Client()
         r = c.post("/accounts/password/reset/", {"email": "student1@example.com"})
         self.assertEqual(r.status_code, 302)
-        # One email should have been sent (the reset link, not "Unknown Account").
         self.assertEqual(len(django_mail.outbox), 1)
         self.assertNotIn("Unknown Account", django_mail.outbox[0].subject)
         self.assertIn("student1@example.com", django_mail.outbox[0].to)

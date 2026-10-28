@@ -6,7 +6,6 @@ from django.test import Client
 from django.urls import reverse
 
 c = Client()
-# Instructor registration
 resp = c.post(reverse('register'), {
     'username': 'inst123',
     'first_name': 'Inst',
@@ -22,7 +21,6 @@ U = get_user_model()
 u = U.objects.filter(username='inst123').first()
 print('Instructor user:', u is not None, getattr(u, 'role', None))
 
-# Tampered role admin should be invalid
 c2 = Client()
 resp3 = c2.post(reverse('register'), {
     'username': 'bad123',
