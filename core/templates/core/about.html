@@ -3,30 +3,33 @@
 {% block title %}About | E-Learning{% endblock %}
 
 {% block content %}
-    <section class="about-hero">
-        <span class="eyebrow">About us</span>
-        <h1>Programming education, at your own pace</h1>
-        <p class="hero-lead page-subtitle">
+    <section class="glass rounded-2xl p-6 sm:p-8 lg:p-10 text-center mb-10">
+        <span class="inline-flex items-center gap-2 rounded-full bg-white/80 border border-bronze/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest mb-3.5">
+            <span class="h-1.5 w-1.5 rounded-full bg-bronze" aria-hidden="true"></span>
+            About us
+        </span>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-forest mb-3">Programming education, at your own pace</h1>
+        <p class="text-base text-forest/80 max-w-2xl mx-auto leading-relaxed m-0">
             We are building an online e-learning platform where students can learn
             programming step by step &mdash; structured lessons, real practice, and
             no fixed schedules. This project is built with Django.
         </p>
     </section>
 
-    <section class="section">
-        <div class="editorial">
-            <div class="editorial-head">
-                <span class="eyebrow">Our mission</span>
-                <h2 class="section-title">Make quality programming education accessible</h2>
+    <section class="card p-6 sm:p-8 mb-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div class="lg:col-span-5">
+                <span class="inline-flex items-center rounded-full bg-beige border border-bronze/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest mb-2.5">Our mission</span>
+                <h2 class="text-2xl font-bold text-forest m-0">Make quality programming education accessible</h2>
             </div>
-            <div class="editorial-body">
-                <p>
+            <div class="lg:col-span-7 space-y-3 text-sm sm:text-base text-forest/80 leading-relaxed">
+                <p class="text-forest font-medium m-0">
                     Our mission is to give every student a clear path into software
                     development. Instead of scattered tutorials, learners get courses
                     that are ordered, complete, and easy to follow &mdash; so it is always
                     obvious what to learn next and how far you have come.
                 </p>
-                <p>
+                <p class="m-0">
                     The whole platform runs on Django, from the course catalog to
                     enrollment and payments, which keeps the experience fast,
                     consistent, and easy to extend with new content.
@@ -35,117 +38,123 @@
         </div>
     </section>
 
-    <section class="section section-soft">
-        <div class="section-head center">
-            <span class="eyebrow">What students can learn</span>
-            <h2 class="section-title">Skills that build on each other</h2>
-            <p class="section-subtitle">A focused catalog that grows with you from first line of code to finished project.</p>
+    <section class="glass rounded-2xl p-6 sm:p-8 mb-10">
+        <div class="max-w-xl mx-auto text-center mb-6">
+            <span class="inline-flex items-center rounded-full bg-white/80 border border-bronze/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest mb-2.5">What students can learn</span>
+            <h2 class="text-2xl font-bold text-forest mb-1.5">Skills that build on each other</h2>
+            <p class="text-sm text-forest/80 m-0">A focused catalog that grows with you from first line of code to finished project.</p>
         </div>
-        <div class="about-body">
-            <ul class="about-list">
-                <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <span><strong>Python fundamentals</strong> &mdash; the core language skills every course on the platform builds upon.</span>
-                </li>
-                <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <span><strong>Django web development</strong> &mdash; templates, views, models, and building full web applications.</span>
-                </li>
-                <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <span><strong>Flask</strong> &mdash; a lightweight alternative for smaller, quick-to-build services.</span>
-                </li>
-                <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <span><strong>SQL &amp; databases</strong> &mdash; storing, querying, and reasoning about your application's data.</span>
-                </li>
-            </ul>
-        </div>
+        <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0 m-0">
+            <li class="card p-4 flex items-start gap-3">
+                <span class="h-9 w-9 rounded-xl bg-forest/10 text-forest inline-flex items-center justify-center shrink-0 mt-0.5" aria-hidden="true">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </span>
+                <span class="text-sm text-forest/80 leading-relaxed"><strong class="text-forest font-semibold">Python fundamentals</strong> &mdash; the core language skills every course on the platform builds upon.</span>
+            </li>
+            <li class="card p-4 flex items-start gap-3">
+                <span class="h-9 w-9 rounded-xl bg-forest/10 text-forest inline-flex items-center justify-center shrink-0 mt-0.5" aria-hidden="true">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </span>
+                <span class="text-sm text-forest/80 leading-relaxed"><strong class="text-forest font-semibold">Django web development</strong> &mdash; templates, views, models, and building full web applications.</span>
+            </li>
+            <li class="card p-4 flex items-start gap-3">
+                <span class="h-9 w-9 rounded-xl bg-forest/10 text-forest inline-flex items-center justify-center shrink-0 mt-0.5" aria-hidden="true">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </span>
+                <span class="text-sm text-forest/80 leading-relaxed"><strong class="text-forest font-semibold">Flask</strong> &mdash; a lightweight alternative for smaller, quick-to-build services.</span>
+            </li>
+            <li class="card p-4 flex items-start gap-3">
+                <span class="h-9 w-9 rounded-xl bg-forest/10 text-forest inline-flex items-center justify-center shrink-0 mt-0.5" aria-hidden="true">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </span>
+                <span class="text-sm text-forest/80 leading-relaxed"><strong class="text-forest font-semibold">SQL &amp; databases</strong> &mdash; storing, querying, and reasoning about your application's data.</span>
+            </li>
+        </ul>
     </section>
 
-    <section class="section">
-        <div class="section-head center">
-            <span class="eyebrow">Why learn with us</span>
-            <h2 class="section-title">A platform designed around real progress</h2>
+    <section class="mb-10">
+        <div class="max-w-xl mx-auto text-center mb-6">
+            <span class="inline-flex items-center rounded-full bg-white/80 border border-bronze/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest mb-2.5">Why learn with us</span>
+            <h2 class="text-2xl font-bold text-forest m-0">A platform designed around real progress</h2>
         </div>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <span class="feature-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="card p-5">
+                <span class="h-10 w-10 rounded-xl bg-forest/10 text-forest inline-flex items-center justify-center mb-3.5" aria-hidden="true">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                 </span>
-                <h3>Complete courses</h3>
-                <p>Each course is a full sequence of lessons with content, not just a playlist of disconnected tips.</p>
+                <h3 class="text-lg font-semibold text-forest mb-1.5">Complete courses</h3>
+                <p class="text-sm text-forest/80 leading-relaxed m-0">Each course is a full sequence of lessons with content, not just a playlist of disconnected tips.</p>
             </div>
-            <div class="feature-card">
-                <span class="feature-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <div class="card p-5">
+                <span class="h-10 w-10 rounded-xl bg-forest/10 text-forest inline-flex items-center justify-center mb-3.5" aria-hidden="true">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </span>
-                <h3>Your own schedule</h3>
-                <p>Enroll once and learn whenever it suits you &mdash; lessons stay available so you can revisit them anytime.</p>
+                <h3 class="text-lg font-semibold text-forest mb-1.5">Your own schedule</h3>
+                <p class="text-sm text-forest/80 leading-relaxed m-0">Enroll once and learn whenever it suits you &mdash; lessons stay available so you can revisit them anytime.</p>
             </div>
-            <div class="feature-card">
-                <span class="feature-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+            <div class="card p-5">
+                <span class="h-10 w-10 rounded-xl bg-forest/10 text-forest inline-flex items-center justify-center mb-3.5" aria-hidden="true">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
                 </span>
-                <h3>Clear progress</h3>
-                <p>Your dashboard lists every course you are enrolled in, so momentum is always visible.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="section section-soft">
-        <div class="section-head center">
-            <span class="eyebrow">Our approach</span>
-            <h2 class="section-title">How we structure learning</h2>
-            <p class="section-subtitle">Simple principles behind every course on the platform.</p>
-        </div>
-        <div class="steps">
-            <div class="step">
-                <span class="step-num">1</span>
-                <h3>Order matters</h3>
-                <p>Lessons are numbered and sequenced so concepts introduce each other in a sensible order.</p>
-            </div>
-            <div class="step">
-                <span class="step-num">2</span>
-                <h3>Practice over theory</h3>
-                <p>Each lesson focuses on what you can build and do, not just what you can recite.</p>
-            </div>
-            <div class="step">
-                <span class="step-num">3</span>
-                <h3>Progress is earned</h3>
-                <p>Lessons unlock through enrollment, keeping you focused on the course you chose.</p>
+                <h3 class="text-lg font-semibold text-forest mb-1.5">Clear progress</h3>
+                <p class="text-sm text-forest/80 leading-relaxed m-0">Your dashboard lists every course you are enrolled in, so momentum is always visible.</p>
             </div>
         </div>
     </section>
 
-    <section class="section">
-        <div class="vision-panel">
-            <div class="vision-body">
-                <span class="eyebrow">Our vision</span>
-                <h2 class="section-title">A catalog students can trust</h2>
-                <p>
+    <section class="glass rounded-2xl p-6 sm:p-8 mb-10">
+        <div class="max-w-xl mx-auto text-center mb-6">
+            <span class="inline-flex items-center rounded-full bg-white/80 border border-bronze/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest mb-2.5">Our approach</span>
+            <h2 class="text-2xl font-bold text-forest mb-1.5">How we structure learning</h2>
+            <p class="text-sm text-forest/80 m-0">Simple principles behind every course on the platform.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="card p-5">
+                <span class="h-8 w-8 rounded-full bg-forest text-beige text-sm font-bold inline-flex items-center justify-center mb-3">1</span>
+                <h3 class="text-base font-semibold text-forest mb-1.5">Order matters</h3>
+                <p class="text-sm text-forest/80 leading-relaxed m-0">Lessons are numbered and sequenced so concepts introduce each other in a sensible order.</p>
+            </div>
+            <div class="card p-5">
+                <span class="h-8 w-8 rounded-full bg-forest text-beige text-sm font-bold inline-flex items-center justify-center mb-3">2</span>
+                <h3 class="text-base font-semibold text-forest mb-1.5">Practice over theory</h3>
+                <p class="text-sm text-forest/80 leading-relaxed m-0">Each lesson focuses on what you can build and do, not just what you can recite.</p>
+            </div>
+            <div class="card p-5">
+                <span class="h-8 w-8 rounded-full bg-forest text-beige text-sm font-bold inline-flex items-center justify-center mb-3">3</span>
+                <h3 class="text-base font-semibold text-forest mb-1.5">Progress is earned</h3>
+                <p class="text-sm text-forest/80 leading-relaxed m-0">Lessons unlock through enrollment, keeping you focused on the course you chose.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-10">
+        <div class="glass rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="max-w-2xl">
+                <span class="inline-flex items-center rounded-full bg-white/80 border border-bronze/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest mb-2.5">Our vision</span>
+                <h2 class="text-2xl font-bold text-forest mb-2">A catalog students can trust</h2>
+                <p class="text-sm sm:text-base text-forest/80 leading-relaxed m-0">
                     We want E-Learning to be the place where a beginner can start with
                     Python and grow into a confident web developer &mdash; with every
                     course held to the same clear, complete, self-paced standard.
                 </p>
             </div>
-            <div class="vision-action">
-                <a class="btn btn-primary" href="{% url 'course_list' %}">Explore the catalog</a>
+            <div class="shrink-0">
+                <a class="btn btn-primary btn-sm text-sm font-semibold px-4 py-2.5 rounded-xl" href="{% url 'course_list' %}">Explore the catalog</a>
             </div>
         </div>
     </section>
 
-    <section class="section">
-        <div class="cta-band">
-            <h2>Ready to start learning?</h2>
-            <p>Create a free account, enroll in a course, and finish your first lesson today.</p>
-            <div class="cta-actions">
+    <section class="mb-4">
+        <div class="cta-band rounded-2xl bg-gradient-to-br from-forest to-moss p-6 sm:p-8 text-center text-white shadow-lg">
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">Ready to start learning?</h2>
+            <p class="text-sm sm:text-base text-beige/90 max-w-xl mx-auto mb-5 leading-relaxed">Create a free account, enroll in a course, and finish your first lesson today.</p>
+            <div class="flex flex-wrap items-center justify-center gap-3">
                 {% if user.is_authenticated %}
-                    <a class="btn btn-primary" href="{% url 'dashboard' %}">Go to dashboard</a>
+                    <a class="btn btn-primary btn-sm bg-beige text-forest text-sm font-semibold px-4 py-2 rounded-xl" href="{% url 'dashboard' %}">Go to dashboard</a>
                 {% else %}
-                    <a class="btn btn-primary" href="{% url 'register' %}">Create a free account</a>
+                    <a class="btn btn-primary btn-sm bg-beige text-forest text-sm font-semibold px-4 py-2 rounded-xl" href="{% url 'register' %}">Create a free account</a>
                 {% endif %}
-                <a class="btn btn-secondary" href="{% url 'course_list' %}">Browse courses</a>
+                <a class="btn btn-secondary btn-sm text-sm font-semibold px-4 py-2 rounded-xl" href="{% url 'course_list' %}">Browse courses</a>
             </div>
         </div>
     </section>

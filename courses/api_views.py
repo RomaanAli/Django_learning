@@ -16,13 +16,6 @@ from .serializers import (
 
 
 class CourseListCreateView(generics.ListCreateAPIView):
-    """List published courses (AllowAny) or create a new course (IsInstructor).
-
-    Queryset scope: published courses only, plus the request user's own
-    courses if authenticated (so draft courses are visible to their owner on
-    the API).  Uses select_related("instructor") to avoid N+1 queries.  Search
-    and ordering are provided by DRF's built-in filters.
-    """
 
     serializer_class = CourseSerializer
     filter_backends = [SearchFilter, OrderingFilter]
