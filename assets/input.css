@@ -136,17 +136,77 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
-.card {
+/* ===== Cards & Course Cards ===== */
+.card,
+.course-card,
+a.card,
+a.course-card {
   background-color: #ffffff;
-  border: 1px solid #e8e1d3;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
+  color: inherit !important;
+  text-decoration: none !important;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
-.card:hover {
+/* Hero panel items in Home: sleek horizontal row, no underline */
+.hero-panel-item,
+a.hero-panel-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+a.hero-panel-item:hover,
+a.hero-panel-item:hover * {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* On hover: ONLY a subtle lift (-translate-y-0.5 / 2px), deeper shadow, and darker border */
+.card:hover,
+.course-card:hover,
+a.card:hover,
+a.course-card:hover,
+a.card:focus-visible,
+a.course-card:focus-visible {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-strong);
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+/* Prevent global a:hover { text-decoration: underline } from bleeding into any element inside the card */
+a.card *,
+a.card:hover *,
+a.card:focus-visible *,
+a.course-card *,
+a.course-card:hover *,
+a.course-card:focus-visible *,
+.card:hover *,
+.course-card:hover * {
+  text-decoration: none !important;
+}
+
+/* Ensure description and price never change color on card hover */
+a.card:hover p,
+a.course-card:hover p,
+a.card:hover span,
+a.course-card:hover span,
+a.card:hover div,
+a.course-card:hover div {
+  text-decoration: none !important;
+}
+
+/* The small "View course →" CTA inside the card may underline on its own hover only */
+a.card .card-cta:hover,
+a.course-card .card-cta:hover,
+.card-cta:hover {
+  text-decoration: underline !important;
 }
 
 /* Ensure legacy home/about bands let the mesh show through with glass translucency */

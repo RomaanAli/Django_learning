@@ -24,7 +24,7 @@
     {% if courses %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for course in courses %}
-                <a class="card group flex flex-col overflow-hidden p-0 text-left no-underline" href="{% url 'course_detail' course.pk %}">
+                <a class="card course-card group flex flex-col overflow-hidden p-0 text-left no-underline" href="{% url 'course_detail' course.pk %}">
                     <!-- Small Gradient Header -->
                     <div class="h-28 bg-gradient-to-br from-forest to-moss p-5 flex items-start justify-between">
                         <span class="inline-flex items-center rounded-full bg-white/15 backdrop-blur-sm border border-white/20 px-2.5 py-0.5 text-xs font-medium text-white">
@@ -40,11 +40,11 @@
 
                     <!-- Card Body -->
                     <div class="flex flex-1 flex-col p-6">
-                        <h2 class="text-lg font-semibold text-forest group-hover:text-moss transition-colors line-clamp-1">
+                        <h2 class="text-lg font-semibold text-forest line-clamp-1">
                             {{ course.title }}
                         </h2>
                         <p class="mt-2 flex-1 text-sm text-forest/80 leading-relaxed">
-                            {{ course.description|truncatewords:22 }}
+                            {{ course.description|truncatewords:18 }}
                         </p>
 
                         <!-- Card Footer -->
@@ -68,7 +68,7 @@
                             </span>
                         </div>
 
-                        <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-forest group-hover:translate-x-0.5 transition-transform">
+                        <span class="card-cta mt-4 inline-flex items-center gap-1 text-sm font-semibold text-forest transition-colors">
                             View course &rarr;
                         </span>
                     </div>
