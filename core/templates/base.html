@@ -10,43 +10,45 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/output.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
-<body class="bg-beige text-slate-900 font-sans antialiased min-h-screen flex flex-col">
-    <div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-bronze/10 blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-moss/10 blur-[120px]"></div>
+<body class="bg-beige text-forest/90 font-sans antialiased min-h-screen flex flex-col overflow-x-hidden">
+    <div class="bg-mesh fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-beige" aria-hidden="true">
+        <div class="bg-mesh-top absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-forest/10 to-transparent"></div>
+        <div class="bg-mesh-blob-forest absolute -top-20 -left-20 w-[44rem] h-[40rem] rounded-full bg-forest/30 blur-3xl"></div>
+        <div class="bg-mesh-blob-moss absolute top-6 -right-20 w-[42rem] h-[38rem] rounded-full bg-moss/35 blur-3xl"></div>
+        <div class="bg-mesh-blob-bronze absolute -bottom-24 left-[18%] w-[46rem] h-[36rem] rounded-full bg-bronze/30 blur-3xl"></div>
     </div>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <header class="navbar sticky top-0 z-40 bg-forest/85 backdrop-blur border-b border-white/10 shadow-sm">
+    <header class="navbar sticky top-0 z-40 bg-forest/85 backdrop-blur-md border-b border-white/10 shadow-sm">
         <div class="container navbar-inner">
-            <a class="brand text-beige" href="{% url 'home' %}">
+            <a class="brand text-beige text-base font-bold tracking-tight" href="{% url 'home' %}">
                 <span class="brand-mark" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-4.5"/></svg>
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-4.5"/></svg>
                 </span>
                 E-Learning
             </a>
 
             <button type="button" class="nav-toggle text-beige" id="nav-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Toggle navigation menu">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
             </button>
 
-            <nav class="nav-links" id="primary-nav" aria-label="Primary">
-                <a href="{% url 'home' %}"{% if request.resolver_match.url_name == 'home' %} class="active bg-beige text-forest rounded-full px-3 py-1 font-medium" aria-current="page"{% endif %}>Home</a>
-                <a href="{% url 'about' %}"{% if request.resolver_match.url_name == 'about' %} class="active bg-beige text-forest rounded-full px-3 py-1 font-medium" aria-current="page"{% endif %}>About</a>
-                <a href="{% url 'course_list' %}"{% if request.resolver_match.app_name == 'courses' or request.resolver_match.url_name == 'course_list' %} class="active bg-beige text-forest rounded-full px-3 py-1 font-medium" aria-current="page"{% endif %}>Courses</a>
+            <nav class="nav-links text-sm" id="primary-nav" aria-label="Primary">
+                <a href="{% url 'home' %}" class="text-sm{% if request.resolver_match.url_name == 'home' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'home' %} aria-current="page"{% endif %}>Home</a>
+                <a href="{% url 'about' %}" class="text-sm{% if request.resolver_match.url_name == 'about' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'about' %} aria-current="page"{% endif %}>About</a>
+                <a href="{% url 'course_list' %}" class="text-sm{% if request.resolver_match.app_name == 'courses' or request.resolver_match.url_name == 'course_list' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.app_name == 'courses' or request.resolver_match.url_name == 'course_list' %} aria-current="page"{% endif %}>Courses</a>
                 {% if user.is_authenticated %}
                     {% if user.is_instructor or user.is_admin %}
-                        <a href="{% url 'instructor_dashboard' %}"{% if request.resolver_match.url_name == 'instructor_dashboard' %} class="active bg-beige text-forest rounded-full px-3 py-1 font-medium" aria-current="page"{% endif %}>Instructor Dashboard</a>
+                        <a href="{% url 'instructor_dashboard' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_dashboard' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_dashboard' %} aria-current="page"{% endif %}>Instructor Dashboard</a>
                     {% else %}
-                        <a href="{% url 'dashboard' %}"{% if request.resolver_match.url_name == 'dashboard' %} class="active bg-beige text-forest rounded-full px-3 py-1 font-medium" aria-current="page"{% endif %}>Dashboard</a>
+                        <a href="{% url 'dashboard' %}" class="text-sm{% if request.resolver_match.url_name == 'dashboard' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
                     {% endif %}
-                    <a href="{% url 'profile' %}"{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' %} class="active bg-beige text-forest rounded-full px-3 py-1 font-medium" aria-current="page"{% endif %}>Profile</a>
+                    <a href="{% url 'profile' %}" class="text-sm{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' %} aria-current="page"{% endif %}>Profile</a>
                     {% if user.is_instructor or user.is_admin %}
-                        <a href="{% url 'instructor_course_list' %}"{% if request.resolver_match.url_name == 'instructor_course_list' or request.resolver_match.url_name == 'instructor_course_edit' %} class="active bg-beige text-forest rounded-full px-3 py-1 font-medium" aria-current="page"{% endif %}>My Courses</a>
-                        <a href="{% url 'instructor_course_create' %}"{% if request.resolver_match.url_name == 'instructor_course_create' %} class="active bg-beige text-forest rounded-full px-3 py-1 font-medium" aria-current="page"{% endif %}>New Course</a>
+                        <a href="{% url 'instructor_course_list' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_course_list' or request.resolver_match.url_name == 'instructor_course_edit' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_course_list' or request.resolver_match.url_name == 'instructor_course_edit' %} aria-current="page"{% endif %}>My Courses</a>
+                        <a href="{% url 'instructor_course_create' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_course_create' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_course_create' %} aria-current="page"{% endif %}>New Course</a>
                     {% endif %}
                 {% endif %}
             </nav>
@@ -56,10 +58,10 @@
                     <a class="nav-avatar hover:text-beige transition-colors" href="{% url 'profile' %}" aria-label="Your profile">
                         {{ user.first_name|first|default:user.username|first|upper }}
                     </a>
-                    <button type="button" class="nav-button hover:bg-white/10 rounded-lg px-3 py-1.5 transition-colors" id="logout-open">Logout</button>
+                    <button type="button" class="nav-button text-sm hover:bg-white/10 rounded-xl px-3 py-1.5 transition-colors" id="logout-open">Logout</button>
                 {% else %}
-                    <a class="nav-button hover:bg-white/10 rounded-lg px-3 py-1.5 transition-colors" href="{% url 'login' %}">Login</a>
-                    <a class="btn btn-primary btn-sm bg-beige text-forest font-semibold rounded-lg px-4 py-2 shadow hover:bg-bronze hover:shadow-lg transition-all active:translate-y-px" href="{% url 'register' %}">Register</a>
+                    <a class="nav-button text-sm hover:bg-white/10 rounded-xl px-3 py-1.5 transition-colors" href="{% url 'login' %}">Login</a>
+                    <a class="btn btn-primary btn-sm bg-beige text-forest text-sm font-semibold rounded-xl px-3.5 py-1.5 shadow-sm hover:bg-linen transition-all active:translate-y-px" href="{% url 'register' %}">Register</a>
                 {% endif %}
             </div>
         </div>
@@ -68,7 +70,7 @@
     <main class="container main" id="main-content">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} glass rounded-lg px-4 py-3 mb-4 border border-white/20 shadow-sm" role="alert">{{ message }}</div>
+                <div class="alert alert-{{ message.tags }} glass rounded-xl px-4 py-3 mb-4 text-sm font-medium shadow-sm" role="alert">{{ message }}</div>
             {% endfor %}
         {% endif %}
 
@@ -76,29 +78,29 @@
         {% endblock %}
     </main>
 
-    <footer class="footer mt-auto bg-forest text-beige py-8">
+    <footer class="footer mt-auto bg-forest text-beige py-10">
         <div class="container">
-            <div class="footer-grid">
+            <div class="footer-grid grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="footer-col">
-                    <a class="footer-brand text-beige hover:text-bronze transition-colors" href="{% url 'home' %}">
+                    <a class="footer-brand text-beige text-base font-bold hover:text-linen transition-colors" href="{% url 'home' %}">
                         <span class="brand-mark" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-4.5"/></svg>
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-4.5"/></svg>
                         </span>
                         E-Learning
                     </a>
-                    <p class="footer-about text-linen/80 mt-4 max-w-sm leading-relaxed">Practical, well-structured courses that take you from fundamentals to job-ready skills — learn at your own pace, on any device.</p>
+                    <p class="footer-about text-linen/90 text-sm mt-3 max-w-sm leading-relaxed">Practical, well-structured courses that take you from fundamentals to job-ready skills — learn at your own pace, on any device.</p>
                 </div>
                 <div class="footer-col">
-                    <h4 class="text-beige font-semibold tracking-wider uppercase text-xs mb-4">Explore</h4>
-                    <ul class="footer-links">
+                    <p class="footer-heading text-beige font-semibold tracking-wider uppercase text-xs mb-3">Explore</p>
+                    <ul class="footer-links text-sm">
                         <li><a href="{% url 'home' %}" class="text-linen/90 hover:text-beige transition-colors">Home</a></li>
                         <li><a href="{% url 'about' %}" class="text-linen/90 hover:text-beige transition-colors">About us</a></li>
                         <li><a href="{% url 'course_list' %}" class="text-linen/90 hover:text-beige transition-colors">All courses</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h4 class="text-beige font-semibold tracking-wider uppercase text-xs mb-4">Account</h4>
-                    <ul class="footer-links">
+                    <p class="footer-heading text-beige font-semibold tracking-wider uppercase text-xs mb-3">Account</p>
+                    <ul class="footer-links text-sm">
                         {% if user.is_authenticated %}
                             {% if user.is_instructor or user.is_admin %}
                                 <li><a href="{% url 'instructor_dashboard' %}" class="text-linen/90 hover:text-beige transition-colors">Instructor Dashboard</a></li>
@@ -114,24 +116,24 @@
                     </ul>
                 </div>
             </div>
-            <div class="footer-bottom mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between gap-4">
-                <p class="text-linen/60 text-sm">&copy; {% now "Y" %} E-Learning. Built with Django.</p>
-                <p class="text-linen/60 text-sm">Learn something new every day.</p>
+            <div class="footer-bottom mt-8 pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between gap-3">
+                <p class="text-linen/90 text-xs">&copy; {% now "Y" %} E-Learning. Built with Django.</p>
+                <p class="text-linen/90 text-xs">Learn something new every day.</p>
             </div>
         </div>
     </footer>
 
     {% if user.is_authenticated %}
         <div class="modal-overlay fixed inset-0 bg-black/40 backdrop-blur-sm" id="logout-modal" hidden>
-            <div class="modal-card glass rounded-xl p-6 max-w-sm mx-auto mt-20 relative" role="dialog" aria-modal="true" aria-labelledby="logout-modal-title" aria-describedby="logout-modal-desc">
+            <div class="modal-card glass-strong rounded-2xl p-6 max-w-sm w-full mx-auto relative" role="dialog" aria-modal="true" aria-labelledby="logout-modal-title" aria-describedby="logout-modal-desc">
                 <span class="modal-icon" aria-hidden="true">&#128274;</span>
-                <h2 id="logout-modal-title" class="text-forest font-semibold text-lg mb-2">Log out?</h2>
-                <p id="logout-modal-desc" class="text-slate-600 mb-6">Are you sure you want to log out? You will need to log in again to access your courses.</p>
-                <div class="modal-actions flex gap-3">
-                    <button type="button" class="btn btn-secondary px-4 py-2 rounded-lg font-medium hover:bg-white/50 transition-colors" id="logout-cancel">Cancel</button>
+                <h2 id="logout-modal-title" class="text-forest font-semibold text-base mb-1.5">Log out?</h2>
+                <p id="logout-modal-desc" class="text-forest/80 text-sm mb-5">Are you sure you want to log out? You will need to log in again to access your courses.</p>
+                <div class="modal-actions flex gap-2.5 justify-center">
+                    <button type="button" class="btn btn-secondary btn-sm px-4 py-2 rounded-xl text-sm font-medium transition-colors" id="logout-cancel">Cancel</button>
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger bg-danger text-white px-4 py-2 rounded-lg font-medium hover:bg-danger-dark transition-colors">Log out</button>
+                        <button type="submit" class="btn btn-danger btn-sm bg-danger text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-danger-dark transition-colors">Log out</button>
                     </form>
                 </div>
             </div>
