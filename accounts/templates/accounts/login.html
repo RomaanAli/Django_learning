@@ -16,35 +16,39 @@
 
 {% block fields %}
 {% if form.non_field_errors %}
-<div class="field-group"><div class="field-error">{{ form.non_field_errors|join:', ' }}</div></div>
+<div class="field-group">
+  <div class="field-error" role="alert">{{ form.non_field_errors|join:', ' }}</div>
+</div>
 {% endif %}
 
 <div class="field-group">
-  <label for="{{ form.username.id_for_label }}">Username or email</label>
+  <label for="{{ form.username.id_for_label }}" class="text-sm font-medium text-forest">Username or email</label>
   {{ form.username }}
-  {% if form.username.errors %}<div class="field-error">{{ form.username.errors|join:', ' }}</div>{% endif %}
+  {% if form.username.errors %}<div class="field-error" role="alert">{{ form.username.errors|join:', ' }}</div>{% endif %}
 </div>
 
 <div class="field-group">
-  <label for="{{ form.password.id_for_label }}">Password</label>
+  <div class="flex items-center justify-between gap-2">
+    <label for="{{ form.password.id_for_label }}" class="text-sm font-medium text-forest">Password</label>
+    <a href="{% url 'account_reset_password' %}" class="auth-link text-xs font-semibold text-forest hover:text-moss">Forgot password?</a>
+  </div>
   <div class="password-wrap">
     <input type="password" id="{{ form.password.id_for_label }}" name="{{ form.password.name }}" autocomplete="current-password">
     <button type="button" class="toggle-password" aria-label="Show password">
-                    <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                </button>
+      <svg class="eye-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    </button>
   </div>
-  {% if form.password.errors %}<div class="field-error">{{ form.password.errors|join:', ' }}</div>{% endif %}
+  {% if form.password.errors %}<div class="field-error" role="alert">{{ form.password.errors|join:', ' }}</div>{% endif %}
 </div>
 
-<p class="muted auth-help">
-  Need to verify your email? <a href="{% url 'resend_otp' %}">Resend code</a>
+<p class="auth-help text-xs text-forest/80 m-0">
+  Need to verify your email? <a href="{% url 'resend_otp' %}" class="auth-link font-semibold text-forest hover:text-moss">Resend code</a>
 </p>
 {% endblock %}
 
 {% block footer %}
-<p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
-<p><a href="{% url 'account_reset_password' %}">Forgot password?</a></p>
+<p class="m-0">Don't have an account? <a href="{% url 'register' %}" class="auth-link font-semibold text-forest hover:text-moss">Register here</a></p>
 {% endblock %}

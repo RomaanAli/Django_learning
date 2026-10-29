@@ -437,6 +437,7 @@ input[type="password"],
 input[type="url"],
 input[type="tel"],
 input[type="number"],
+input[type="file"],
 textarea,
 select {
   width: 100% !important;
@@ -445,6 +446,7 @@ select {
   background: #ffffff !important;
   padding: 0.65rem 0.9rem !important;
   font-size: 0.95rem !important;
+  color: #203d32 !important;
 }
 
 .form-control:focus,
@@ -454,11 +456,145 @@ input[type="password"]:focus,
 input[type="url"]:focus,
 input[type="tel"]:focus,
 input[type="number"]:focus,
+input[type="file"]:focus,
 textarea:focus,
 select:focus {
   outline: none !important;
   border-color: #203d32 !important;
   box-shadow: 0 0 0 2px rgba(32, 61, 50, 0.2) !important;
+}
+
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #203d32 !important;
+  outline-offset: 2px !important;
+}
+
+.navbar a:focus-visible,
+.navbar button:focus-visible,
+.footer a:focus-visible {
+  outline: 2px solid #f7f3ea !important;
+  outline-offset: 2px !important;
+}
+
+/* ===== Auth Shell & Role Toggle Polish ===== */
+.auth-page {
+  background: transparent !important;
+}
+
+.auth-card.glass-strong {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 12px 32px rgba(24, 42, 34, 0.1) !important;
+  max-width: 480px !important;
+  width: 100%;
+}
+
+.password-wrap input[type="password"],
+.password-wrap input[type="text"] {
+  padding-right: 2.5rem !important;
+}
+
+.password-wrap .toggle-password .eye-icon {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+.role-toggle {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0.625rem !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.role-btn {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  padding: 0.625rem 0.875rem !important;
+  border-radius: var(--radius-control) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid #e8e1d3 !important;
+  color: #203d32 !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+.role-btn .role-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  border: 1.5px solid #557461;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.role-btn:has(input:checked),
+.role-btn:has(input:checked):hover {
+  background: #203d32 !important;
+  border-color: #203d32 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(32, 61, 50, 0.18) !important;
+}
+
+.role-btn:has(input:checked) .role-label {
+  color: #ffffff !important;
+}
+
+.role-btn:has(input:checked) .role-dot {
+  background: #f7f3ea !important;
+  border-color: #f7f3ea !important;
+}
+
+.role-toggle-hint {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.625rem 0.875rem !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid #e8e1d3 !important;
+  border-radius: var(--radius-control) !important;
+  font-size: 0.875rem !important;
+  color: rgba(32, 61, 50, 0.82) !important;
+}
+
+.field-error,
+.field-group .field-error,
+.errorlist {
+  display: flex !important;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #f6e9e9 !important;
+  border: 1px solid #e7cccc !important;
+  color: #933636 !important;
+  border-radius: 10px !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  margin-top: 0.2rem !important;
+}
+
+#otp.otp-input {
+  width: 100% !important;
+  max-width: 220px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.35em !important;
 }
 
 input.error,

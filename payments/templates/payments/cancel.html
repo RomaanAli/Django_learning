@@ -3,16 +3,22 @@
 {% block title %}Payment cancelled | E-Learning{% endblock %}
 
 {% block content %}
-    <div class="card payment-result-card">
-        <div class="payment-result-icon payment-warning" aria-hidden="true">&#10006;</div>
-        <h1>Payment cancelled</h1>
-        <p class="muted">
+<div class="max-w-lg mx-auto py-6">
+    <div class="glass-strong rounded-2xl p-6 sm:p-8 text-center shadow-xl">
+        <div class="mx-auto h-12 w-12 rounded-full bg-[#f6e9e9] text-[#933636] border border-[#e7cccc] flex items-center justify-center text-xl font-bold" aria-hidden="true">
+            &#10006;
+        </div>
+        <h1 class="mt-4 text-2xl font-bold tracking-tight text-forest">
+            Payment cancelled
+        </h1>
+        <p class="mt-2 text-base text-forest/80 leading-relaxed">
             No money was taken and you were not charged. You can come back and
             try again whenever you are ready.
         </p>
-        <div class="payment-actions">
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
             <a class="btn btn-primary" href="{% url 'payments:confirm' course.pk %}">Try again</a>
-            <a class="btn btn-secondary" href="{% url 'course_detail' course.pk %}">Back to the course</a>
+            <a class="btn btn-secondary" href="{% url 'course_detail' course.pk %}">Back to course</a>
         </div>
     </div>
+</div>
 {% endblock %}

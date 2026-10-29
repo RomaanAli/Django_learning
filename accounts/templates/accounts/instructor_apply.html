@@ -3,28 +3,72 @@
 {% block title %}Become an Instructor | E-Learning{% endblock %}
 
 {% block content %}
-    <div class="page-head">
-        <h1>Become an instructor</h1>
-        <p class="page-subtitle">Upload a document that proves your expertise. An admin reviews it before you can publish courses.</p>
+<div class="max-w-2xl mx-auto space-y-6">
+    <!-- Page Header -->
+    <div>
+        <span
+            class="inline-flex items-center gap-2 rounded-full border border-bronze/20 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">
+            Instructor Application
+        </span>
+        <h1 class="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-forest">
+            Become an instructor
+        </h1>
+        <p class="mt-1.5 text-base text-forest/80 leading-relaxed">
+            Upload a document that proves your expertise. An admin reviews it before you can publish courses.
+        </p>
     </div>
 
-    <div class="card form-panel">
+    <!-- Application Glass Card -->
+    <div class="glass-strong rounded-2xl p-6 sm:p-8 shadow-xl space-y-5">
         {% if document %}
-            <p class="alert alert-info">
+        <div class="alert alert-info text-sm" role="status">
+            <span>
                 Current status:
-                <strong>{{ document.get_status_display }}</strong>
+                <strong class="font-semibold">{{ document.get_status_display }}</strong>
                 {% if document.created_at %} &middot; uploaded {{ document.created_at|date:"M j, Y" }}{% endif %}
-            </p>
+            </span>
+        </div>
         {% endif %}
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" class="space-y-5" novalidate>
             {% csrf_token %}
-            {{ form.as_p }}
-            <button class="btn btn-primary" type="submit">
-                {% if document %}Replace document{% else %}Submit application{% endif %}
-            </button>
-        </form>
 
-        <p class="form-footer"><a href="{% url 'dashboard' %}">Back to dashboard</a></p>
+            {% if form.non_field_errors %}
+            <div class="alert alert-error text-sm" role="alert">
+                {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div class="space-y-1.5">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-forest">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                <p class="text-xs text-forest/80 m-0">{{ field.help_text }}</p>
+                {% endif %}
+                {% for error in field.errors %}
+                <p
+                    class="field-error text-xs font-medium text-[#933636] bg-[#f6e9e9] border border-[#e7cccc] rounded-lg px-3 py-1.5">
+                    {{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <div class="pt-4 border-t border-linen flex flex-wrap items-center gap-3">
+                <button class="btn btn-primary" type="submit">
+                    {% if document %}Replace document{% else %}Submit application{% endif %}
+                </button>
+                {% if user.is_instructor or user.is_admin %}
+                <a class="btn btn-secondary" href="{% url 'instructor_dashboard' %}">Back to dashboard</a>
+                {% else %}
+                <a class="btn btn-secondary" href="{% url 'dashboard' %}">Back to dashboard</a>
+                {% endif %}
+            </div>
+        </form>
     </div>
+</div>
 {% endblock %}

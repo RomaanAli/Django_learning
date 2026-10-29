@@ -15,88 +15,91 @@
 {% block submit_text %}Create account{% endblock %}
 
 {% block role_toggle %}
-<div class="role-toggle" role="radiogroup" aria-label="Account type" data-role-toggle>
-  <label class="role-btn" data-role="student">
-    <input type="radio" name="role" value="student" {% if selected_role == 'student' %}checked{% endif %}>
-    <span class="role-icon" aria-hidden="true">🎓</span>
-    <span class="role-label">Student</span>
-    <span class="role-badge">Browse &amp; enroll</span>
+<div class="role-toggle grid grid-cols-2 gap-2.5" role="radiogroup" aria-label="Account type" data-role-toggle>
+  <label class="role-btn rounded-xl border px-3.5 py-2.5 text-sm font-semibold" data-role="student" aria-checked="{% if selected_role == 'instructor' %}false{% else %}true{% endif %}">
+    <input type="radio" name="role" value="student" {% if selected_role != 'instructor' %}checked{% endif %}>
+    <span class="role-dot" aria-hidden="true"></span>
+    <span class="role-label text-sm font-semibold">Student</span>
   </label>
-  <label class="role-btn" data-role="instructor">
+  <label class="role-btn rounded-xl border px-3.5 py-2.5 text-sm font-semibold" data-role="instructor" aria-checked="{% if selected_role == 'instructor' %}true{% else %}false{% endif %}">
     <input type="radio" name="role" value="instructor" {% if selected_role == 'instructor' %}checked{% endif %}>
-    <span class="role-icon" aria-hidden="true">🧑‍🏫</span>
-    <span class="role-label">Instructor</span>
-    <span class="role-badge">Create &amp; manage</span>
+    <span class="role-dot" aria-hidden="true"></span>
+    <span class="role-label text-sm font-semibold">Instructor</span>
   </label>
 </div>
 {% if form.role.errors %}
-<div class="field-error">{{ form.role.errors|join:', ' }}</div>
+<div class="field-error" role="alert">{{ form.role.errors|join:', ' }}</div>
 {% endif %}
-<div class="role-toggle-hint" aria-live="polite">
-  <strong id="role-hint-title">{% if selected_role == 'instructor' %}Instructor account{% else %}Student account{% endif %}</strong>
+<div class="role-toggle-hint rounded-xl bg-white/75 border border-linen px-3.5 py-2.5 text-sm text-forest/80" aria-live="polite">
+  <strong id="role-hint-title" class="font-semibold text-forest">{% if selected_role == 'instructor' %}Instructor account{% else %}Student account{% endif %}</strong>
+  <span>&mdash;</span>
   <span id="role-hint-detail">{% if selected_role == 'instructor' %}Create and manage your courses.{% else %}Browse courses and enroll.{% endif %}</span>
 </div>
 {% endblock %}
 
 {% block fields %}
 {% if form.non_field_errors %}
-<div class="field-group"><div class="field-error">{{ form.non_field_errors|join:', ' }}</div></div>
+<div class="field-group">
+  <div class="field-error" role="alert">{{ form.non_field_errors|join:', ' }}</div>
+</div>
 {% endif %}
 
 <div class="field-group">
-  <label for="{{ form.username.id_for_label }}">Username</label>
+  <label for="{{ form.username.id_for_label }}" class="text-sm font-medium text-forest">Username</label>
   {{ form.username }}
-  {% if form.username.errors %}<div class="field-error">{{ form.username.errors|join:', ' }}</div>{% endif %}
+  {% if form.username.errors %}<div class="field-error" role="alert">{{ form.username.errors|join:', ' }}</div>{% endif %}
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+  <div class="field-group">
+    <label for="{{ form.first_name.id_for_label }}" class="text-sm font-medium text-forest">First name</label>
+    {{ form.first_name }}
+    {% if form.first_name.errors %}<div class="field-error" role="alert">{{ form.first_name.errors|join:', ' }}</div>{% endif %}
+  </div>
+
+  <div class="field-group">
+    <label for="{{ form.last_name.id_for_label }}" class="text-sm font-medium text-forest">Last name</label>
+    {{ form.last_name }}
+    {% if form.last_name.errors %}<div class="field-error" role="alert">{{ form.last_name.errors|join:', ' }}</div>{% endif %}
+  </div>
 </div>
 
 <div class="field-group">
-  <label for="{{ form.first_name.id_for_label }}">First name</label>
-  {{ form.first_name }}
-  {% if form.first_name.errors %}<div class="field-error">{{ form.first_name.errors|join:', ' }}</div>{% endif %}
-</div>
-
-<div class="field-group">
-  <label for="{{ form.last_name.id_for_label }}">Last name</label>
-  {{ form.last_name }}
-  {% if form.last_name.errors %}<div class="field-error">{{ form.last_name.errors|join:', ' }}</div>{% endif %}
-</div>
-
-<div class="field-group">
-  <label for="{{ form.email.id_for_label }}">Email</label>
+  <label for="{{ form.email.id_for_label }}" class="text-sm font-medium text-forest">Email</label>
   {{ form.email }}
-  {% if form.email.errors %}<div class="field-error">{{ form.email.errors|join:', ' }}</div>{% endif %}
+  {% if form.email.errors %}<div class="field-error" role="alert">{{ form.email.errors|join:', ' }}</div>{% endif %}
 </div>
 
 <div class="field-group">
-  <label for="{{ form.password1.id_for_label }}">Password</label>
+  <label for="{{ form.password1.id_for_label }}" class="text-sm font-medium text-forest">Password</label>
   <div class="password-wrap">
     {{ form.password1 }}
     <button type="button" class="toggle-password" aria-label="Show password">
-        <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-        </svg>
+      <svg class="eye-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
     </button>
   </div>
-  {% if form.password1.errors %}<div class="field-error">{{ form.password1.errors|join:', ' }}</div>{% endif %}
-  <p class="muted">Use at least 8 characters with a mix of letters and numbers.</p>
+  {% if form.password1.errors %}<div class="field-error" role="alert">{{ form.password1.errors|join:', ' }}</div>{% endif %}
+  <p class="text-xs text-forest/75 m-0">Use at least 8 characters with a mix of letters and numbers.</p>
 </div>
 
 <div class="field-group">
-  <label for="{{ form.password2.id_for_label }}">Confirm password</label>
+  <label for="{{ form.password2.id_for_label }}" class="text-sm font-medium text-forest">Confirm password</label>
   <div class="password-wrap">
     {{ form.password2 }}
     <button type="button" class="toggle-password" aria-label="Show password">
-        <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-        </svg>
+      <svg class="eye-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
     </button>
   </div>
-  {% if form.password2.errors %}<div class="field-error">{{ form.password2.errors|join:', ' }}</div>{% endif %}
+  {% if form.password2.errors %}<div class="field-error" role="alert">{{ form.password2.errors|join:', ' }}</div>{% endif %}
 </div>
 {% endblock %}
 
 {% block footer %}
-<p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+<p class="m-0">Already have an account? <a href="{% url 'login' %}" class="auth-link font-semibold text-forest hover:text-moss">Sign in</a></p>
 {% endblock %}

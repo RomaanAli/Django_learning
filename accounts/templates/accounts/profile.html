@@ -3,24 +3,60 @@
 {% block title %}My Profile | E-Learning{% endblock %}
 
 {% block content %}
-    <div class="page-head">
-        <h1>{{ user.first_name|default:user.username }}'s Profile</h1>
-        <p class="page-subtitle">Your account details as stored on the platform.</p>
-    </div>
+<div class="max-w-3xl mx-auto space-y-6">
+    <!-- Profile Glass Header -->
+    <div class="glass rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4 min-w-0">
+            <div class="h-12 w-12 shrink-0 rounded-full bg-gradient-to-br from-forest to-moss text-white flex items-center justify-center text-lg font-bold shadow-sm" aria-hidden="true">
+                {{ user.first_name|default:user.username|slice:":1"|upper }}
+            </div>
+            <div class="min-w-0">
+                <h1 class="text-xl font-bold text-forest break-words">
+                    {{ user.first_name|default:user.username }}'s Profile
+                </h1>
+                <p class="mt-0.5 text-sm text-forest/80 break-all">
+                    @{{ user.username }}{% if user.email %} &middot; {{ user.email }}{% endif %}
+                </p>
+            </div>
+        </div>
 
-    <div class="card profile-card">
-        <ul class="stats">
-            <li><strong>Username:</strong> {{ user.username }}</li>
-            <li><strong>First name:</strong> {{ user.first_name|default:"—" }}</li>
-            <li><strong>Last name:</strong> {{ user.last_name|default:"—" }}</li>
-            <li><strong>Email:</strong> {{ user.email|default:"—" }}</li>
-            <li><strong>Age:</strong> {{ profile.age|default:"—" }}</li>
-            <li><strong>Contact:</strong> {{ profile.contact|default:"—" }}</li>
-        </ul>
-
-        <div class="form-actions">
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
             <a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit Profile</a>
             <a class="btn btn-secondary" href="{% url 'dashboard' %}">Back to Dashboard</a>
         </div>
     </div>
+
+    <!-- Account Details Grid -->
+    <div class="card p-6 sm:p-8">
+        <h2 class="text-lg font-semibold text-forest">Account details</h2>
+        <p class="mt-1 text-sm text-forest/80">Your account details as stored on the platform.</p>
+
+        <dl class="mt-6 m-0 grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-linen">
+            <div class="min-w-0">
+                <dt class="text-sm font-medium text-forest/80">Username</dt>
+                <dd class="m-0 mt-1 text-base font-medium text-forest break-all">{{ user.username }}</dd>
+            </div>
+            <div class="min-w-0">
+                <dt class="text-sm font-medium text-forest/80">Email</dt>
+                <dd class="m-0 mt-1 text-base font-medium text-forest break-all">{{ user.email|default:"—" }}</dd>
+            </div>
+            <div class="min-w-0">
+                <dt class="text-sm font-medium text-forest/80">First name</dt>
+                <dd class="m-0 mt-1 text-base font-medium text-forest break-words">{{ user.first_name|default:"—" }}</dd>
+            </div>
+            <div class="min-w-0">
+                <dt class="text-sm font-medium text-forest/80">Last name</dt>
+                <dd class="m-0 mt-1 text-base font-medium text-forest break-words">{{ user.last_name|default:"—" }}</dd>
+            </div>
+            <div class="min-w-0">
+                <dt class="text-sm font-medium text-forest/80">Age</dt>
+                <dd class="m-0 mt-1 text-base font-medium text-forest">{{ profile.age|default:"—" }}</dd>
+            </div>
+            <div class="min-w-0">
+                <dt class="text-sm font-medium text-forest/80">Contact</dt>
+                <dd class="m-0 mt-1 text-base font-medium text-forest break-words">{{ profile.contact|default:"—" }}</dd>
+            </div>
+        </dl>
+    </div>
+</div>
 {% endblock %}

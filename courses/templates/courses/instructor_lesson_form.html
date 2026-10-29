@@ -1,45 +1,84 @@
 {% extends "base.html" %}
 
-{% block title %}
-    {% if lesson %}Edit {{ lesson.title }}{% else %}Add lesson{% endif %} | E-Learning
-{% endblock %}
+{% block title %}{% if lesson %}Edit {{ lesson.title }}{% else %}Add lesson{% endif %} | E-Learning{% endblock %}
 
 {% block content %}
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-        <a href="{% url 'instructor_dashboard' %}">Instructor dashboard</a>
-        <span>/</span>
-        <a href="{% url 'instructor_course_list' %}">My courses</a>
-        <span>/</span>
-        <a href="{% url 'instructor_course_edit' course.pk %}">{{ course.title }}</a>
-        <span>/</span>
-        <span class="current">{% if lesson %}Edit lesson{% else %}Add lesson{% endif %}</span>
+<div class="max-w-3xl mx-auto space-y-8">
+    <!-- Breadcrumb -->
+    <nav class="flex flex-wrap items-center gap-2 text-sm text-forest/80" aria-label="Breadcrumb">
+        <a class="hover:text-forest transition-colors" href="{% url 'instructor_dashboard' %}">Instructor dashboard</a>
+        <span aria-hidden="true">/</span>
+        <a class="hover:text-forest transition-colors" href="{% url 'instructor_course_list' %}">My courses</a>
+        <span aria-hidden="true">/</span>
+        <a class="hover:text-forest transition-colors truncate max-w-xs" href="{% url 'instructor_course_edit' course.pk %}">{{ course.title }}</a>
+        <span aria-hidden="true">/</span>
+        <span class="font-medium text-forest">{% if lesson %}Edit lesson{% else %}Add lesson{% endif %}</span>
     </nav>
 
-    <div class="page-head">
-        <h1>{% if lesson %}Edit lesson{% else %}Add a lesson{% endif %}</h1>
-        <p class="page-subtitle">Lesson in "{{ course.title }}".</p>
+    <!-- Page Header -->
+    <div>
+        <span class="inline-flex items-center gap-2 rounded-full border border-bronze/20 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest">
+            Lesson Editor
+        </span>
+        <h1 class="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-forest">
+            {% if lesson %}Edit lesson{% else %}Add a lesson{% endif %}
+        </h1>
+        <p class="mt-1.5 text-base text-forest/80">
+            Lesson in "{{ course.title }}".
+        </p>
     </div>
 
-    <div class="card form-panel">
-        <form method="post">
+    <!-- Lesson Form Card -->
+    <section class="glass-strong rounded-2xl p-6 sm:p-8 shadow-xl space-y-5">
+        <h2 class="text-lg font-semibold text-forest m-0">Lesson details</h2>
+
+        <form method="post" class="space-y-5" novalidate>
             {% csrf_token %}
-            {{ form.as_p }}
-            <div class="form-actions">
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-error text-sm" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="space-y-1.5">
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-forest">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <p class="text-xs text-forest/80 m-0">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p class="field-error text-xs font-medium text-[#933636] bg-[#f6e9e9] border border-[#e7cccc] rounded-lg px-3 py-1.5">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <!-- Static Save / Cancel Row -->
+            <div class="pt-4 border-t border-linen flex flex-wrap items-center gap-3">
                 <button class="btn btn-primary" type="submit">Save</button>
                 <a class="btn btn-secondary" href="{% url 'instructor_course_edit' course.pk %}">Cancel</a>
             </div>
         </form>
-    </div>
+    </section>
 
     {% if lesson %}
-        <div class="card">
-            <h2>Danger zone</h2>
-            <p class="muted">Deleting a lesson removes it for every enrolled student.</p>
-            <form method="post" action="{% url 'instructor_lesson_edit' lesson.pk %}">
+        <!-- Danger Zone -->
+        <section class="card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <h2 class="text-lg font-semibold text-[#933636] m-0">Danger zone</h2>
+                <p class="text-sm text-forest/80 m-0">Deleting a lesson removes it for every enrolled student.</p>
+            </div>
+            <form method="post" action="{% url 'instructor_lesson_edit' lesson.pk %}" class="shrink-0">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="delete">
                 <button class="btn btn-danger" type="submit">Delete lesson</button>
             </form>
-        </div>
+        </section>
     {% endif %}
+</div>
 {% endblock %}
