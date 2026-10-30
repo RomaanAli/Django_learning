@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -40,7 +41,7 @@ def _redirect_with_message(request, course, level, text):
     return redirect("course_detail", pk=course.pk)
 
 
-def _send_enrollment_email(user, course, amount, currency) -> bool:
+def _send_enrollment_email(user, course, amount, currency, request=None) -> bool:
 
     recipient = (user.email or "").strip()
     if not recipient:
@@ -52,18 +53,40 @@ def _send_enrollment_email(user, course, amount, currency) -> bool:
         return False
 
     subject = f"You're enrolled in {course.title}"
-    message = (
-        f"Hi {user.username},\n\n"
-        "Thank you for your payment! Your enrollment is confirmed and the "
-        "course is now unlocked on your dashboard.\n\n"
-        f"Course : {course.title}\n"
-        f"Price  : {amount:.2f} {(currency or '').upper()}\n\n"
-        "Log in any time to continue learning where you left off.\n\n"
-        "Happy learning!\n"
-        "- The E-Learning Team"
-    )
+    formatted_amount = f"{amount:.2f}"
+    formatted_currency = (currency or "").upper()
+    instructor_username = ""
+    if getattr(course, "instructor", None):
+        instructor_username = getattr(course.instructor, "username", "") or ""
+
+    dashboard_url = None
+    if request:
+        try:
+            dashboard_url = request.build_absolute_uri(reverse("dashboard"))
+        except Exception:
+            dashboard_url = None
+
+    context = {
+        "user": user,
+        "username": user.username,
+        "course": course,
+        "course_title": course.title,
+        "amount": amount,
+        "formatted_amount": formatted_amount,
+        "currency": formatted_currency,
+        "instructor_username": instructor_username,
+        "dashboard_url": dashboard_url,
+    }
+    message = render_to_string("payments/emails/enrollment_email.txt", context)
+    html_message = render_to_string("payments/emails/enrollment_email.html", context)
     try:
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [recipient])
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient],
+            html_message=html_message,
+        )
     except Exception as exc:
         print(
             f"[email] Could not send enrollment confirmation to "
@@ -74,7 +97,7 @@ def _send_enrollment_email(user, course, amount, currency) -> bool:
     return True
 
 
-def fulfill_checkout_session(session):
+def fulfill_checkout_session(session, request=None):
     """Mark the Payment paid and enrol the student — exactly once.
 
     Accepts either a ``StripeObject`` (what the Stripe API hands back) or a
@@ -127,6 +150,7 @@ def fulfill_checkout_session(session):
             course,
             amount,
             session.get("currency") or settings.STRIPE_CURRENCY,
+            request=request,
         )
     return True
 
@@ -274,7 +298,7 @@ class PaymentSuccessView(LoginRequiredMixin, TemplateView):
         ):
             return False
 
-        return fulfill_checkout_session(data)
+        return fulfill_checkout_session(data, request=self.request)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

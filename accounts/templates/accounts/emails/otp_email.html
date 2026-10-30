@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Verify Your E-Learning Account</title>
+  <style type="text/css">
+    @media only screen and (max-width: 600px) {
+      .email-container {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .email-content {
+        padding: 24px 16px !important;
+      }
+      .otp-box-cell {
+        padding: 14px 16px !important;
+      }
+      .otp-code {
+        font-size: 26px !important;
+        letter-spacing: 5px !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #f7f3ea; font-family: Arial, Helvetica, sans-serif;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7f3ea;">
+    <tr>
+      <td align="center" style="padding: 20px 10px;">
+        <table role="presentation" class="email-container" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e8e1d3; border-radius: 8px; overflow: hidden;">
+          <!-- Brand Header -->
+          <tr>
+            <td align="left" style="background-color: #203d32; padding: 16px 20px; border-bottom: 2px solid #557461;">
+              <span style="font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold; color: #ffffff; letter-spacing: 0.5px; text-decoration: none;">
+                E-Learning
+              </span>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td class="email-content" style="padding: 28px 20px; background-color: #ffffff; font-family: Arial, Helvetica, sans-serif; color: #203d32;">
+              <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 22px; color: #203d32;">
+                Hi {{ username }},
+              </p>
+
+              <h1 style="margin: 0 0 8px 0; font-size: 20px; font-weight: bold; line-height: 26px; color: #203d32;">
+                Your verification code
+              </h1>
+
+              <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 20px; color: #557461;">
+                Use this code to verify your E-Learning account.
+              </p>
+
+              <!-- Centered OTP Box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 0 18px 0;">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="background-color: #f7f3ea; border: 2px dashed #b88a54; border-radius: 8px; margin: 0 auto;">
+                      <tr>
+                        <td align="center" class="otp-box-cell" style="padding: 14px 24px;">
+                          <span class="otp-code" style="font-family: 'Courier New', Courier, monospace, Arial; font-size: 30px; font-weight: bold; letter-spacing: 6px; color: #203d32; display: inline-block;">
+                            {{ otp }}
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 14px 0; font-size: 13px; font-weight: bold; line-height: 18px; color: #b88a54; text-align: center;">
+                This code expires in {{ otp_lifetime_minutes }} minutes.
+              </p>
+
+              <p style="margin: 0; font-size: 13px; line-height: 19px; color: #557461; text-align: center;">
+                Enter this code on the verify-email page. If you did not request this account, you can ignore this email.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 16px 20px; background-color: #f7f3ea; border-top: 1px solid #e8e1d3; font-family: Arial, Helvetica, sans-serif; text-align: center;">
+              <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: bold; line-height: 16px; color: #b88a54;">
+                Never share this code with anyone.
+              </p>
+              <p style="margin: 0; font-size: 12px; line-height: 16px; color: #718096;">
+                This is an automated email, please do not reply. &mdash; The E-Learning Team
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

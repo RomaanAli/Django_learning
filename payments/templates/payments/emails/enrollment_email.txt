@@ -1,0 +1,19 @@
+You're enrolled!
+
+Hi {{ username }}, thank you for your payment! Your enrollment is confirmed and the course is now unlocked on your dashboard.
+
+Course : {{ course_title }}
+Price  : {{ formatted_amount }} {{ currency }}
+{% if instructor_username %}Instructor : {{ instructor_username }}
+{% endif %}
+{% if dashboard_url %}Go to my dashboard: {{ dashboard_url }}
+{% else %}Log in and open your dashboard
+{% endif %}
+
+Log in any time to continue learning where you left off.
+
+Happy learning!
+- The E-Learning Team
+
+This is an automated email, please do not reply. — The E-Learning Team
+

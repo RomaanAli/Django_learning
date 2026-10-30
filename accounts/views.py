@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -41,17 +42,25 @@ def _generate_otp() -> str:
     return f"{secrets.randbelow(1_000_000):06d}"
 
 
-def _send_otp_email(user, otp: str) -> bool:
+def _send_otp_email(user, otp: str, request=None) -> bool:
 
     subject = "Verify Your E-Learning Account"
-    message = (
-        f"Hi {user.username},\n\n"
-        f"Your verification OTP is:\n\n{otp}\n\n"
-        f"This OTP will expire in {OTP_LIFETIME_MINUTES} minutes.\n\n"
-        "If you did not request this account, you can ignore this email."
-    )
+    context = {
+        "user": user,
+        "username": user.username,
+        "otp": otp,
+        "otp_lifetime_minutes": OTP_LIFETIME_MINUTES,
+    }
+    message = render_to_string("accounts/emails/otp_email.txt", context)
+    html_message = render_to_string("accounts/emails/otp_email.html", context)
     try:
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            html_message=html_message,
+        )
     except Exception as exc:
         print(f"[email] Could not send OTP to {user.email}: {exc}", flush=True)
         return False

@@ -1,0 +1,15 @@
+Hi {{ username }},
+
+Your verification code
+
+Use this code to verify your E-Learning account.
+
+{{ otp }}
+
+This code expires in {{ otp_lifetime_minutes }} minutes.
+
+Enter this code on the verify-email page. If you did not request this account, you can ignore this email.
+
+Never share this code with anyone.
+This is an automated email, please do not reply. — The E-Learning Team
+

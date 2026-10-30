@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>You're enrolled in {{ course_title }}</title>
+  <style type="text/css">
+    @media only screen and (max-width: 600px) {
+      .email-container {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .email-content {
+        padding: 24px 16px !important;
+      }
+      .detail-label {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+      }
+      .detail-val {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+      }
+      .btn-dashboard {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 12px 16px !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #f7f3ea; font-family: Arial, Helvetica, sans-serif;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7f3ea;">
+    <tr>
+      <td align="center" style="padding: 20px 10px;">
+        <table role="presentation" class="email-container" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e8e1d3; border-radius: 8px; overflow: hidden;">
+          <!-- Brand Header -->
+          <tr>
+            <td align="left" style="background-color: #203d32; padding: 16px 20px; border-bottom: 2px solid #557461;">
+              <span style="font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold; color: #ffffff; letter-spacing: 0.5px; text-decoration: none;">
+                E-Learning
+              </span>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td class="email-content" style="padding: 28px 20px; background-color: #ffffff; font-family: Arial, Helvetica, sans-serif; color: #203d32;">
+              <h1 style="margin: 0 0 14px 0; font-size: 20px; font-weight: bold; line-height: 26px; color: #203d32;">
+                You're enrolled!
+              </h1>
+
+              <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 22px; color: #203d32;">
+                Hi {{ username }}, thank you for your payment! Your enrollment is confirmed and the course is now unlocked on your dashboard.
+              </p>
+
+              <!-- Course Details Table -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 0 20px 0; background-color: #f7f3ea; border: 1px solid #e8e1d3; border-radius: 8px; border-collapse: separate;">
+                <tr>
+                  <td class="detail-label" style="padding: 12px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #557461; border-bottom: 1px solid #e8e1d3; width: 32%;">Course</td>
+                  <td class="detail-val" style="padding: 12px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: #203d32; border-bottom: 1px solid #e8e1d3; text-align: right; word-break: break-word;">{{ course_title }}</td>
+                </tr>
+                {% if instructor_username %}
+                <tr>
+                  <td class="detail-label" style="padding: 12px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #557461; border-bottom: 1px solid #e8e1d3; width: 32%;">Price</td>
+                  <td class="detail-val" style="padding: 12px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: #203d32; border-bottom: 1px solid #e8e1d3; text-align: right;">{{ formatted_amount }} {{ currency }}</td>
+                </tr>
+                <tr>
+                  <td class="detail-label" style="padding: 12px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #557461; width: 32%;">Instructor</td>
+                  <td class="detail-val" style="padding: 12px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: #203d32; text-align: right; word-break: break-word;">{{ instructor_username }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td class="detail-label" style="padding: 12px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #557461; width: 32%;">Price</td>
+                  <td class="detail-val" style="padding: 12px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: #203d32; text-align: right;">{{ formatted_amount }} {{ currency }}</td>
+                </tr>
+                {% endif %}
+              </table>
+
+              <!-- Primary Action -->
+              {% if dashboard_url %}
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 0 22px 0;">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                      <tr>
+                        <td align="center" style="border-radius: 8px; background-color: #203d32;">
+                          <a href="{{ dashboard_url }}" class="btn-dashboard" target="_blank" style="display: inline-block; padding: 12px 28px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: #ffffff; text-decoration: none; border-radius: 8px; background-color: #203d32; text-align: center;">Go to my dashboard</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              {% else %}
+              <p style="margin: 0 0 22px 0; font-size: 15px; font-weight: bold; color: #203d32; text-align: center;">
+                Log in and open your dashboard
+              </p>
+              {% endif %}
+
+              <p style="margin: 0; font-size: 13px; line-height: 20px; color: #557461;">
+                Log in any time to continue learning where you left off. Happy learning! &mdash; The E-Learning Team
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 16px 20px; background-color: #f7f3ea; border-top: 1px solid #e8e1d3; font-family: Arial, Helvetica, sans-serif; text-align: center;">
+              <p style="margin: 0; font-size: 12px; line-height: 16px; color: #718096;">
+                This is an automated email, please do not reply. &mdash; The E-Learning Team
+              </p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
