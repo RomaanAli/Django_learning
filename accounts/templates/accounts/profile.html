@@ -58,5 +58,15 @@
             </div>
         </dl>
     </div>
+
+    {% if user.is_student %}
+    <div class="card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/70 border border-linen">
+        <div>
+            <h3 class="text-base font-bold text-forest m-0">Want to teach on E-Learning?</h3>
+            <p class="text-sm text-forest/80 m-0 mt-1">Apply to become an instructor, upload your qualification document, and start creating courses.</p>
+        </div>
+        <a class="btn btn-primary shrink-0" href="{% url 'instructor_apply' %}">Apply to Teach</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

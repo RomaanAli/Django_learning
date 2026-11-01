@@ -17,7 +17,7 @@
 {% block social_auth %}
 {% if google_configured %}
 <div class="space-y-2 mb-4">
-  <a class="btn btn-google w-full rounded-xl py-2.5 px-4 text-sm font-semibold text-forest bg-white border border-linen hover:bg-beige/60 transition-colors flex items-center justify-center gap-2" href="{% provider_login_url 'google' process='login' %}">
+  <a class="btn btn-google w-full rounded-xl py-2.5 px-4 text-sm font-semibold text-forest bg-white border border-linen hover:bg-beige/60 transition-colors flex items-center justify-center gap-2" href="{% provider_login_url 'google' %}">
     <span class="google-icon font-bold text-base" aria-hidden="true">G</span>
     <span>Continue with Google</span>
   </a>

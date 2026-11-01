@@ -21,9 +21,9 @@
 <div class="space-y-2 mb-4">
   <a id="google-signup-btn" class="btn btn-google w-full rounded-xl py-2.5 px-4 text-sm font-semibold text-forest bg-white border border-linen hover:bg-beige/60 transition-colors flex items-center justify-center gap-2" href="{% provider_login_url 'google' %}">
     <span class="google-icon font-bold text-base" aria-hidden="true">G</span>
-    <span>Continue with Google as <strong id="google-role-label">{% if selected_role == 'instructor' %}Instructor{% else %}Student{% endif %}</strong></span>
+    <span>Continue with Google</span>
   </a>
-  <p class="text-xs text-center text-forest/75 m-0">Your account will be created as <strong id="google-role-sublabel">{% if selected_role == 'instructor' %}Instructor{% else %}Student{% endif %}</strong>.</p>
+  <p class="text-xs text-center text-forest/75 m-0">Fast 1-click signup with Google.</p>
 </div>
 <p class="divider text-xs text-forest/70 my-3"><span>or register with email</span></p>
 {% endif %}

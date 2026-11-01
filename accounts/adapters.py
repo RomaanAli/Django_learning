@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
 from django.urls import reverse
 from allauth.account.adapter import DefaultAccountAdapter
-from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialApp
 
@@ -20,7 +19,7 @@ class AccountAdapter(DefaultAccountAdapter):
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     """Default behaviour with duplicate app handling, role preservation on login,
-    and server-enforced role assignment for new social signups.
+    and automatic student default (or selected instructor role) for new social signups.
     """
 
     def get_app(self, request, provider, client_id=None):
@@ -41,7 +40,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         # IF the social login belongs to an EXISTING user:
         # DO NOTHING to role, is_approved_instructor, is_active, or email.
-        # Return / log in unchanged.
+        # Log in unchanged.
         if sociallogin.is_existing:
             return
 
@@ -55,23 +54,12 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 sociallogin.connect(request, existing)
                 return
 
-        # If user clicked login-only Google link without an existing account:
-        process = sociallogin.state.get("process")
-        if process == "login":
-            messages.info(
-                request,
-                "No account found with this Google email. Please select whether you want to join as a Student or Instructor."
-            )
-            raise ImmediateHttpResponse(redirect("register"))
-
-        # IF the social login is for a NEW user:
+        # NEW user signup via Google:
+        # If user explicitly selected instructor on register page, honor it,
+        # otherwise default to Student without any blocking or redirect traps.
         role = request.session.pop("pending_signup_role", None)
         if role not in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR):
-            messages.info(
-                request,
-                "Please choose whether you want to join as a Student or Instructor before signing up with Google."
-            )
-            raise ImmediateHttpResponse(redirect("register"))
+            role = User.ROLE_STUDENT
 
         request.session["_google_new_user_role"] = role
 

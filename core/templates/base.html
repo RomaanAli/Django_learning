@@ -48,6 +48,7 @@
                         <a href="{% url 'instructor_dashboard' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_dashboard' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_dashboard' %} aria-current="page"{% endif %}>Approval Pending</a>
                     {% else %}
                         <a href="{% url 'dashboard' %}" class="text-sm{% if request.resolver_match.url_name == 'dashboard' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+                        <a href="{% url 'instructor_apply' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_apply' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_apply' %} aria-current="page"{% endif %}>Teach</a>
                     {% endif %}
                     <a href="{% url 'profile' %}" class="text-sm{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' %} aria-current="page"{% endif %}>Profile</a>
                 {% endif %}
