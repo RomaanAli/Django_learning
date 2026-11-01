@@ -19,11 +19,11 @@
 {% block social_auth %}
 {% if google_configured %}
 <div class="space-y-2 mb-4">
-  <a class="btn btn-google w-full rounded-xl py-2.5 px-4 text-sm font-semibold text-forest bg-white border border-linen hover:bg-beige/60 transition-colors flex items-center justify-center gap-2" href="{% provider_login_url 'google' %}">
+  <a id="google-signup-btn" class="btn btn-google w-full rounded-xl py-2.5 px-4 text-sm font-semibold text-forest bg-white border border-linen hover:bg-beige/60 transition-colors flex items-center justify-center gap-2" href="{% provider_login_url 'google' %}">
     <span class="google-icon font-bold text-base" aria-hidden="true">G</span>
-    <span>Continue with Google</span>
+    <span>Continue with Google as <strong id="google-role-label">{% if selected_role == 'instructor' %}Instructor{% else %}Student{% endif %}</strong></span>
   </a>
-  <p class="text-xs text-center text-forest/75 m-0">Signing up with Google will use your selected role (<strong id="google-role-label">{% if selected_role == 'instructor' %}Instructor{% else %}Student{% endif %}</strong>).</p>
+  <p class="text-xs text-center text-forest/75 m-0">Your account will be created as <strong id="google-role-sublabel">{% if selected_role == 'instructor' %}Instructor{% else %}Student{% endif %}</strong>.</p>
 </div>
 <p class="divider text-xs text-forest/70 my-3"><span>or register with email</span></p>
 {% endif %}
@@ -91,7 +91,7 @@
     {{ form.password1 }}
     <button type="button" class="toggle-password" aria-label="Show password">
       <svg class="eye-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
         <circle cx="12" cy="12" r="3"></circle>
       </svg>
     </button>
@@ -106,7 +106,7 @@
     {{ form.password2 }}
     <button type="button" class="toggle-password" aria-label="Show password">
       <svg class="eye-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
         <circle cx="12" cy="12" r="3"></circle>
       </svg>
     </button>

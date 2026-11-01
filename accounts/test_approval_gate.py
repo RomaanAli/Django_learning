@@ -4,6 +4,7 @@ from django.test import TestCase, RequestFactory, Client
 from django.urls import reverse
 from rest_framework.test import APIClient
 from allauth.socialaccount.models import SocialAccount, SocialLogin, SocialApp
+from allauth.core.exceptions import ImmediateHttpResponse
 from accounts.models import InstructorDocument, EmailVerification
 from accounts.adapters import SocialAccountAdapter
 from courses.models import Course, Lesson
@@ -350,26 +351,39 @@ class GoogleRoleAdapterTests(TestCase):
         self.assertEqual(user.role, User.ROLE_STUDENT)
         self.assertFalse(user.is_approved_instructor)
 
-    def test_pre_social_login_new_user_without_session_role_defaults_to_student(self):
+    def test_pre_social_login_new_user_from_login_page_redirects_to_register(self):
         user = User(username="new_guser", email="new_guser@example.com")
         account = SocialAccount(user=user, provider="google", uid="54321")
         login = SocialLogin(user=user, account=account)
+        login.state = {"process": "login"}
 
         req = self.rf.get("/accounts/google/login/")
         _attach_messages_and_session(req)
 
-        self.adapter.pre_social_login(req, login)
-        self.assertEqual(req.session.get("_google_new_user_role"), User.ROLE_STUDENT)
+        with self.assertRaises(ImmediateHttpResponse) as ctx:
+            self.adapter.pre_social_login(req, login)
 
-        saved = self.adapter.save_user(req, login)
-        self.assertEqual(saved.role, User.ROLE_STUDENT)
-        self.assertFalse(saved.is_approved_instructor)
-        self.assertFalse(saved.can_teach)
+        self.assertEqual(ctx.exception.response.url, reverse("register"))
+
+    def test_pre_social_login_new_user_without_session_role_redirects_to_register(self):
+        user = User(username="new_guser2", email="new_guser2@example.com")
+        account = SocialAccount(user=user, provider="google", uid="54322")
+        login = SocialLogin(user=user, account=account)
+        login.state = {}
+
+        req = self.rf.get("/accounts/google/login/")
+        _attach_messages_and_session(req)
+
+        with self.assertRaises(ImmediateHttpResponse) as ctx:
+            self.adapter.pre_social_login(req, login)
+
+        self.assertEqual(ctx.exception.response.url, reverse("register"))
 
     def test_pre_social_login_new_user_with_instructor_role(self):
         user = User(username="new_ginst", email="new_ginst@example.com")
         account = SocialAccount(user=user, provider="google", uid="99999")
         login = SocialLogin(user=user, account=account)
+        login.state = {}
 
         req = self.rf.get("/accounts/google/login/")
         _attach_messages_and_session(req)
@@ -384,6 +398,26 @@ class GoogleRoleAdapterTests(TestCase):
         # save_user sets role and is_approved_instructor=False
         saved = self.adapter.save_user(req, login)
         self.assertEqual(saved.role, User.ROLE_INSTRUCTOR)
+        self.assertFalse(saved.is_approved_instructor)
+        self.assertFalse(saved.can_teach)
+
+    def test_pre_social_login_new_user_with_student_role(self):
+        user = User(username="new_gstud", email="new_gstud@example.com")
+        account = SocialAccount(user=user, provider="google", uid="88888")
+        login = SocialLogin(user=user, account=account)
+        login.state = {}
+
+        req = self.rf.get("/accounts/google/login/")
+        _attach_messages_and_session(req)
+        req.session["pending_signup_role"] = "student"
+
+        self.adapter.pre_social_login(req, login)
+
+        self.assertNotIn("pending_signup_role", req.session)
+        self.assertEqual(req.session.get("_google_new_user_role"), "student")
+
+        saved = self.adapter.save_user(req, login)
+        self.assertEqual(saved.role, User.ROLE_STUDENT)
         self.assertFalse(saved.is_approved_instructor)
         self.assertFalse(saved.can_teach)
 
