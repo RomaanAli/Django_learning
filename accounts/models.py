@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -25,6 +25,11 @@ class User(AbstractUser):
         default=ROLE_STUDENT,
         verbose_name="role",
     )
+    is_approved_instructor = models.BooleanField(
+        default=False,
+        verbose_name="approved instructor",
+        help_text="Designates whether this instructor has been approved to teach courses.",
+    )
 
     class Meta:
         verbose_name = "user"
@@ -44,6 +49,11 @@ class User(AbstractUser):
     def is_student(self) -> bool:
         """True when this user is an ordinary learner."""
         return self.role == self.ROLE_STUDENT
+
+    @property
+    def can_teach(self) -> bool:
+        """True when this user has verified permissions to create and manage courses."""
+        return self.is_admin or (self.is_instructor and self.is_approved_instructor)
 
 
 class Profile(models.Model):
@@ -132,6 +142,11 @@ class InstructorDocument(models.Model):
         related_name="approved_documents",
         verbose_name="approved by",
     )
+    review_note = models.TextField(
+        blank=True,
+        verbose_name="review note",
+        help_text="Reason for denial or reviewer notes shown to the instructor.",
+    )
 
     class Meta:
         verbose_name = "instructor document"
@@ -155,28 +170,43 @@ class InstructorDocument(models.Model):
             self.save()
 
     def approve(self, reviewer=None) -> bool:
-        if self.status == self.STATUS_APPROVED and self.approved_at:
-            return False
+        with transaction.atomic():
+            if self.status == self.STATUS_APPROVED and self.approved_at and self.user.is_approved_instructor:
+                return False
 
-        self.status = self.STATUS_APPROVED
-        self.approved_at = self.approved_at or timezone.now()
-        self.approved_by = reviewer or self.approved_by
-        self._save_stamped(("status", "approved_at", "approved_by"))
+            self.status = self.STATUS_APPROVED
+            self.approved_at = self.approved_at or timezone.now()
+            self.approved_by = reviewer or self.approved_by
+            self.review_note = ""
+            self._save_stamped(("status", "approved_at", "approved_by", "review_note"))
 
-        user = self.user
-        if user.role == user.ROLE_STUDENT:
-            user.role = user.ROLE_INSTRUCTOR
-            user.save(update_fields=["role"])
-        return True
+            user = self.user
+            update_fields = ["is_approved_instructor"]
+            if user.role == user.ROLE_STUDENT:
+                user.role = user.ROLE_INSTRUCTOR
+                update_fields.append("role")
+            user.is_approved_instructor = True
+            user.save(update_fields=update_fields)
+            return True
 
-    def deny(self, reviewer=None) -> bool:
+    def deny(self, reviewer=None, reason="") -> bool:
+        with transaction.atomic():
+            reason_str = (reason or "").strip()
+            if self.status == self.STATUS_DENIED and not self.user.is_approved_instructor and self.review_note == reason_str:
+                return False
 
-        if self.status == self.STATUS_DENIED:
-            return False
+            self.status = self.STATUS_DENIED
+            self.approved_at = None
+            self.approved_by = None
+            if reason_str:
+                self.review_note = reason_str
+            self._save_stamped(("status", "approved_at", "approved_by", "review_note"))
 
-        self.status = self.STATUS_DENIED
-        self._save_stamped(("status",))
-        return True
+            user = self.user
+            if user.is_approved_instructor:
+                user.is_approved_instructor = False
+                user.save(update_fields=["is_approved_instructor"])
+            return True
 
     def __str__(self):
         return f"{self.user.username} - {self.get_status_display()}"

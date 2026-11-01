@@ -157,7 +157,7 @@
                             You are enrolled! Your lessons are unlocked on this page.
                         </div>
                     {% elif user.is_authenticated %}
-                        {% if can_manage %}
+                        {% if can_manage and user.can_teach %}
                             <a class="btn btn-secondary w-full justify-center" href="{% url 'instructor_course_edit' course.pk %}">
                                 Manage this course
                             </a>

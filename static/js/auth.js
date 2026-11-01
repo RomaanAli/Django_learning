@@ -78,6 +78,33 @@
     radios.forEach(function (r) {
       r.checked = (r.value === role);
     });
+
+    var docGroup = document.getElementById('document-group');
+    if (docGroup) {
+      docGroup.style.display = (role === 'instructor') ? 'block' : 'none';
+      var docInput = docGroup.querySelector('input[type="file"]');
+      if (role !== 'instructor' && docInput) {
+        docInput.value = '';
+      }
+    }
+
+    var googleRoleLabel = document.getElementById('google-role-label');
+    if (googleRoleLabel) {
+      googleRoleLabel.textContent = (role === 'instructor') ? 'Instructor' : 'Student';
+    }
+
+    // Sync session pending_signup_role in background
+    var csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    if (csrfInput) {
+      var formData = new FormData();
+      formData.append('csrfmiddlewaretoken', csrfInput.value);
+      formData.append('role', role);
+      fetch('/accounts/set-role/', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: formData
+      }).catch(function() {});
+    }
   }
 
   radios.forEach(function (r) {

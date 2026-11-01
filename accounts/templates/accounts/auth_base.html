@@ -41,7 +41,8 @@
         <p class="auth-subtitle text-sm text-forest/80 m-0">{% block header_subtitle %}Enter your details to continue{% endblock %}</p>
       </header>
 
-      <form class="auth-form {% block form_class %}{% endblock %}" method="post" action="{% block form_action %}{% endblock %}" novalidate>
+      {% block auth_content %}
+      <form class="auth-form {% block form_class %}{% endblock %}" method="post" action="{% block form_action %}{% endblock %}" {% block form_enctype %}{% endblock %} novalidate>
         {% csrf_token %}
         {% if request.GET.next %}
         <input type="hidden" name="next" value="{{ request.GET.next }}">
@@ -77,6 +78,7 @@
           <span class="btn-spinner" aria-hidden="true"></span>
         </button>
       </form>
+      {% endblock %}
 
       {% block after_form %}{% endblock %}
 

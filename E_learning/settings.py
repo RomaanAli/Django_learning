@@ -290,6 +290,7 @@ ACCOUNT_LOGIN_METHODS = {"username", "email"}
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
+ACCOUNT_ADAPTER = "accounts.adapters.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountAdapter"
 
 SOCIALACCOUNT_PROVIDERS = {

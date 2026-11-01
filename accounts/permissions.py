@@ -37,7 +37,7 @@ class RoleRequiredMixin(LoginRequiredMixin):
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and not self.has_permission():
-            self.handle_no_permission()
+            return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
 
     def handle_no_permission(self):
@@ -52,6 +52,35 @@ class InstructorRequiredMixin(RoleRequiredMixin):
     """Allow instructors and admins only."""
 
     allowed_roles = ("instructor", "admin")
+
+
+class ApprovedInstructorRequiredMixin(InstructorRequiredMixin):
+    """Allow approved instructors and admins only (can_teach is True).
+
+    Pending and denied instructors are redirected to the instructor dashboard
+    status page with an informative message.
+    """
+
+    def has_permission(self):
+        user = self.request.user
+        if not user.is_authenticated or not user.is_active:
+            return False
+        if user.is_superuser:
+            return True
+        return user.can_teach
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()
+        from django.contrib import messages
+        from django.shortcuts import redirect
+        if self.request.user.is_instructor:
+            messages.info(
+                self.request,
+                "Your instructor account is pending admin approval before you can manage courses."
+            )
+            return redirect("instructor_dashboard")
+        raise PermissionDenied("Your account does not have permission to view this page.")
 
 
 class AdminRequiredMixin(RoleRequiredMixin):

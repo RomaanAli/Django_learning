@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import DetailView, ListView
 
-from accounts.permissions import InstructorRequiredMixin
+from accounts.permissions import ApprovedInstructorRequiredMixin, InstructorRequiredMixin
 
 from .forms import CourseForm, LessonForm
 from .models import Course, Enrollment, Lesson
@@ -96,7 +96,7 @@ class EnrollCourseView(LoginRequiredMixin, View):
         return self._enroll(request, pk)
 
 
-class InstructorCourseListView(InstructorRequiredMixin, ListView):
+class InstructorCourseListView(ApprovedInstructorRequiredMixin, ListView):
     """List the courses the signed-in instructor manages."""
 
     model = Course
@@ -115,7 +115,7 @@ class InstructorCourseListView(InstructorRequiredMixin, ListView):
         )
 
 
-class InstructorCourseCreateView(InstructorRequiredMixin, View):
+class InstructorCourseCreateView(ApprovedInstructorRequiredMixin, View):
     """Let an instructor create a new course (unpublished until they publish)."""
 
     template_name = "courses/instructor_course_form.html"
@@ -137,7 +137,7 @@ class InstructorCourseCreateView(InstructorRequiredMixin, View):
         return redirect("instructor_course_edit", pk=course.pk)
 
 
-class InstructorCourseEditView(InstructorRequiredMixin, View):
+class InstructorCourseEditView(ApprovedInstructorRequiredMixin, View):
     """Edit a course — only by the instructor who owns it (or an admin)."""
 
     template_name = "courses/instructor_course_form.html"
@@ -177,7 +177,7 @@ class InstructorCourseEditView(InstructorRequiredMixin, View):
         return redirect("instructor_course_edit", pk=course.pk)
 
 
-class InstructorCoursePublishView(InstructorRequiredMixin, View):
+class InstructorCoursePublishView(ApprovedInstructorRequiredMixin, View):
     """Publish or unpublish one of the instructor's courses."""
 
     def post(self, request, pk):
@@ -195,7 +195,7 @@ class InstructorCoursePublishView(InstructorRequiredMixin, View):
         return redirect("instructor_course_edit", pk=course.pk)
 
 
-class InstructorLessonCreateView(InstructorRequiredMixin, View):
+class InstructorLessonCreateView(ApprovedInstructorRequiredMixin, View):
     """Add a lesson to one of the instructor's courses."""
 
     template_name = "courses/instructor_lesson_form.html"
@@ -239,7 +239,7 @@ class InstructorLessonCreateView(InstructorRequiredMixin, View):
         return redirect("instructor_course_edit", pk=course.pk)
 
 
-class InstructorLessonEditView(InstructorRequiredMixin, View):
+class InstructorLessonEditView(ApprovedInstructorRequiredMixin, View):
     """Edit or delete a lesson of one of the instructor's courses."""
 
     template_name = "courses/instructor_lesson_form.html"

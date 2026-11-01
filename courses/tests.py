@@ -18,12 +18,14 @@ class InstructorCourseOwnershipTests(TestCase):
             email="instructor1@example.com",
             password=PASSWORD,
             role=User.ROLE_INSTRUCTOR,
+            is_approved_instructor=True,
         )
         self.other = User.objects.create_user(
             username="instructor2",
             email="instructor2@example.com",
             password=PASSWORD,
             role=User.ROLE_INSTRUCTOR,
+            is_approved_instructor=True,
         )
         self.student = User.objects.create_user(
             username="student1", email="student1@example.com", password=PASSWORD
@@ -116,6 +118,7 @@ class InstructorCourseManagementTests(TestCase):
             email="instructor1@example.com",
             password=PASSWORD,
             role=User.ROLE_INSTRUCTOR,
+            is_approved_instructor=True,
         )
         self.client.force_login(self.instructor)
 
@@ -230,6 +233,7 @@ class InstructorCourseManagementTests(TestCase):
             email="instructor2@example.com",
             password=PASSWORD,
             role=User.ROLE_INSTRUCTOR,
+            is_approved_instructor=True,
         )
         course = Course.objects.create(
             title="Not yours",
@@ -258,6 +262,7 @@ class EnrollmentTests(TestCase):
             email="instructor1@example.com",
             password=PASSWORD,
             role=User.ROLE_INSTRUCTOR,
+            is_approved_instructor=True,
         )
         self.course = Course.objects.create(
             title="Free course",

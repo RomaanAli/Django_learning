@@ -1,3 +1,4 @@
+from django.urls import reverse
 import secrets
 from datetime import timedelta
 
@@ -11,6 +12,7 @@ from django.template.loader import render_to_string
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.http import JsonResponse
 from django.views import View
 from django.views.generic import TemplateView
 
@@ -106,7 +108,8 @@ def _activate_user(request, user) -> None:
         pending_role = User.ROLE_STUDENT
     user.role = pending_role
     user.is_active = True
-    user.save(update_fields=["role", "is_active"])
+    user.is_approved_instructor = False
+    user.save(update_fields=["role", "is_active", "is_approved_instructor"])
     request.session.pop("pending_user_id", None)
     request.session.pop("pending_user_role", None)
 
@@ -117,6 +120,36 @@ def _is_google_configured(request) -> bool:
         return bool(get_adapter(request).list_apps(request, provider="google"))
     except Exception:
         return False
+
+class ChooseRoleView(View):
+    """Legacy redirect: routes choose-role directly to register."""
+
+    def get(self, request):
+        role = request.GET.get("role")
+        if role in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR):
+            return redirect(f"{reverse('register')}?role={role}")
+        return redirect("register")
+
+    def post(self, request):
+        role = (request.POST.get("role") or "").strip().lower()
+        if role in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR):
+            request.session["pending_signup_role"] = role
+            if request.headers.get("x-requested-with") == "XMLHttpRequest" or request.GET.get("format") == "json":
+                return JsonResponse({"status": "ok", "role": role})
+            return redirect(f"{reverse('register')}?role={role}")
+        return redirect("register")
+
+
+class SetRoleView(View):
+    """AJAX/fetch endpoint to set pending_signup_role in the session for Google signup."""
+
+    def post(self, request):
+        role = (request.POST.get("role") or "").strip().lower()
+        if role in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR):
+            request.session["pending_signup_role"] = role
+            return JsonResponse({"status": "ok", "role": role})
+        return JsonResponse({"status": "error", "message": "Invalid role"}, status=400)
+
 
 class RegisterView(View):
 
@@ -142,6 +175,7 @@ class RegisterView(View):
 
     def get(self, request):
         role = self._selected_role(request.GET.get("role"))
+        request.session["pending_signup_role"] = role
         form = StudentRegistrationForm(initial={"role": role})
         return self._render(request, form, selected_role=role)
 
@@ -157,7 +191,7 @@ class RegisterView(View):
                 User.objects.filter(pk__in=stale_ids).delete()
 
         submitted_role = self._selected_role(request.POST.get("role"))
-        form = StudentRegistrationForm(request.POST)
+        form = StudentRegistrationForm(request.POST, request.FILES)
         if not form.is_valid():
             return self._render(request, form, selected_role=submitted_role)
 
@@ -631,7 +665,7 @@ class InstructorApplyView(LoginRequiredMixin, View):
 
     Applying uploads one document (a certificate, ID or similar). The upload
     is stored as ``pending``; an admin approves it from the Django admin,
-    which promotes the user to the ``instructor`` role.
+    which promotes the user to the ``instructor`` role and sets ``is_approved_instructor``.
     """
 
     template_name = "accounts/instructor_apply.html"
@@ -641,7 +675,10 @@ class InstructorApplyView(LoginRequiredMixin, View):
 
     def get(self, request):
         if request.user.is_instructor:
-            messages.info(request, "You are already an instructor.")
+            if not request.user.can_teach:
+                messages.info(request, "Your instructor application is already submitted and pending review.")
+            else:
+                messages.info(request, "You are already an instructor.")
             return redirect("instructor_dashboard")
 
         document = self._document(request.user)
@@ -657,7 +694,10 @@ class InstructorApplyView(LoginRequiredMixin, View):
 
     def post(self, request):
         if request.user.is_instructor:
-            messages.info(request, "You are already an instructor.")
+            if not request.user.can_teach:
+                messages.info(request, "Your instructor application is already submitted and pending review.")
+            else:
+                messages.info(request, "You are already an instructor.")
             return redirect("instructor_dashboard")
 
         document = self._document(request.user)
@@ -675,6 +715,7 @@ class InstructorApplyView(LoginRequiredMixin, View):
         document.status = InstructorDocument.STATUS_PENDING
         document.approved_at = None
         document.approved_by = None
+        document.review_note = ""
         document.save()
 
         messages.success(
@@ -684,8 +725,58 @@ class InstructorApplyView(LoginRequiredMixin, View):
         return redirect("instructor_apply")
 
 
+class InstructorDocumentUploadView(LoginRequiredMixin, View):
+    """Dedicated document upload handler for instructors."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        if request.user.is_student:
+            messages.info(request, "Document upload is for instructors only.")
+            return redirect("dashboard")
+        if request.user.can_teach:
+            messages.info(request, "You are already an approved instructor.")
+            return redirect("instructor_dashboard")
+        return super().dispatch(request, *args, **kwargs)
+
+    def _get_document(self, user):
+        return InstructorDocument.objects.filter(user=user).first()
+
+    def get(self, request):
+        return redirect("instructor_dashboard")
+
+    def post(self, request):
+        document = self._get_document(request.user)
+        if document and document.status == InstructorDocument.STATUS_PENDING:
+            messages.info(request, "Your document is already under review.")
+            return redirect("instructor_dashboard")
+
+        form = InstructorDocumentForm(request.POST, request.FILES, instance=document)
+        if not form.is_valid():
+            err_msg = "Please upload a valid document (PDF, PNG, JPG under 5 MB)."
+            if form.errors and "file" in form.errors:
+                err_msg = form.errors["file"][0]
+            messages.error(request, err_msg)
+            return redirect("instructor_dashboard")
+
+        doc = form.save(commit=False)
+        doc.user = request.user
+        doc.status = InstructorDocument.STATUS_PENDING
+        doc.approved_at = None
+        doc.approved_by = None
+        doc.review_note = ""
+        doc.save()
+
+        if request.user.is_approved_instructor:
+            request.user.is_approved_instructor = False
+            request.user.save(update_fields=["is_approved_instructor"])
+
+        messages.success(request, "Your document was uploaded and is waiting for admin approval.")
+        return redirect("instructor_dashboard")
+
+
 class InstructorDashboardView(InstructorRequiredMixin, TemplateView):
-    """Landing page for instructors: their courses and student counts."""
+    """Landing page for instructors: their courses if approved, status card if pending/denied."""
 
     template_name = "accounts/instructor_dashboard.html"
 
@@ -694,6 +785,15 @@ class InstructorDashboardView(InstructorRequiredMixin, TemplateView):
 
         context = super().get_context_data(**kwargs)
         user = self.request.user
+
+        if not user.can_teach:
+            document = InstructorDocument.objects.filter(user=user).first()
+            context["document"] = document
+            context["courses"] = []
+            context["student_count"] = 0
+            context["draft_courses"] = []
+            return context
+
         # Mirror InstructorCourseListView: admins see all courses, not
         # just the (usually empty) set they personally teach.
         if user.is_admin or user.is_superuser:

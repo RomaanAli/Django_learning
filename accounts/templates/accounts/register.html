@@ -12,7 +12,22 @@
 
 {% block form_action %}{% url 'register' %}{% endblock %}
 
+{% block form_enctype %}enctype="multipart/form-data"{% endblock %}
+
 {% block submit_text %}Create account{% endblock %}
+
+{% block social_auth %}
+{% if google_configured %}
+<div class="space-y-2 mb-4">
+  <a class="btn btn-google w-full rounded-xl py-2.5 px-4 text-sm font-semibold text-forest bg-white border border-linen hover:bg-beige/60 transition-colors flex items-center justify-center gap-2" href="{% provider_login_url 'google' %}">
+    <span class="google-icon font-bold text-base" aria-hidden="true">G</span>
+    <span>Continue with Google</span>
+  </a>
+  <p class="text-xs text-center text-forest/75 m-0">Signing up with Google will use your selected role (<strong id="google-role-label">{% if selected_role == 'instructor' %}Instructor{% else %}Student{% endif %}</strong>).</p>
+</div>
+<p class="divider text-xs text-forest/70 my-3"><span>or register with email</span></p>
+{% endif %}
+{% endblock %}
 
 {% block role_toggle %}
 <div class="role-toggle grid grid-cols-2 gap-2.5" role="radiogroup" aria-label="Account type" data-role-toggle>
@@ -97,6 +112,13 @@
     </button>
   </div>
   {% if form.password2.errors %}<div class="field-error" role="alert">{{ form.password2.errors|join:', ' }}</div>{% endif %}
+</div>
+
+<div class="field-group" id="document-group" {% if selected_role != 'instructor' %}style="display: none;"{% endif %}>
+  <label for="{{ form.document.id_for_label }}" class="text-sm font-medium text-forest">Proof of qualification document</label>
+  {{ form.document }}
+  {% if form.document.errors %}<div class="field-error" role="alert">{{ form.document.errors|join:', ' }}</div>{% endif %}
+  <p class="text-xs text-forest/75 m-0 mt-1">For instructors only. Upload a document that proves you can teach (PDF or image, max 5 MB). An admin will review it. You can log in while you wait, but you cannot create courses until you are approved.</p>
 </div>
 {% endblock %}
 
