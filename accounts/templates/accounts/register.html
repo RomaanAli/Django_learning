@@ -18,14 +18,14 @@
 
 {% block social_auth %}
 {% if google_configured %}
-<div class="space-y-2 mb-4">
+<div id="google-signup-wrapper" class="space-y-2 mb-4" {% if selected_role == 'instructor' %}style="display: none;"{% endif %}>
   <a id="google-signup-btn" class="btn btn-google w-full rounded-xl py-2.5 px-4 text-sm font-semibold text-forest bg-white border border-linen hover:bg-beige/60 transition-colors flex items-center justify-center gap-2" href="{% provider_login_url 'google' %}">
     <span class="google-icon font-bold text-base" aria-hidden="true">G</span>
     <span>Continue with Google</span>
   </a>
   <p class="text-xs text-center text-forest/75 m-0">Fast 1-click signup with Google.</p>
 </div>
-<p class="divider text-xs text-forest/70 my-3"><span>or register with email</span></p>
+<p id="google-signup-divider" class="divider text-xs text-forest/70 my-3" {% if selected_role == 'instructor' %}style="display: none;"{% endif %}><span>or register with email</span></p>
 {% endif %}
 {% endblock %}
 
@@ -115,10 +115,32 @@
 </div>
 
 <div class="field-group" id="document-group" {% if selected_role != 'instructor' %}style="display: none;"{% endif %}>
-  <label for="{{ form.document.id_for_label }}" class="text-sm font-medium text-forest">Proof of qualification document</label>
-  {{ form.document }}
+  <label for="{{ form.document.id_for_label }}" class="text-sm font-medium text-forest flex items-center gap-2 mb-1.5">
+    <svg class="w-4 h-4 text-forest/80 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+      <polyline points="14 2 14 8 20 8"></polyline>
+      <line x1="12" y1="18" x2="12" y2="12"></line>
+      <line x1="9" y1="15" x2="12" y2="12"></line>
+      <line x1="15" y1="15" x2="12" y2="12"></line>
+    </svg>
+    <span>Proof of qualification document</span>
+  </label>
+  <div class="relative">
+    <div class="flex items-center gap-3 p-3 rounded-xl border border-linen bg-white/75 hover:bg-white transition-colors">
+      <div class="w-9 h-9 rounded-lg bg-beige flex items-center justify-center text-forest shrink-0">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        {{ form.document }}
+      </div>
+    </div>
+  </div>
   {% if form.document.errors %}<div class="field-error" role="alert">{{ form.document.errors|join:', ' }}</div>{% endif %}
-  <p class="text-xs text-forest/75 m-0 mt-1">For instructors only. Upload a document that proves you can teach (PDF or image, max 5 MB). An admin will review it. You can log in while you wait, but you cannot create courses until you are approved.</p>
+  <p class="text-xs text-forest/75 m-0 mt-1.5">For instructors only. Upload a document that proves you can teach (PDF or image, max 5 MB). An admin will review it. You can log in while you wait, but you cannot create courses until you are approved.</p>
 </div>
 {% endblock %}
 

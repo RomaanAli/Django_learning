@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/payments/', include('payments.api_urls')),
     path('courses/', include('courses.urls')),
     path('payments/', include('payments.urls')),
+    path('chatbot/', include('chatbot.urls')),
     path('webhooks/stripe/', payments_views.stripe_webhook, name='stripe_webhook'),
 ]
 

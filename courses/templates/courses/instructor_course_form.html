@@ -6,9 +6,7 @@
 <div class="max-w-3xl mx-auto space-y-8">
     <!-- Breadcrumb -->
     <nav class="flex flex-wrap items-center gap-2 text-sm text-forest/80" aria-label="Breadcrumb">
-        <a class="hover:text-forest transition-colors" href="{% url 'instructor_dashboard' %}">Instructor dashboard</a>
-        <span aria-hidden="true">/</span>
-        <a class="hover:text-forest transition-colors" href="{% url 'instructor_course_list' %}">My courses</a>
+        <a class="hover:text-forest transition-colors" href="{% url 'instructor_dashboard' %}">Dashboard</a>
         <span aria-hidden="true">/</span>
         <span class="font-medium text-forest">{% if course %}Edit{% else %}New{% endif %}</span>
     </nav>
@@ -59,7 +57,7 @@
             <!-- Static Save / Cancel Row -->
             <div class="pt-4 border-t border-linen flex flex-wrap items-center gap-3">
                 <button class="btn btn-primary" type="submit">Save</button>
-                <a class="btn btn-secondary" href="{% url 'instructor_course_list' %}">Cancel</a>
+                <a class="btn btn-secondary" href="{% url 'instructor_dashboard' %}">Cancel</a>
             </div>
         </form>
     </section>

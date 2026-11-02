@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'courses',
     'accounts',
     'payments',
+    'chatbot',
 ]
 
 MIDDLEWARE = [
@@ -315,4 +316,7 @@ STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "").strip()
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "").strip()
 STRIPE_CURRENCY = os.environ.get("STRIPE_CURRENCY", "usd").strip().lower()
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b").strip()
 

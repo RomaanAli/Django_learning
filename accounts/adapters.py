@@ -55,22 +55,14 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 return
 
         # NEW user signup via Google:
-        # If user explicitly selected instructor on register page, honor it,
-        # otherwise default to Student without any blocking or redirect traps.
-        role = request.session.pop("pending_signup_role", None)
-        if role not in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR):
-            role = User.ROLE_STUDENT
-
-        request.session["_google_new_user_role"] = role
+        # Only students register with Google
+        request.session["_google_new_user_role"] = User.ROLE_STUDENT
 
     def save_user(self, request, sociallogin, form=None):
         User = get_user_model()
         u = sociallogin.user
-        role = request.session.pop("_google_new_user_role", None) or User.ROLE_STUDENT
-        if role not in (User.ROLE_STUDENT, User.ROLE_INSTRUCTOR):
-            role = User.ROLE_STUDENT
-
-        u.role = role
+        # Only students register with Google
+        u.role = User.ROLE_STUDENT
         u.is_approved_instructor = False
         u.is_active = True
         u.set_unusable_password()

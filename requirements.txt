@@ -13,3 +13,7 @@ whitenoise==6.8.2
 dj-database-url==2.2.0
 psycopg[binary]==3.2.12
 stripe==15.6.1
+groq==1.7.0
+sentence-transformers==6.2.0
+pgvector==0.5.1
+

@@ -41,14 +41,12 @@
                 <a href="{% url 'course_list' %}" class="text-sm{% if request.resolver_match.app_name == 'courses' or request.resolver_match.url_name == 'course_list' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.app_name == 'courses' or request.resolver_match.url_name == 'course_list' %} aria-current="page"{% endif %}>Courses</a>
                 {% if user.is_authenticated %}
                     {% if user.can_teach %}
-                        <a href="{% url 'instructor_dashboard' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_dashboard' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_dashboard' %} aria-current="page"{% endif %}>Instructor Dashboard</a>
-                        <a href="{% url 'instructor_course_list' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_course_list' or request.resolver_match.url_name == 'instructor_course_edit' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_course_list' or request.resolver_match.url_name == 'instructor_course_edit' %} aria-current="page"{% endif %}>My Courses</a>
+                        <a href="{% url 'instructor_dashboard' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_dashboard' or request.resolver_match.url_name == 'instructor_course_list' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_dashboard' or request.resolver_match.url_name == 'instructor_course_list' %} aria-current="page"{% endif %}>Dashboard</a>
                         <a href="{% url 'instructor_course_create' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_course_create' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_course_create' %} aria-current="page"{% endif %}>New Course</a>
                     {% elif user.is_instructor %}
                         <a href="{% url 'instructor_dashboard' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_dashboard' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_dashboard' %} aria-current="page"{% endif %}>Approval Pending</a>
                     {% else %}
                         <a href="{% url 'dashboard' %}" class="text-sm{% if request.resolver_match.url_name == 'dashboard' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
-                        <a href="{% url 'instructor_apply' %}" class="text-sm{% if request.resolver_match.url_name == 'instructor_apply' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'instructor_apply' %} aria-current="page"{% endif %}>Teach</a>
                     {% endif %}
                     <a href="{% url 'profile' %}" class="text-sm{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' %} active bg-beige text-forest rounded-full px-3 py-1 font-semibold{% endif %}"{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' %} aria-current="page"{% endif %}>Profile</a>
                 {% endif %}
@@ -104,8 +102,7 @@
                     <ul class="footer-links text-sm">
                         {% if user.is_authenticated %}
                             {% if user.can_teach %}
-                                <li><a href="{% url 'instructor_dashboard' %}" class="text-linen/90 hover:text-beige transition-colors">Instructor Dashboard</a></li>
-                                <li><a href="{% url 'instructor_course_list' %}" class="text-linen/90 hover:text-beige transition-colors">My Courses</a></li>
+                                <li><a href="{% url 'instructor_dashboard' %}" class="text-linen/90 hover:text-beige transition-colors">Dashboard</a></li>
                             {% elif user.is_instructor %}
                                 <li><a href="{% url 'instructor_dashboard' %}" class="text-linen/90 hover:text-beige transition-colors">Approval Pending</a></li>
                             {% else %}
@@ -210,5 +207,6 @@
         })();
     </script>
 
+    {% include 'chatbot/widget.html' %}
 </body>
 </html>

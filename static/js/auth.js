@@ -88,6 +88,15 @@
       }
     }
 
+    var googleWrapper = document.getElementById('google-signup-wrapper');
+    if (googleWrapper) {
+      googleWrapper.style.display = (role === 'instructor') ? 'none' : 'block';
+    }
+    var googleDivider = document.getElementById('google-signup-divider');
+    if (googleDivider) {
+      googleDivider.style.display = (role === 'instructor') ? 'none' : 'block';
+    }
+
     var roleLabel = (role === 'instructor') ? 'Instructor' : 'Student';
     var googleRoleLabel = document.getElementById('google-role-label');
     if (googleRoleLabel) {

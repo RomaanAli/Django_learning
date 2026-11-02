@@ -1,0 +1,568 @@
+<!-- Floating RAG Chatbot Widget -->
+<style>
+    #rag-chat-widget {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 99999;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #rag-chat-toggle {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background-color: #203d32;
+        color: #f7f3ea;
+        box-shadow: 0 8px 24px rgba(32, 61, 50, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        outline: none;
+        transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    #rag-chat-toggle:hover {
+        background-color: #183027;
+        transform: scale(1.05);
+    }
+    #rag-chat-toggle:active {
+        transform: scale(0.95);
+    }
+    #rag-chat-card {
+        position: absolute;
+        bottom: 64px;
+        right: 0;
+        width: 380px;
+        height: 490px;
+        max-width: calc(100vw - 32px);
+        max-height: calc(100vh - 100px);
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 20px 40px rgba(24, 42, 34, 0.2), 0 0 0 1px rgba(32, 61, 50, 0.12);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: ragFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #rag-chat-card.hidden {
+        display: none !important;
+    }
+    @media (max-width: 640px) {
+        #rag-chat-widget {
+            bottom: 16px;
+            right: 16px;
+            left: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        #rag-chat-card {
+            width: 100%;
+            max-width: 100%;
+            right: 0;
+            left: 0;
+            bottom: 64px;
+            height: 480px;
+            max-height: calc(100dvh - 96px);
+        }
+    }
+    @keyframes ragFadeIn {
+        from { opacity: 0; transform: translateY(8px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .rag-header {
+        background-color: #203d32;
+        color: #f7f3ea;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .rag-header-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #ffffff;
+    }
+    .rag-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #34d399;
+    }
+    .rag-close-btn {
+        background: transparent;
+        border: none;
+        color: #e8e1d3;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .rag-close-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #ffffff;
+    }
+    #rag-chat-messages {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background-color: #faf8f5;
+        font-size: 13.5px;
+        line-height: 1.5;
+    }
+    .rag-msg-user {
+        align-self: flex-end;
+        background-color: #203d32;
+        color: #f7f3ea;
+        border-radius: 16px 16px 2px 16px;
+        padding: 9px 13px;
+        max-width: 86%;
+        word-break: break-word;
+        box-shadow: 0 2px 6px rgba(32, 61, 50, 0.12);
+        white-space: pre-wrap;
+    }
+    .rag-msg-bot {
+        align-self: flex-start;
+        background-color: #ffffff;
+        color: #203d32;
+        border: 1px solid rgba(32, 61, 50, 0.12);
+        border-radius: 16px 16px 16px 2px;
+        padding: 11px 14px;
+        max-width: 88%;
+        word-break: break-word;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        line-height: 1.55;
+    }
+    .rag-bot-p {
+        margin: 0 0 8px 0;
+    }
+    .rag-bot-p:last-child {
+        margin-bottom: 0;
+    }
+    .rag-bot-list {
+        margin: 6px 0 8px 0;
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .rag-bot-list:last-child {
+        margin-bottom: 0;
+    }
+    .rag-bot-item {
+        line-height: 1.5;
+        color: #1f3328;
+    }
+    .rag-msg-bot strong {
+        color: #11261d;
+        font-weight: 600;
+    }
+    .rag-inline-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        background: #eef4f0;
+        color: #203d32;
+        padding: 2px 7px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1px solid rgba(32, 61, 50, 0.16);
+        margin: 1px 3px 1px 0;
+        transition: all 0.15s ease;
+    }
+    .rag-inline-link:hover {
+        background: #203d32;
+        color: #f7f3ea;
+        border-color: #203d32;
+        text-decoration: none;
+    }
+    .rag-sources {
+        margin-top: 6px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .rag-source-chip {
+        font-size: 11px;
+        color: #203d32;
+        background: #eef2ed;
+        border: 1px solid rgba(32, 61, 50, 0.15);
+        border-radius: 6px;
+        padding: 2px 8px;
+        text-decoration: none;
+        transition: background-color 0.15s;
+    }
+    .rag-source-chip:hover {
+        background: #e0e8df;
+    }
+    .rag-typing {
+        display: inline-flex;
+        gap: 4px;
+        padding: 8px 12px;
+        background: #ffffff;
+        border: 1px solid rgba(32, 61, 50, 0.12);
+        border-radius: 12px;
+        width: fit-content;
+    }
+    .rag-typing-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #557461;
+        opacity: 0.6;
+        animation: ragPulse 1.2s infinite ease-in-out;
+    }
+    .rag-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .rag-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes ragPulse {
+        0%, 100% { transform: translateY(0); opacity: 0.4; }
+        50% { transform: translateY(-3px); opacity: 1; }
+    }
+    .rag-input-container {
+        padding: 10px 12px;
+        background: #ffffff;
+        border-top: 1px solid rgba(32, 61, 50, 0.1);
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+    }
+    #rag-chat-input {
+        flex: 1;
+        border: 1px solid rgba(32, 61, 50, 0.2);
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-family: inherit;
+        color: #203d32;
+        background: #faf8f5;
+        resize: none;
+        max-height: 80px;
+        outline: none;
+    }
+    #rag-chat-input:focus {
+        border-color: #203d32;
+        background: #ffffff;
+    }
+    #rag-chat-send {
+        background-color: #203d32;
+        color: #f7f3ea;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s;
+    }
+    #rag-chat-send:hover { background-color: #183027; }
+    #rag-chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+    .rag-login-prompt {
+        padding: 12px;
+        background: #faf8f5;
+        border-top: 1px solid rgba(32, 61, 50, 0.1);
+        text-align: center;
+        font-size: 12px;
+        color: #557461;
+    }
+    .rag-login-prompt a {
+        color: #203d32;
+        font-weight: 600;
+        text-decoration: underline;
+    }
+</style>
+
+<div id="rag-chat-widget">
+    <!-- Chat Card -->
+    <div id="rag-chat-card" class="hidden" role="dialog" aria-label="AI Course Assistant">
+        <!-- Header -->
+        <div class="rag-header">
+            <div class="rag-header-title">
+                <span class="rag-dot"></span>
+                <span>Course Assistant</span>
+            </div>
+            <button type="button" id="rag-chat-close" class="rag-close-btn" aria-label="Close chat">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="rag-chat-messages">
+            <div class="rag-msg-bot">
+                {% if user.is_authenticated %}
+                    Hi {{ user.first_name|default:user.username }}! I can help you with course details, curriculum, lessons, pricing, and enrollment. What would you like to know?
+                {% else %}
+                    Welcome to E-Learning! I can answer questions about published courses, lessons, pricing, and how the platform works.
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        {% if user.is_authenticated %}
+            <form id="rag-chat-form" class="rag-input-container">
+                {% csrf_token %}
+                <textarea id="rag-chat-input" rows="1" maxlength="500" placeholder="Ask a question... (Enter to send)"></textarea>
+                <button type="submit" id="rag-chat-send" aria-label="Send message">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        {% else %}
+            <div class="rag-login-prompt">
+                Please <a href="{% url 'login' %}?next={{ request.path }}">log in</a> to ask questions to the assistant.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Toggle Launcher Button -->
+    <button type="button" id="rag-chat-toggle" aria-expanded="false" aria-controls="rag-chat-card" aria-label="Toggle Course Assistant chat">
+        <svg id="rag-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <svg id="rag-icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+    </button>
+</div>
+
+<script>
+    (function() {
+        const toggleBtn = document.getElementById("rag-chat-toggle");
+        const chatCard = document.getElementById("rag-chat-card");
+        const closeBtn = document.getElementById("rag-chat-close");
+        const iconOpen = document.getElementById("rag-icon-open");
+        const iconClose = document.getElementById("rag-icon-close");
+        const messagesContainer = document.getElementById("rag-chat-messages");
+        const form = document.getElementById("rag-chat-form");
+        const input = document.getElementById("rag-chat-input");
+        const sendBtn = document.getElementById("rag-chat-send");
+
+        if (!toggleBtn || !chatCard) return;
+
+        function toggleChat(show) {
+            const isOpen = typeof show === "boolean" ? show : chatCard.classList.contains("hidden");
+            if (isOpen) {
+                chatCard.classList.remove("hidden");
+                toggleBtn.setAttribute("aria-expanded", "true");
+                if (iconOpen) iconOpen.style.display = "none";
+                if (iconClose) iconClose.style.display = "block";
+                if (input) input.focus();
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } else {
+                chatCard.classList.add("hidden");
+                toggleBtn.setAttribute("aria-expanded", "false");
+                if (iconOpen) iconOpen.style.display = "block";
+                if (iconClose) iconClose.style.display = "none";
+            }
+        }
+
+        toggleBtn.addEventListener("click", () => toggleChat());
+        if (closeBtn) closeBtn.addEventListener("click", () => toggleChat(false));
+
+        if (new URLSearchParams(window.location.search).get("chat") === "open") {
+            toggleChat(true);
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatBotMessage(rawText) {
+            if (!rawText) return "";
+
+            // Normalize crammed lists: if digits or bullet points are packed into single line
+            let text = rawText
+                .replace(/([^\n])\s+(\d+\.\s+)/g, "$1\n$2")
+                .replace(/([^\n])\s+([•\-]\s+)/g, "$1\n$2");
+
+            // Escape HTML entities to prevent XSS
+            let escaped = escapeHtml(text);
+
+            // Bold: **text**
+            escaped = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+            // Italic: *text* or _text_
+            escaped = escaped.replace(/(^|[^\*])\*([^\*]+)\*([^\*]|$)/g, "$1<em>$2</em>$3");
+
+            // Markdown link: [Title](URL)
+            escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(match, label, url) {
+                const cleanUrl = url.trim();
+                const safeUrl = (cleanUrl.startsWith("/") || cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) ? cleanUrl : "#";
+                return `<a href="${safeUrl}" class="rag-inline-link" target="_blank" rel="noopener noreferrer">${label}</a>`;
+            });
+
+            // Context URL mentions like (URL: /courses/24/) or (URL: https://...)
+            escaped = escaped.replace(/\(URL:\s*([^\s)]+)\)/gi, function(match, url) {
+                const cleanUrl = url.trim();
+                const safeUrl = (cleanUrl.startsWith("/") || cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) ? cleanUrl : "#";
+                return `<a href="${safeUrl}" class="rag-inline-link" target="_blank" rel="noopener noreferrer">View Course &rarr;</a>`;
+            });
+
+            // Split into blocks: paragraphs & lists
+            const lines = escaped.split("\n");
+            let html = "";
+            let inList = false;
+            let listType = "ul";
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (!line) {
+                    if (inList) {
+                        html += `</${listType}>`;
+                        inList = false;
+                    }
+                    continue;
+                }
+
+                const olMatch = line.match(/^(\d+)\.\s+(.*)/);
+                const ulMatch = line.match(/^[-•*]\s+(.*)/);
+
+                if (olMatch) {
+                    if (!inList || listType !== "ol") {
+                        if (inList) html += `</${listType}>`;
+                        html += "<ol class='rag-bot-list'>";
+                        inList = true;
+                        listType = "ol";
+                    }
+                    html += `<li class='rag-bot-item'>${olMatch[2]}</li>`;
+                } else if (ulMatch) {
+                    if (!inList || listType !== "ul") {
+                        if (inList) html += `</${listType}>`;
+                        html += "<ul class='rag-bot-list'>";
+                        inList = true;
+                        listType = "ul";
+                    }
+                    html += `<li class='rag-bot-item'>${ulMatch[1]}</li>`;
+                } else {
+                    if (inList) {
+                        html += `</${listType}>`;
+                        inList = false;
+                    }
+                    html += `<p class='rag-bot-p'>${line}</p>`;
+                }
+            }
+            if (inList) {
+                html += `</${listType}>`;
+            }
+
+            return html;
+        }
+
+        function appendMessage(text, role, sources = []) {
+            const bubble = document.createElement("div");
+            bubble.className = role === "user" ? "rag-msg-user" : "rag-msg-bot";
+
+            if (role === "user") {
+                bubble.textContent = text;
+            } else {
+                bubble.innerHTML = formatBotMessage(text);
+            }
+
+            if (sources && sources.length > 0) {
+                const sourcesBox = document.createElement("div");
+                sourcesBox.className = "rag-sources";
+                sources.forEach(s => {
+                    const link = document.createElement("a");
+                    link.href = s.url;
+                    link.className = "rag-source-chip";
+                    link.textContent = s.title.length > 28 ? s.title.substring(0, 28) + "..." : s.title;
+                    sourcesBox.appendChild(link);
+                });
+                bubble.appendChild(sourcesBox);
+            }
+
+            messagesContainer.appendChild(bubble);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function appendTypingIndicator() {
+            const indicator = document.createElement("div");
+            indicator.id = "rag-typing-indicator";
+            indicator.className = "rag-typing";
+            indicator.innerHTML = '<span class="rag-typing-dot"></span><span class="rag-typing-dot"></span><span class="rag-typing-dot"></span>';
+            messagesContainer.appendChild(indicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return indicator;
+        }
+
+        if (form && input) {
+            input.addEventListener("keydown", function(e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    form.requestSubmit();
+                }
+            });
+
+            form.addEventListener("submit", async function(e) {
+                e.preventDefault();
+                const msg = input.value.trim();
+                if (!msg) return;
+
+                appendMessage(msg, "user");
+                input.value = "";
+                input.style.height = "auto";
+                if (sendBtn) sendBtn.disabled = true;
+
+                const typingIndicator = appendTypingIndicator();
+
+                try {
+                    const csrfToken = getCookie("csrftoken") || (document.querySelector("[name=csrfmiddlewaretoken]") ? document.querySelector("[name=csrfmiddlewaretoken]").value : "");
+                    const response = await fetch("/chatbot/ask/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": csrfToken
+                        },
+                        body: JSON.stringify({ message: msg })
+                    });
+
+                    if (typingIndicator) typingIndicator.remove();
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        appendMessage(data.answer, "assistant", data.sources || []);
+                    } else {
+                        appendMessage(data.error || "Sorry, an error occurred. Please try again.", "assistant");
+                    }
+                } catch (err) {
+                    if (typingIndicator) typingIndicator.remove();
+                    appendMessage("Network error. Please check your connection and try again.", "assistant");
+                } finally {
+                    if (sendBtn) sendBtn.disabled = false;
+                    if (input) input.focus();
+                }
+            });
+        }
+    })();
+</script>
