@@ -21,9 +21,54 @@ RATE_LIMIT_REQUESTS = 5
 RATE_LIMIT_WINDOW_SECONDS = 60
 
 FALLBACK_OUT_OF_SCOPE = (
-    "I don't have information about that. I can help you with course details, "
-    "enrollment, payments, and how to use the site."
+    "I don't know the answer to that. You can check the courses page at /courses/ "
+    "for course details, or ask me about registering, logging in, enrolling, lessons, "
+    "or becoming an instructor."
 )
+
+# Fixed refusal replies (policy decisions, not LLM output).
+REFUSAL_ENROLLMENT_COUNT = "I don't provide enrollment numbers."
+REFUSAL_ADMIN = "I can't help with admin things. Please contact the site admin."
+REFUSAL_PRIVATE = (
+    "I don't have that information. I can't share other users' details "
+    "or unpublished courses."
+)
+
+_ENROLLMENT_COUNT_PATTERNS = [
+    r"\b(how many|number of|count of|total)\b.*\b(students?|learners?|people|users?|enrollments?)\b",
+    r"\benrol(l)?(ment)?s? (count|numbers?|stats?|statistics)\b",
+    r"\b(students?|learners?) (count|numbers?)\b",
+    r"\bhow (popular|many enrolled)\b",
+]
+_ADMIN_PATTERNS = [
+    r"\badmin(s|istrator|istrators|istration)?\b",
+    r"\bsuperuser\b",
+    r"\bstaff (account|panel|user|role)\b",
+]
+_PRIVATE_PATTERNS = [
+    r"\bwho (are|is|has|have)\b.*\b(students?|learners?|users?|enrolled|bought|purchased|paid)\b",
+    r"\bwho (enrolled|bought|purchased|paid|registered)\b",
+    r"\b(list|names?|emails?|contacts?|details?)\b.*\b(other|students?|learners?|users?)\b.*\b(enrolled|in|of|on|who)\b",
+    r"\b(students?|learners?|users?) (enrolled|registered) in\b",
+    r"\bother (users?|students?|people|learners?)\b",
+    r"\b(unpublished|draft|hidden|private) courses?\b",
+]
+
+
+def _policy_refusal(message: str) -> Optional[str]:
+    """
+    Returns a fixed refusal for questions the chatbot must never answer:
+    enrollment counts, admin topics, and other users' private data or
+    unpublished courses. Returns None when the question is allowed.
+    """
+    msg_lower = message.lower()
+    if any(re.search(p, msg_lower) for p in _ENROLLMENT_COUNT_PATTERNS):
+        return REFUSAL_ENROLLMENT_COUNT
+    if any(re.search(p, msg_lower) for p in _ADMIN_PATTERNS):
+        return REFUSAL_ADMIN
+    if any(re.search(p, msg_lower) for p in _PRIVATE_PATTERNS):
+        return REFUSAL_PRIVATE
+    return None
 
 
 def _check_rate_limit(user_id: int) -> bool:
@@ -50,15 +95,30 @@ def _handle_personal_question(user: Any, message: str) -> Optional[Dict[str, Any
     """
     msg_lower = message.lower()
 
-    # 1. Enrolled courses query
+    # Only treat a message as personal when it is about the asking user
+    # ("my courses", "am I enrolled"), not a how-to question ("how do I
+    # enroll?") and not a question about other students or users.
+    is_about_me = re.search(r"\b(i|i'm|im|me|my|mine)\b", msg_lower) is not None
+    is_how_to = re.search(r"\bhow (do|can|to|should|does)\b", msg_lower) is not None
+    mentions_others = re.search(
+        r"\b(students?|users?|people|learners?|others?|anyone|everyone|who)\b",
+        msg_lower,
+    ) is not None
+
+    # 1. Enrolled courses query (lists the user's own courses, no counts)
     is_enrollment_query = (
-        ("course" in msg_lower and any(w in msg_lower for w in ["enroll", "enrolled", "bought", "purchased", "registered", "taken", "taking"]))
-        or any(phrase in msg_lower for phrase in [
-            "my course", "my courses", "enrolled in", "what courses do i have",
-            "which courses did i enroll", "am i enrolled in", "am i enrolled",
-            "my enrollments", "courses i bought", "courses i purchased",
-            "have enrolled", "have i enrolled", "how many courses", "how many course"
-        ])
+        is_about_me
+        and not is_how_to
+        and not mentions_others
+        and (
+            ("course" in msg_lower and any(w in msg_lower for w in ["enroll", "enrolled", "bought", "purchased", "taken", "taking"]))
+            or any(phrase in msg_lower for phrase in [
+                "my course", "my courses", "what courses do i have",
+                "which courses did i enroll", "am i enrolled",
+                "my enrollments", "courses i bought", "courses i purchased",
+                "have i enrolled",
+            ])
+        )
     )
     if is_enrollment_query:
         enrollments = Enrollment.objects.filter(student=user).select_related("course")
@@ -68,7 +128,7 @@ def _handle_personal_question(user: Any, message: str) -> Optional[Dict[str, Any
                 for e in enrollments
             )
             answer = (
-                f"You are currently enrolled in {enrollments.count()} course(s):\n{courses_str}"
+                f"You are currently enrolled in these courses:\n{courses_str}"
             )
             sources = [
                 {"title": e.course.title, "url": f"/courses/{e.course.id}/"}
@@ -83,8 +143,8 @@ def _handle_personal_question(user: Any, message: str) -> Optional[Dict[str, Any
 
         return {"answer": answer, "sources": sources}
 
-    # 2. User role and account status query
-    if any(phrase in msg_lower for phrase in [
+    # 2. User role and account status query (not "how do I change my role?")
+    if not is_how_to and any(phrase in msg_lower for phrase in [
         "my role", "what is my role", "am i a student", "am i an instructor",
         "what role do i have", "my account status", "am i approved"
     ]):
@@ -161,14 +221,21 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
             status=400,
         )
 
-    # 4. Handle personal user-specific questions via Django ORM
+    # 4. Refuse enrollment-count, admin, and private-data questions up front
+    refusal = _policy_refusal(cleaned_message)
+    if refusal is not None:
+        ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
+        ChatMessage.objects.create(user=request.user, role="assistant", content=refusal)
+        return JsonResponse({"answer": refusal, "sources": []})
+
+    # 5. Handle personal user-specific questions via Django ORM
     personal_resp = _handle_personal_question(request.user, cleaned_message)
     if personal_resp is not None:
         ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
         ChatMessage.objects.create(user=request.user, role="assistant", content=personal_resp["answer"])
         return JsonResponse(personal_resp)
 
-    # 5. Retrieve top knowledge chunks from PostgreSQL via pgvector
+    # 6. Retrieve top knowledge chunks from PostgreSQL via pgvector
     retrieval_res = retrieve_relevant_chunks(cleaned_message, top_k=4)
 
     # If the closest match distance exceeds 0.70 (similarity < 0.30), trigger fallback
@@ -191,7 +258,7 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
             seen_urls.add(url)
             sources.append({"title": c.get("title", ""), "url": url})
 
-    # 6. Check Groq API Key configuration
+    # 7. Check Groq API Key configuration
     groq_api_key = getattr(settings, "GROQ_API_KEY", "").strip()
     if not groq_api_key or groq_api_key == "YOUR_GROQ_API_KEY_HERE":
         unconfigured_msg = (
@@ -204,7 +271,7 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
             "sources": sources,
         })
 
-    # 7. Query Groq LLM
+    # 8. Query Groq LLM
     try:
         from groq import Groq
 
@@ -222,17 +289,25 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
         system_instruction = (
             "You are the helpful AI assistant for the E-Learning platform.\n"
             "Rules you must strictly follow:\n"
-            "1. Answer ONLY using the facts given in the Context below. If the answer is not in the Context, say: "
-            "'I do not have information about that course or feature.'\n"
-            "2. Never invent courses, prices, features, or instructor details.\n"
-            "3. Formatting and Presentation:\n"
-            "   - When listing courses, lessons, or options, ALWAYS use a clean numbered list (1., 2., 3.) or bullet points (- ), with each item on its own new line.\n"
+            "1. Answer ONLY using the facts given in the Context below. This includes questions about student features, "
+            "instructor features, registering, logging in, enrolling, lessons, and changing role from student to instructor. "
+            "If the answer is not in the Context, say you don't know, and suggest checking the courses page at /courses/ "
+            "or the relevant help page from the Context. Never invent prices, dates, course names, features, steps, or pages.\n"
+            "2. Enrollment numbers: if the user asks how many students are enrolled in a course, how many students a course has, "
+            "or any enrollment count, do NOT give a number, do NOT guess, and do NOT say where a number is shown. "
+            "Reply only: \"I don't provide enrollment numbers.\"\n"
+            "3. Admin: if the user asks about admin, the Django admin panel, how admin approval works, how to become an admin, "
+            "or any admin feature, do not explain anything. Reply only: \"I can't help with admin things. Please contact the site admin.\"\n"
+            "4. Private data and unpublished content: never give other users' names, emails, enrollments, or payments, "
+            "and never describe unpublished or draft courses. Reply that you don't have that information.\n"
+            "5. Formatting and Presentation:\n"
+            "   - When listing courses, lessons, steps, or options, ALWAYS use a clean numbered list (1., 2., 3.) or bullet points (- ), with each item on its own new line.\n"
             "   - Format each course title as a Markdown link with its URL, e.g. [Course Title](URL) followed by the price (e.g. [Course Title](/courses/1/) - $20.00).\n"
             "   - Use blank lines between paragraphs and list items to keep the response well-spaced and easy to read.\n"
             "   - Never cram multiple items or courses into a single congested sentence or paragraph.\n"
-            "4. If mentioning a course or page, provide the corresponding URL from the context.\n"
-            "5. Never execute actions, modify database records, or claim to process payments.\n"
-            "6. Keep responses concise, clear, and professional."
+            "6. If mentioning a course or page, provide the corresponding URL from the context.\n"
+            "7. Never execute actions, modify database records, or claim to process payments.\n"
+            "8. Keep responses concise, clear, and professional."
         )
 
         messages = [{"role": "system", "content": system_instruction}]
@@ -261,7 +336,7 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
             status=503,
         )
 
-    # 8. Save messages to history
+    # 9. Save messages to history
     ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
     ChatMessage.objects.create(user=request.user, role="assistant", content=assistant_answer)
 
