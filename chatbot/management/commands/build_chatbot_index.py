@@ -34,12 +34,7 @@ class Command(BaseCommand):
     help = "Builds or updates the RAG knowledge index in PostgreSQL with pgvector."
 
     def handle(self, *args, **options):
-        hf_token = getattr(settings, "HF_TOKEN", "").strip()
-        if not hf_token:
-            self.stderr.write(self.style.ERROR("HF_TOKEN is not configured in settings or .env file."))
-            return
-
-        self.stdout.write(self.style.NOTICE(f"Using Hugging Face Inference API ({EMBEDDING_MODEL_NAME})..."))
+        self.stdout.write(self.style.NOTICE(f"Using FastEmbed ONNX model ({EMBEDDING_MODEL_NAME})..."))
 
         raw_chunks = []
 
@@ -115,8 +110,8 @@ class Command(BaseCommand):
         texts_to_embed = [
             f"{chunk['title']}\n{chunk['content']}" for chunk in raw_chunks
         ]
-        self.stdout.write(f"Generating 384-d embeddings via Hugging Face Inference API for {len(texts_to_embed)} chunks...")
-        embeddings = get_batch_embeddings(texts_to_embed, hf_token=hf_token, batch_size=10, pause_between_batches=0.5)
+        self.stdout.write(f"Generating 384-d embeddings via FastEmbed for {len(texts_to_embed)} chunks...")
+        embeddings = get_batch_embeddings(texts_to_embed, batch_size=16)
 
         KnowledgeChunk.objects.all().delete()
 

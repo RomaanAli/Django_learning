@@ -15,4 +15,5 @@ psycopg[binary]==3.2.12
 stripe==15.6.1
 groq==1.7.0
 pgvector==0.5.1
+fastembed==0.9.1
 

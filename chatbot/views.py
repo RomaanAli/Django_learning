@@ -206,14 +206,11 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
         ChatMessage.objects.create(user=request.user, role="assistant", content=personal_resp["answer"])
         return JsonResponse(personal_resp)
 
-    hf_token = getattr(settings, "HF_TOKEN", "")
-    if isinstance(hf_token, str):
-        hf_token = hf_token.strip()
     groq_api_key = getattr(settings, "GROQ_API_KEY", "")
     if isinstance(groq_api_key, str):
         groq_api_key = groq_api_key.strip()
 
-    if not hf_token or not groq_api_key:
+    if not groq_api_key:
         unconfigured_msg = "Chatbot is not configured yet."
         ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
         ChatMessage.objects.create(user=request.user, role="assistant", content=unconfigured_msg)
