@@ -1,24 +1,14 @@
 import logging
 from typing import Any, Dict, List, Optional
-from pgvector.django import CosineDistance
-from sentence_transformers import SentenceTransformer
 
+from pgvector.django import CosineDistance
+
+from chatbot.embeddings import get_text_embedding
 from chatbot.models import KnowledgeChunk
 
 logger = logging.getLogger(__name__)
 
-EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
-_embed_model: Optional[SentenceTransformer] = None
-
-# Distance threshold: Cosine distance > 0.70 corresponds to cosine similarity < 0.30
 DISTANCE_THRESHOLD = 0.70
-
-
-def get_embedding_model() -> SentenceTransformer:
-    global _embed_model
-    if _embed_model is None:
-        _embed_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
-    return _embed_model
 
 
 def retrieve_relevant_chunks(
@@ -26,16 +16,6 @@ def retrieve_relevant_chunks(
     top_k: int = 4,
     distance_threshold: float = DISTANCE_THRESHOLD,
 ) -> Dict[str, Any]:
-    """
-    Takes a user query, computes its embedding using all-MiniLM-L6-v2,
-    queries KnowledgeChunk with pgvector CosineDistance, and returns top_k chunks.
-
-    Returns:
-        dict with:
-            - 'chunks': list of dicts (title, content, source_url, distance, similarity)
-            - 'best_distance': float or None
-            - 'has_relevant_match': bool (True if best_distance <= distance_threshold)
-    """
     cleaned_query = (query or "").strip()
     if not cleaned_query:
         return {
@@ -44,8 +24,7 @@ def retrieve_relevant_chunks(
             "has_relevant_match": False,
         }
 
-    model = get_embedding_model()
-    query_vector = model.encode(cleaned_query).tolist()
+    query_vector = get_text_embedding(cleaned_query)
 
     qs = KnowledgeChunk.objects.annotate(
         distance=CosineDistance("embedding", query_vector)

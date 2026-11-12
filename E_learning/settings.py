@@ -319,4 +319,5 @@ STRIPE_CURRENCY = os.environ.get("STRIPE_CURRENCY", "usd").strip().lower()
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b").strip()
+HF_TOKEN = os.environ.get("HF_TOKEN", "")
 

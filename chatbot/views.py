@@ -26,7 +26,6 @@ FALLBACK_OUT_OF_SCOPE = (
     "or becoming an instructor."
 )
 
-# Fixed refusal replies (policy decisions, not LLM output).
 REFUSAL_ENROLLMENT_COUNT = "I don't provide enrollment numbers."
 REFUSAL_ADMIN = "I can't help with admin things. Please contact the site admin."
 REFUSAL_PRIVATE = (
@@ -56,11 +55,6 @@ _PRIVATE_PATTERNS = [
 
 
 def _policy_refusal(message: str) -> Optional[str]:
-    """
-    Returns a fixed refusal for questions the chatbot must never answer:
-    enrollment counts, admin topics, and other users' private data or
-    unpublished courses. Returns None when the question is allowed.
-    """
     msg_lower = message.lower()
     if any(re.search(p, msg_lower) for p in _ENROLLMENT_COUNT_PATTERNS):
         return REFUSAL_ENROLLMENT_COUNT
@@ -72,10 +66,6 @@ def _policy_refusal(message: str) -> Optional[str]:
 
 
 def _check_rate_limit(user_id: int) -> bool:
-    """
-    Returns True if user is within rate limit (max 5 requests per minute),
-    False if rate limit is exceeded.
-    """
     cache_key = f"chatbot_rate_limit_{user_id}"
     reqs = cache.get(cache_key, 0)
     if reqs >= RATE_LIMIT_REQUESTS:
@@ -89,15 +79,8 @@ def _check_rate_limit(user_id: int) -> bool:
 
 
 def _handle_personal_question(user: Any, message: str) -> Optional[Dict[str, Any]]:
-    """
-    Answers user-specific account/enrollment questions directly from Django ORM.
-    Never guesses or uses LLM for personal data.
-    """
     msg_lower = message.lower()
 
-    # Only treat a message as personal when it is about the asking user
-    # ("my courses", "am I enrolled"), not a how-to question ("how do I
-    # enroll?") and not a question about other students or users.
     is_about_me = re.search(r"\b(i|i'm|im|me|my|mine)\b", msg_lower) is not None
     is_how_to = re.search(r"\bhow (do|can|to|should|does)\b", msg_lower) is not None
     mentions_others = re.search(
@@ -105,7 +88,6 @@ def _handle_personal_question(user: Any, message: str) -> Optional[Dict[str, Any
         msg_lower,
     ) is not None
 
-    # 1. Enrolled courses query (lists the user's own courses, no counts)
     is_enrollment_query = (
         is_about_me
         and not is_how_to
@@ -143,7 +125,6 @@ def _handle_personal_question(user: Any, message: str) -> Optional[Dict[str, Any
 
         return {"answer": answer, "sources": sources}
 
-    # 2. User role and account status query (not "how do I change my role?")
     if not is_how_to and any(phrase in msg_lower for phrase in [
         "my role", "what is my role", "am i a student", "am i an instructor",
         "what role do i have", "my account status", "am i approved"
@@ -173,26 +154,18 @@ def _handle_personal_question(user: Any, message: str) -> Optional[Dict[str, Any
 
 @require_POST
 def ask_chatbot(request: HttpRequest) -> JsonResponse:
-    """
-    RAG Chatbot query endpoint.
-    Requires authentication, validates input, applies rate limits,
-    retrieves context chunks, queries Groq, and logs the exchange.
-    """
-    # 1. Authentication check
     if not request.user.is_authenticated:
         return JsonResponse(
             {"error": "Authentication required. Please log in to chat with the assistant."},
             status=401,
         )
 
-    # 2. Rate limiting check (5 req / min per user)
     if not _check_rate_limit(request.user.id):
         return JsonResponse(
             {"error": "Rate limit exceeded. Please wait a minute before sending more questions."},
             status=429,
         )
 
-    # 3. Parse JSON body
     try:
         payload = json.loads(request.body.decode("utf-8"))
     except (json.JSONDecodeError, UnicodeDecodeError):
@@ -221,24 +194,43 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
             status=400,
         )
 
-    # 4. Refuse enrollment-count, admin, and private-data questions up front
     refusal = _policy_refusal(cleaned_message)
     if refusal is not None:
         ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
         ChatMessage.objects.create(user=request.user, role="assistant", content=refusal)
         return JsonResponse({"answer": refusal, "sources": []})
 
-    # 5. Handle personal user-specific questions via Django ORM
     personal_resp = _handle_personal_question(request.user, cleaned_message)
     if personal_resp is not None:
         ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
         ChatMessage.objects.create(user=request.user, role="assistant", content=personal_resp["answer"])
         return JsonResponse(personal_resp)
 
-    # 6. Retrieve top knowledge chunks from PostgreSQL via pgvector
-    retrieval_res = retrieve_relevant_chunks(cleaned_message, top_k=4)
+    hf_token = getattr(settings, "HF_TOKEN", "")
+    if isinstance(hf_token, str):
+        hf_token = hf_token.strip()
+    groq_api_key = getattr(settings, "GROQ_API_KEY", "")
+    if isinstance(groq_api_key, str):
+        groq_api_key = groq_api_key.strip()
 
-    # If the closest match distance exceeds 0.70 (similarity < 0.30), trigger fallback
+    if not hf_token or not groq_api_key:
+        unconfigured_msg = "Chatbot is not configured yet."
+        ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
+        ChatMessage.objects.create(user=request.user, role="assistant", content=unconfigured_msg)
+        return JsonResponse({
+            "answer": unconfigured_msg,
+            "sources": [],
+        })
+
+    try:
+        retrieval_res = retrieve_relevant_chunks(cleaned_message, top_k=4)
+    except Exception as exc:
+        logger.exception("Error during knowledge chunk retrieval: %s", exc)
+        return JsonResponse(
+            {"error": "The AI service is temporarily unavailable. Please try again shortly."},
+            status=503,
+        )
+
     if not retrieval_res.get("has_relevant_match") or not retrieval_res.get("chunks"):
         fallback_answer = FALLBACK_OUT_OF_SCOPE
         ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
@@ -248,7 +240,6 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
             "sources": [],
         })
 
-    # Prepare unique sources
     chunks = retrieval_res["chunks"]
     seen_urls = set()
     sources: List[Dict[str, str]] = []
@@ -258,27 +249,12 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
             seen_urls.add(url)
             sources.append({"title": c.get("title", ""), "url": url})
 
-    # 7. Check Groq API Key configuration
-    groq_api_key = getattr(settings, "GROQ_API_KEY", "").strip()
-    if not groq_api_key or groq_api_key == "YOUR_GROQ_API_KEY_HERE":
-        unconfigured_msg = (
-            "Chatbot is not configured yet. The Groq API key has not been set."
-        )
-        ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
-        ChatMessage.objects.create(user=request.user, role="assistant", content=unconfigured_msg)
-        return JsonResponse({
-            "answer": unconfigured_msg,
-            "sources": sources,
-        })
-
-    # 8. Query Groq LLM
     try:
         from groq import Groq
 
         model_name = getattr(settings, "GROQ_MODEL", "llama-3.1-8b-instant")
         client = Groq(api_key=groq_api_key, timeout=15.0)
 
-        # Build context
         context_blocks = []
         for c in chunks:
             context_blocks.append(
@@ -312,7 +288,6 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
 
         messages = [{"role": "system", "content": system_instruction}]
 
-        # Include last 2-3 chat history turns
         recent_chats = ChatMessage.objects.filter(user=request.user).order_by("-created_at")[:4]
         for past in reversed(list(recent_chats)):
             messages.append({"role": past.role, "content": past.content})
@@ -336,7 +311,6 @@ def ask_chatbot(request: HttpRequest) -> JsonResponse:
             status=503,
         )
 
-    # 9. Save messages to history
     ChatMessage.objects.create(user=request.user, role="user", content=cleaned_message)
     ChatMessage.objects.create(user=request.user, role="assistant", content=assistant_answer)
 
@@ -371,7 +345,6 @@ def rebuild_index(request: HttpRequest) -> JsonResponse:
         )
 
     lock_key = "chatbot_rebuild_index_lock"
-    # Acquire a temporary cache lock (120s TTL) so concurrent requests don't collide
     if not cache.add(lock_key, True, timeout=120):
         return JsonResponse(
             {"error": "An index rebuild is already in progress. Please wait a moment."},

@@ -1,21 +1,18 @@
 import logging
-from django.core.management.base import BaseCommand
-from sentence_transformers import SentenceTransformer
+from typing import List
 
+from django.conf import settings
+from django.core.management.base import BaseCommand
+
+from chatbot.embeddings import EMBEDDING_MODEL_NAME, get_batch_embeddings
 from chatbot.faqs import FAQS
 from chatbot.models import KnowledgeChunk
 from courses.models import Course, Lesson
 
 logger = logging.getLogger(__name__)
 
-EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
-
 
 def chunk_text(text: str, max_words: int = 400, overlap_words: int = 60) -> list[str]:
-    """
-    Split text into chunks of at most max_words with overlap_words overlap.
-    Preserves whole words and avoids cutting sentences arbitrarily.
-    """
     words = text.split()
     if not words:
         return []
@@ -37,12 +34,15 @@ class Command(BaseCommand):
     help = "Builds or updates the RAG knowledge index in PostgreSQL with pgvector."
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.NOTICE("Initializing embedding model: all-MiniLM-L6-v2..."))
-        embed_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+        hf_token = getattr(settings, "HF_TOKEN", "").strip()
+        if not hf_token:
+            self.stderr.write(self.style.ERROR("HF_TOKEN is not configured in settings or .env file."))
+            return
+
+        self.stdout.write(self.style.NOTICE(f"Using Hugging Face Inference API ({EMBEDDING_MODEL_NAME})..."))
 
         raw_chunks = []
 
-        # 1. Index FAQs
         faq_count = 0
         for faq in FAQS:
             title = faq["title"]
@@ -59,7 +59,6 @@ class Command(BaseCommand):
                 })
                 faq_count += 1
 
-        # 2. Index ONLY published courses
         course_count = 0
         lesson_count = 0
         published_courses = Course.objects.filter(is_published=True).select_related("instructor")
@@ -86,7 +85,6 @@ class Command(BaseCommand):
                 })
                 course_count += 1
 
-            # Index lessons for this published course
             lessons = course.lessons.all().order_by("order")
             for lesson in lessons:
                 lesson_text = (
@@ -114,14 +112,12 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("No chunks to index."))
             return
 
-        # Compute embeddings in batches
         texts_to_embed = [
             f"{chunk['title']}\n{chunk['content']}" for chunk in raw_chunks
         ]
-        self.stdout.write(f"Generating 384-d embeddings for {len(texts_to_embed)} chunks...")
-        embeddings = embed_model.encode(texts_to_embed, batch_size=32, show_progress_bar=False)
+        self.stdout.write(f"Generating 384-d embeddings via Hugging Face Inference API for {len(texts_to_embed)} chunks...")
+        embeddings = get_batch_embeddings(texts_to_embed, hf_token=hf_token, batch_size=10, pause_between_batches=0.5)
 
-        # Idempotent database update: delete previous chunks and save freshly indexed ones
         KnowledgeChunk.objects.all().delete()
 
         chunks_to_create = []
@@ -133,7 +129,7 @@ class Command(BaseCommand):
                     title=meta["title"],
                     content=meta["content"],
                     source_url=meta["source_url"],
-                    embedding=embedding.tolist(),
+                    embedding=embedding,
                 )
             )
 
